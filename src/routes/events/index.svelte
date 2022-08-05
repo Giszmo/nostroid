@@ -1,28 +1,17 @@
 <script lang="ts">
-	import { scale } from 'svelte/transition';
-	import { flip } from 'svelte/animate';
-	import { relayPool } from 'nostr-tools';
+	// import SvelteMarkdown from 'svelte-markdown'
+	import { relayPool } from 'nostr-tools'
+	import type { Event } from './types'
+	import TextNote from './TextNote.svelte'
 
-	type Event = {
-		id: string;
-		created_at: Date;
-		text: string;
-	};
+	export let events: Event[] = []
 
-	export let events: Event[] = [];
-
-	const relay = 'wss://relay.nostr.info';
+	const relay = 'wss://relay.nostr.info'
 	const pool = relayPool()
 	pool.addRelay(relay, {read: true, write: true})
-	function onEvent(event, relay) {
-		const e = {
-			id: event.id,
-			created_at: event.created_at,
-			text: event.content
-		}
-		events.push(e)
-	  console.log(e)
-		events = events
+	function onEvent(event: Event, relay) {
+	  console.log(event)
+		events = [...events, event]
 	}
 	pool.sub({
 	  cb: onEvent,
@@ -41,7 +30,9 @@
 <div class="todos">
 	<h1>Events</h1>
 
-	{#each events as event (event.id)}
-		<p>{event.text}</p>
+	{#each events as event}
+		<p>
+			<TextNote event={event}/>
+		</p>
 	{/each}
 </div>
