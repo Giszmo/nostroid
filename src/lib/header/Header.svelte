@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import logo from './svelte-logo.svg';
+	import logo from './nostroid-logo.svg';
 </script>
 
 <header>
 	<div class="corner">
-		<a href="https://kit.svelte.dev">
-			<img src={logo} alt="SvelteKit" />
-		</a>
+		<span>
+			<img src={logo} alt="App Logo" />
+		</span>
 	</div>
 
 	<nav>
@@ -15,15 +15,20 @@
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
 		</svg>
 		<ul>
-			<li class:active={$page.url.pathname === '/'}><a sveltekit:prefetch href="/">Home</a></li>
-			<li class:active={$page.url.pathname === '/about'}>
-				<a sveltekit:prefetch href="/about">About</a>
+			<li class:active={$page.url.pathname === '/profiles'}>
+				<a sveltekit:prefetch href="/profiles">Profiles</a>
 			</li>
-			<li class:active={$page.url.pathname === '/events'}>
-				<a sveltekit:prefetch href="/events">Nostr</a>
+			<li class:active={$page.url.pathname === '/'}>
+				<a sveltekit:prefetch href="/">Feed</a>
 			</li>
-			<li class:active={$page.url.pathname === '/todos'}>
-				<a sveltekit:prefetch href="/todos">Todos</a>
+			<li class:active={$page.url.pathname === '/notifications'}>
+				<a sveltekit:prefetch href="/notifications">Notifications</a>
+			</li>
+			<li class:active={$page.url.pathname === '/messages'}>
+				<a sveltekit:prefetch href="/messages">Messages</a>
+			</li>
+			<li class:active={$page.url.pathname === '/settings'}>
+				<a sveltekit:prefetch href="/settings">Settings</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
@@ -32,7 +37,9 @@
 	</nav>
 
 	<div class="corner">
-		<!-- TODO put something else here? github link? -->
+		<a href="#a">
+			<img src={logo} alt="App Logo" />
+		</a>
 	</div>
 </header>
 
@@ -47,7 +54,7 @@
 		height: 3em;
 	}
 
-	.corner a {
+	.corner span,a {
 		display: flex;
 		align-items: center;
 		justify-content: center;

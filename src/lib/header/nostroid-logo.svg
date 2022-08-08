@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="27.357571mm"
+   height="27.357571mm"
+   viewBox="0 0 27.357571 27.357571"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
+   sodipodi:docname="nostroid-logo.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.9115232"
+     inkscape:cx="70.33624"
+     inkscape:cy="61.161384"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     lock-margins="true"
+     fit-margin-top="0.2"
+     fit-margin-left="0.2"
+     fit-margin-right="0.2"
+     fit-margin-bottom="0.2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-31.267297,-71.030101)">
+    <text
+       xml:space="preserve"
+       style="font-size:7.05556px;line-height:125%;font-family:KacstOne;-inkscape-font-specification:'KacstOne, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#9cf1ff;stroke-width:0.00127076;stroke-linejoin:round"
+       x="44.961422"
+       y="87.377426"
+       id="text835"><tspan
+         sodipodi:role="line"
+         id="tspan833"
+         x="44.961422"
+         y="87.377426"
+         style="fill:#1d165c;fill-opacity:1;stroke:none;stroke-width:0.00127076;stroke-opacity:1">nos roid</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#1d165c;stroke-width:1.565;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 44.645149,97.48157 c 0,-23.544049 0.264217,-25.468954 -13.177852,-25.468954 h 26.163739"
+       id="path837"
+       sodipodi:nodetypes="ccc" />
+  </g>
+</svg>

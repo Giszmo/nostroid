@@ -1,61 +1,37 @@
-<script context="module" lang="ts">
-	export const prerender = true;
-</script>
-
 <script lang="ts">
-	import Counter from '$lib/Counter.svelte';
+	// import SvelteMarkdown from 'svelte-markdown'
+	import { Data } from '../data'
+	import type { Event } from '../types'
+	import TextNote from './TextNote.svelte'
+
+  const data = Data.instance
+	data.connectDB(indexedDB)
+  data.connectWS()
+
+	let events = Data.instance.events
+	setInterval(() => {events = Data.instance.events}, 500)
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+ 	<title>Events</title>
+	<meta name="description" content="Showing nostr events" />
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset="svelte-welcome.webp" type="image/webp" />
-				<img src="svelte-welcome.png" alt="Welcome" />
-			</picture>
-		</span>
+<div class="todos">
+	<h1>Events</h1>
 
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/index.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
+	{#each events as event}
+		<p>
+			<TextNote event={event}/>
+		</p>
+	{/each}
+</div>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-	}
-
-	h1 {
+	.todos {
 		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
+		max-width: var(--column-width);
+		margin: var(--column-margin-top) auto 0 auto;
+		line-height: 1;
 	}
 </style>

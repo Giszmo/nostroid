@@ -8,3 +8,8 @@ export type Event = {
   sig: string
 }
 
+export type Profile = {
+  privkey: string,
+  pubkey: string,
+  name: string
+}
