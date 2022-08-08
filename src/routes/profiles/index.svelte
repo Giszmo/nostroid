@@ -2,7 +2,8 @@
 	import type { Profile } from '../../types'
 	import { Data } from '../../data'
 	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
-	
+	import { bech32, fromWords } from '../../lib/bech32.js'
+
   const data = Data.instance
 	data.connectDB(indexedDB)
 
@@ -11,7 +12,27 @@
 	$: newProfilePrivkey = ""
 	$: newProfilePubkey = ""
 	let error = ""
+	
 	setInterval(() => {profiles = Data.instance.profiles}, 500)
+	
+	function hex(val: number) {
+		if (val < 10)
+			return String.fromCharCode(48 + val)
+		if (val < 16)
+			return String.fromCharCode(97 + val - 10)
+	}
+
+	function hexEncode(buf)	{
+		var str = ""
+		for (let i = 0; i < buf.length; i++) {
+			const c = buf[i]
+			str += hex(c >> 4)
+			str += hex(c & 0xF)
+		}
+		return str
+	}
+
+	
 	let addAccount = () => {
 		error = ""
 		if (newProfileName.length == 0) {
@@ -29,25 +50,47 @@
 				})
 				break
 			case "pub":
-				if (newProfilePubkey.length != 64) {
+				var k = ''
+				if (newProfilePubkey.startsWith('npub')) {
+					const x = bech32().decode(newProfilePubkey)
+					const b = fromWords(x.words)
+					k = hexEncode(b)
+					if (k.length !== 64) {
+						error = `"${newProfilePubkey}" is not a compatible npub key`
+						return
+					}
+				} else if (newProfilePubkey.length === 64) {
+					k = newProfilePubkey
+				} else {
 					error = `"${newProfilePubkey}" doesn't look like a pubkey`
 					return
 				}
 				Data.instance.profiles.push({
 					name: newProfileName,
 					privkey: undefined,
-					pubkey: newProfilePubkey
+					pubkey: k
 				})
 				break
 			case "priv":
-				if (newProfilePrivkey.length != 64) {
+				var k = ''
+				if (newProfilePrivkey.startsWith('nsec')) {
+					const x = bech32().decode(newProfilePrivkey)
+					const b = fromWords(x.words)
+					k = hexEncode(b)
+					if (k.length !== 64) {
+						error = `"${newProfilePrivkey}" is not a compatible nsec key`
+						return
+					}
+				} else if (newProfilePrivkey.length === 64) {
+					k = newProfilePubkey
+				} else {
 					error = `"${newProfilePrivkey}" doesn't look like a privkey`
 					return
 				}
 				Data.instance.profiles.push({
 					name: newProfileName,
-					privkey: newProfilePrivkey,
-					pubkey: getPublicKey(newProfilePrivkey)
+					privkey: k,
+					pubkey: getPublicKey(k)
 				})
 				break
 		}
@@ -85,7 +128,7 @@
 			bind:group={radioWhat}
 			value="priv" />using imported private key</label>
 		{#if radioWhat == "priv"}
-			<input bind:value={newProfilePrivkey} >
+			<input bind:value={newProfilePrivkey} > (format: hex or bech32)
 		{/if}
 		<br>
 		<label><input
@@ -93,7 +136,7 @@
 			bind:group={radioWhat}
 			value="pub" />using imported public key</label>
 		{#if radioWhat == "pub"}
-			<input bind:value={newProfilePubkey} >
+			<input bind:value={newProfilePubkey} > (format: hex or bech32)
 		{/if}
 	</p>
 	{#if error.length > 0}
