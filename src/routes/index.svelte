@@ -9,7 +9,7 @@
   data.connectWS()
 
 	let events = Data.instance.events
-	setInterval(() => {events = Data.instance.events}, 500)
+	setInterval(() => {events = Data.instance.events}, 1000)
 </script>
 
 <svelte:head>

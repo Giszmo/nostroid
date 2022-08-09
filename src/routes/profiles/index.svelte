@@ -3,6 +3,7 @@
 	import { Data } from '../../data'
 	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
 	import { bech32, fromWords } from '../../lib/bech32.js'
+	import ProfileWidget from './ProfileWidget.svelte'
 
   const data = Data.instance
 	data.connectDB(indexedDB)
@@ -13,7 +14,8 @@
 	$: newProfilePubkey = ""
 	let error = ""
 	
-	setInterval(() => {profiles = Data.instance.profiles}, 500)
+	// HACK: this surely should work differently in Svelte:
+	setInterval(() => {profiles = data.profiles}, 1000)
 	
 	function hex(val: number) {
 		if (val < 10)
@@ -43,7 +45,7 @@
 			case "gen":
 				const privkey = generatePrivateKey()
 				const pubkey = getPublicKey(privkey)
-				Data.instance.profiles.push({
+				data.profiles.push({
 					name: newProfileName,
 					privkey: privkey,
 					pubkey: pubkey
@@ -65,7 +67,7 @@
 					error = `"${newProfilePubkey}" doesn't look like a pubkey`
 					return
 				}
-				Data.instance.profiles.push({
+				data.profiles.push({
 					name: newProfileName,
 					privkey: undefined,
 					pubkey: k
@@ -87,7 +89,7 @@
 					error = `"${newProfilePrivkey}" doesn't look like a privkey`
 					return
 				}
-				Data.instance.profiles.push({
+				data.profiles.push({
 					name: newProfileName,
 					privkey: k,
 					pubkey: getPublicKey(k)
@@ -110,7 +112,7 @@
 	<h1>Profiles</h1>
 	{#each profiles as profile}
 		<p>
-			{profile.privkey ? '🔑' : ' '}{profile.name} ({profile.pubkey})
+			<ProfileWidget {profile} />
 		</p>
 	{/each}
 	<p>New Profile</p>
