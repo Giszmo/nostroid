@@ -45,7 +45,7 @@
 			case "gen":
 				const privkey = generatePrivateKey()
 				const pubkey = getPublicKey(privkey)
-				data.profiles.push({
+				data.addProfile({
 					name: newProfileName,
 					privkey: privkey,
 					pubkey: pubkey
@@ -67,7 +67,7 @@
 					error = `"${newProfilePubkey}" doesn't look like a pubkey`
 					return
 				}
-				data.profiles.push({
+				data.addProfile({
 					name: newProfileName,
 					privkey: undefined,
 					pubkey: k
@@ -84,12 +84,12 @@
 						return
 					}
 				} else if (newProfilePrivkey.length === 64) {
-					k = newProfilePubkey
+					k = newProfilePrivkey
 				} else {
 					error = `"${newProfilePrivkey}" doesn't look like a privkey`
 					return
 				}
-				data.profiles.push({
+				data.addProfile({
 					name: newProfileName,
 					privkey: k,
 					pubkey: getPublicKey(k)

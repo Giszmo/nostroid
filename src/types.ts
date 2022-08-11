@@ -11,5 +11,6 @@ export type Event = {
 export type Profile = {
   privkey: string,
   pubkey: string,
-  name: string
+  name: string,
+  avatar: string
 }

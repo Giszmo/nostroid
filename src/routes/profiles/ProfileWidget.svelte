@@ -4,7 +4,6 @@
 	import { Data } from '../../data'
 
   export let profile: Profile
-  export let avatar: string
   const data = Data.instance
 
   const load = () => {
@@ -13,8 +12,11 @@
   }
 </script>
 
-<nobr class={data.selectedProfile == profile ? "selectedProfile" : ""}>
+<nobr class="profile {data.selectedProfile == profile ? "selectedProfile" : ""}">
   <button on:click={load}>load</button>
+  {#if profile.avatar}
+    <img src={profile.avatar} alt="user's avatar">
+  {/if}
   {@html profile.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
   {profile.name}
   ({profile.pubkey})
