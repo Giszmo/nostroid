@@ -1,21 +1,20 @@
 <script lang="ts">
 	import type { Profile } from '../../types'
-	import { Data } from '../../data'
 	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
 	import { bech32, fromWords } from '../../lib/bech32.js'
 	import ProfileWidget from './ProfileWidget.svelte'
+  import { db } from "../../db";
+  import { liveQuery } from "dexie"
 
-  const data = Data.instance
-	data.connectDB(indexedDB)
-
-	let profiles: Profile[] = []
+	let profiles = liveQuery(
+    () => db.profiles.toArray()
+  )
+	
+	// let profiles: Profile[] = []
 	$: newProfileName = "nostroid-user"
 	$: newProfilePrivkey = ""
 	$: newProfilePubkey = ""
 	let error = ""
-	
-	// HACK: this surely should work differently in Svelte:
-	setInterval(() => {profiles = data.profiles}, 1000)
 	
 	function hex(val: number) {
 		if (val < 10)
@@ -34,8 +33,8 @@
 		return str
 	}
 
-	
-	let addAccount = () => {
+	async function addProfile() {
+		var profile: Profile
 		error = ""
 		if (newProfileName.length == 0) {
 			error = "missing profile name"
@@ -45,11 +44,12 @@
 			case "gen":
 				const privkey = generatePrivateKey()
 				const pubkey = getPublicKey(privkey)
-				data.addProfile({
+				profile = {
 					name: newProfileName,
 					privkey: privkey,
-					pubkey: pubkey
-				})
+					pubkey: pubkey,
+					avatar: ''
+				}
 				break
 			case "pub":
 				var k = ''
@@ -67,11 +67,12 @@
 					error = `"${newProfilePubkey}" doesn't look like a pubkey`
 					return
 				}
-				data.addProfile({
+				profile = {
 					name: newProfileName,
-					privkey: undefined,
-					pubkey: k
-				})
+					privkey: '',
+					pubkey: k,
+					avatar: ''
+				}
 				break
 			case "priv":
 				var k = ''
@@ -89,13 +90,20 @@
 					error = `"${newProfilePrivkey}" doesn't look like a privkey`
 					return
 				}
-				data.addProfile({
+				profile = {
 					name: newProfileName,
 					privkey: k,
-					pubkey: getPublicKey(k)
-				})
+					pubkey: getPublicKey(k),
+					avatar: ''
+				}
 				break
+			default: return
 		}
+		try {
+      const id = await db.profiles.add(profile)
+    } catch (error) {
+      error = `Failed to add ${profile}: ${error}`
+    }
 		newProfilePrivkey = ""
 		newProfilePubkey = ""
 		newProfileName = "nostroid-user"
@@ -110,11 +118,13 @@
 
 <div class="todos">
 	<h1>Profiles</h1>
-	{#each profiles as profile}
+	{#if $profiles }
+	{#each $profiles as profile}
 		<p>
 			<ProfileWidget {profile} />
 		</p>
 	{/each}
+	{/if}
 	<p>New Profile</p>
 	<p>
 		Profile Name: <input bind:value={newProfileName}>
@@ -145,7 +155,7 @@
 		<p style="color: red">{error}</p>
 	{/if}
 	<p>
-		<button on:click={addAccount}>Add Account</button>
+		<button on:click={addProfile}>Add Account</button>
 	</p>
 </div>
 

@@ -5,7 +5,6 @@
 	import TextNote from './TextNote.svelte'
 
   const data = Data.instance
-	data.connectDB(indexedDB)
   data.connectWS()
 
 	let events = Data.instance.events
