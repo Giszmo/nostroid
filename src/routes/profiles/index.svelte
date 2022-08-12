@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Profile } from '../../types'
 	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
 	import { bech32, fromWords } from '../../lib/bech32.js'
 	import ProfileWidget from './ProfileWidget.svelte'
-  import { db } from "../../db";
+	import { db } from "../../db";
+	import type { IProfile } from "../../db";
   import { liveQuery } from "dexie"
 
 	let profiles = liveQuery(
@@ -34,7 +34,7 @@
 	}
 
 	async function addProfile() {
-		var profile: Profile
+		var profile: IProfile
 		error = ""
 		if (newProfileName.length == 0) {
 			error = "missing profile name"
@@ -100,7 +100,7 @@
 			default: return
 		}
 		try {
-      const id = await db.profiles.add(profile)
+      await db.profiles.add(profile)
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }

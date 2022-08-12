@@ -7,10 +7,3 @@ export type Event = {
   content: string,
   sig: string
 }
-
-export type Profile = {
-  privkey: string,
-  pubkey: string,
-  name: string,
-  avatar: string
-}

@@ -1,5 +1,5 @@
 import { relayPool } from 'nostr-tools'
-import type { Event } from '../types'
+import type { Profile, Event } from '../types'
 
 export class Data {
   private static _instance: Data = new this()
