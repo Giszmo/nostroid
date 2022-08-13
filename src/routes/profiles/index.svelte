@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
 	import { bech32, fromWords } from '../../lib/bech32.js'
-	import ProfileWidget from './ProfileWidget.svelte'
-	import { db } from "../../db";
-	import type { IProfile } from "../../db";
+	import Profile from '../../components/Profile.svelte'
+	import { db } from "../../db"
+	import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
 
 	let profiles = liveQuery(
@@ -121,7 +121,7 @@
 	{#if $profiles }
 	{#each $profiles as profile}
 		<p>
-			<ProfileWidget {profile} />
+			<Profile {profile} />
 		</p>
 	{/each}
 	{/if}

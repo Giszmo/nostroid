@@ -1,14 +1,12 @@
 <script lang="ts">
 	// import SvelteMarkdown from 'svelte-markdown'
 	import { Data } from '../data'
-	import type { Event } from '../types'
 	import TextNote from './TextNote.svelte'
 
   const data = Data.instance
   data.connectWS()
 
 	let events = Data.instance.events
-	setInterval(() => {events = Data.instance.events}, 1000)
 </script>
 
 <svelte:head>

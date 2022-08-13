@@ -1,34 +1,32 @@
 import { relayPool } from 'nostr-tools'
-import type { Profile, Event } from '../types'
+import { db } from "./db"
+import type { IProfile, IEvent } from "./db"
+import { liveQuery } from "dexie"
 
 export class Data {
   private static _instance: Data = new this()
   private pool
 
-  public events: Event[] = []
+  public events: IEvent[] = []
   
   private constructor() {
   }
   
-  public selectProfile(profile: Profile): void {
-    this.selectedProfile = profile
-    this.loadAndWatchProfile(profile)
-  }
-  
-  private loadAndWatchProfile(profile: Profile): void {
+  public loadAndWatchProfile(pubkey: string): void {
     this.connectWS()
     this.events = []
     this.pool.sub({
       cb: Data.instance.onEvent,
-      filter: {limit: 100, kinds: [1], authors: [profile.pubkey]}
+      filter: {authors: [pubkey]}
     }, 'from-us')
     this.pool.sub({
       cb: Data.instance.onEvent,
-      filter: {limit: 100, '#p': [profile.pubkey]}
+      filter: {'#p': [pubkey]}
     }, 'to-us')
   }
   
-  private onEvent(event: Event, relay: string): void {
+  private onEvent(event: IEvent, relay: string): void {
+    db.events.put(event)
     Data.instance.events = [...(Data.instance.events), event]
   }
 
