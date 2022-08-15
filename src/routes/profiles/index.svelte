@@ -6,9 +6,7 @@
 	import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
 
-	let profiles = liveQuery(
-    () => db.profiles.toArray()
-  )
+	let profiles = liveQuery(() => db.profiles.toArray())
 	
 	// let profiles: Profile[] = []
 	$: newProfileName = "nostroid-user"
@@ -100,7 +98,7 @@
 			default: return
 		}
 		try {
-      await db.profiles.add(profile)
+      await db.profiles.put(profile)
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }
@@ -120,9 +118,7 @@
 	<h1>Profiles</h1>
 	{#if $profiles }
 	{#each $profiles as profile}
-		<p>
-			<Profile {profile} />
-		</p>
+		<Profile {profile} />
 	{/each}
 	{/if}
 	<p>New Profile</p>

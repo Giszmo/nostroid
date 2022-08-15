@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import logo from './nostroid-logo.svg';
+	import AccountInfo from '../../components/AccountInfo.svelte'
 </script>
 
 <header>
@@ -36,10 +37,8 @@
 		</svg>
 	</nav>
 
-	<div class="corner">
-		<a href="#a">
-			<img src={logo} alt="App Logo" />
-		</a>
+	<div class="accountInfo">
+		<AccountInfo />
 	</div>
 </header>
 
