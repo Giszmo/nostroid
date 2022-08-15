@@ -10,7 +10,7 @@
 </main>
 
 <footer>
-	<p>visit <a href="https://nostr.info">nostr.info</a></p>
+	<p>GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
 </footer>
 
 <style>

@@ -15,7 +15,7 @@
   $: profile = $p as IProfile
   
 	let events = liveQuery(
-    () => db.events.where('pubkey').equals(pubkey).toArray()
+		() => db.events.where('pubkey').equals(pubkey).toArray()
   )
 
 </script>
