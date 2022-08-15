@@ -2,6 +2,7 @@ import { relayPool } from 'nostr-tools'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
 import { liveQuery } from "dexie"
+import { tick } from 'svelte'
 
 export class Data {
   private static _instance: Data = new this()
@@ -39,7 +40,8 @@ export class Data {
     }, 5000);
   }
   
-  private onEvent(event: IEvent, relay: string): void {
+  async private onEvent(event: IEvent, relay: string): void {
+    await tick()
     Data.instance.events.push(event)
   }
 
