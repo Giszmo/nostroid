@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/header/Header.svelte';
+	import Debug from '../components/Debug.svelte'
 	import '../app.css';
 </script>
 
@@ -10,7 +11,7 @@
 </main>
 
 <footer>
-	<p>GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
+	<p><Debug /> GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
 </footer>
 
 <style>

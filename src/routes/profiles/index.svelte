@@ -116,8 +116,8 @@
 
 <div class="todos">
 	<h1>Profiles</h1>
-	{#if $profiles }
-	{#each $profiles as profile}
+	{#if $profiles instanceof Array }
+	{#each $profiles as profile (profile.pubkey)}
 		<Profile {profile} />
 	{/each}
 	{/if}

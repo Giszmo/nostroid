@@ -2,14 +2,13 @@ import { db } from "./db"
 import type { IProfile } from "./db"
 import { liveQuery } from "dexie"
 
-export const activePubkey = liveQuery(() => {
-  return db.config
-    .get('activePubkey')
-    .then((c?: IConfig) => c?.value ? c.value : '')
-})
-
 export const activeProfile = liveQuery(async () => {
-  return await db.profiles
-    .get($activePubkey)
-    .then((c?: IConfig) => c?.value ? c.value : '')
+  const pubkey = (await db.config.get('activePubkey'))?.value
+  if (pubkey) {
+    const profile = await db.profiles.get(pubkey)
+    if (profile) {
+      return profile
+    }
+  }
+  return {name: '', pubkey: ''}
 })

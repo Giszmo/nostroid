@@ -1,32 +1,30 @@
 <script type="ts">
   import type { IProfile } from "../db"
-  import { db } from "../db"
-  import { liveQuery } from "dexie"
-  import { activePubkey } from '../stores'
+  // import { db } from "../db"
+  // import { liveQuery } from "dexie"
+  import { activeProfile } from '../stores'
 
-  let p
-  let profile: IProfile
+  $: profile = $activeProfile as IProfile
   $: {
-    p = liveQuery(async () => await db.profiles.get($activePubkey))
-    profile = $p
-      ? $p as IProfile
-      : {} as IProfile
+    console.log(profile)
   }
 </script>
 
 <div class="accountInfo">
-  {profile?.name}
+  {profile?.name || '???'}
   <p>
     {#if profile?.avatar}
     <img src={profile.avatar} alt="user's avatar">
     {/if}
     {@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
-    ({profile?.pubkey})<br>
+    ({profile?.pubkey?.slice(0,10)})<br>
   </p>
 </div>
 
 <style>
 .accountInfo {
+  width: 10em;
+  height: 10em;
   font-weight: bold;
 }
 </style>

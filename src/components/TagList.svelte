@@ -3,9 +3,9 @@
   // $: height = tags.length
   // $: width = Math.max(...tags.map(it=>it.length))
 </script>
+{#if tags?.length > 0}
 <pre>
 <table>
-{#if tags}
 {#each tags as tag}
 <tr>
 {#each tag as value}
@@ -13,6 +13,8 @@
 {/each}
 </tr>
 {/each}
-{/if}
 </table>
 </pre>
+{:else}
+[]
+{/if}

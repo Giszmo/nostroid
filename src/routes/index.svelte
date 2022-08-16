@@ -4,39 +4,26 @@
 	import { liveQuery } from "dexie"
 	import type { Observable } from "dexie"
 	import { db } from "../db"
-	import type { IEvent } from "../db"
-  import { activePubkey } from '../stores'
+	import type { IProfile, IEvent } from "../db"
+  import { activeProfile } from '../stores'
 
-	let events: Observable<IEvent[]> = liveQuery(async () => {
-		const pubkey = await db.config.get('activePubkey')
-			.then(c => c?.value)
+	$: active = $activeProfile as IProfile
+	$: events = liveQuery(async () => {
+		const pubkey = active.pubkey
 		if (pubkey == undefined) {
 			return []
 		}
 		return await db
 			.events
-			// .orderBy('created_at').reverse()
+			.orderBy('created_at').reverse()
 			.filter((it) =>
-				it.pubkey == $activePubkey
+				it.pubkey == active.pubkey
 				&&
 				it.kind === 1
 			)
 			.limit(20)
 			.toArray()
 	})
-
-	// let events: Observable<IEvent[]> = liveQuery(async () =>
-	// 	await db
-	// 		.events
-	// 		.orderBy('created_at').reverse()
-	// 		.filter((it) =>
-	// 			it.pubkey == $activePubkey
-	// 			&&
-	// 			it.kind === 1
-	// 		)
-	// 		.limit(20)
-	// 		.toArray()
-	// )
 		
 </script>
 
@@ -47,7 +34,6 @@
 
 <div class="todos">
 	<h1>Feed</h1>
-	<p>{$activePubkey}</p>
 	{#if $events instanceof Array }
 	{#each $events as event (event.id)}
 		<p>
