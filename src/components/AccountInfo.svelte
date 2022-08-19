@@ -5,26 +5,38 @@
   import { activeProfile } from '../stores'
 
   $: profile = $activeProfile as IProfile
-  $: {
-    console.log(profile)
-  }
 </script>
 
 <div class="accountInfo">
-  {profile?.name || '???'}
+  <div class='name'>{profile?.name || '???'}<br></div>
+  <div class='pubkey'>{profile?.pubkey}</div>
   <p>
     {#if profile?.avatar}
     <img src={profile.avatar} alt="user's avatar">
     {/if}
     {@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
-    ({profile?.pubkey?.slice(0,10)})<br>
   </p>
 </div>
 
 <style>
+img {
+  width: 3em;
+  height: 3em;
+  object-fit: cover;
+}
 .accountInfo {
   width: 10em;
   height: 10em;
   font-weight: bold;
+}
+.pubkey {
+  width: 8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.name {
+  width: 8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -5,6 +5,7 @@
 	import { db } from "../../db"
 	import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
+	import { Data } from '../../data'
 
 	let profiles = liveQuery(() => db.profiles.toArray())
 	
@@ -99,6 +100,7 @@
 		}
 		try {
       await db.profiles.put(profile)
+			Data.instance.loadAndWatchProfiles()
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }
@@ -156,10 +158,4 @@
 </div>
 
 <style>
-	.todos {
-		width: 100%;
-		max-width: var(--column-width);
-		margin: var(--column-margin-top) auto 0 auto;
-		line-height: 1;
-	}
 </style>

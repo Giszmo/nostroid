@@ -15,7 +15,13 @@
   $: profile = $p as IProfile
   
 	let events = liveQuery(
-		() => db.events.where('pubkey').equals(pubkey).toArray()
+		() => db
+			.events
+			.orderBy('created_at').reverse()
+			.filter((it) =>
+				it.pubkey == pubkey
+			)
+			.toArray()
   )
 
 </script>
