@@ -1,8 +1,6 @@
 <script lang="ts">
-	// import SvelteMarkdown from 'svelte-markdown'
 	import TextNote from '../components/TextNote.svelte'
 	import { liveQuery } from "dexie"
-	import type { Observable } from "dexie"
 	import { db } from "../db"
 	import type { IProfile, IEvent } from "../db"
   import { activeProfile } from '../stores'

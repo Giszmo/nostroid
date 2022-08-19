@@ -7,6 +7,7 @@ export interface IProfile {
   name?: string
   avatar?: string
   nip05?: string
+  isAccount: boolean
 }
 
 export interface IConfig {
@@ -26,7 +27,7 @@ export interface IEvent {
 
 export interface ITag {
   id: number
-  event: number
+  event: string
   key: string
   value: string
 }
@@ -39,10 +40,10 @@ export class NostroidDexie extends Dexie {
 
   constructor() {
     super('data4')
-    this.version(6).stores({
+    this.version(7).stores({
       profiles: '&pubkey',
       config: '&key',
-      events: '&id, pubkey, kind, created_at, [pubkey+kind]',
+      events: '&id, pubkey, kind, created_at, [pubkey+kind], *tags',
       tags: '++id, event, key, value'
     })
   }
