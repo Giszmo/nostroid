@@ -1,4 +1,4 @@
-import { relayPool } from 'nostr-tools'
+import { mkPool, type RelayPool } from 'teahouse'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
 import { liveQuery } from "dexie"
@@ -6,26 +6,36 @@ import { tick } from 'svelte'
 // const worker = new Worker(new URL('./worker.js', import.meta.url))
 
 export class Data {
-  private static _instance: Data = new this()
-  public pool
+  private static _instance: Data = await Data.build();
+  public pool: RelayPool|undefined = undefined
 
   // event buffer to batch insert
-  public events: IEvent[] = []
-  
+  public events: IEvent[]
+
   private constructor() {
+      this.events = []
+  }
+  
+  static private async build() {
     db.updateProfileFromMeta()
+    const inst = new this()
+
+    console.log({ inst })
+    await inst.loadAndWatchProfiles()
+
     setInterval(() => {
       // worker.port.postMessage('test')
-      Data.instance.events = [...new Set(Data.instance.events)]
-      const e = Data.instance.events.splice(-100)
+      inst.events = [...new Set(inst.events)]
+      const e = inst.events.splice(-100)
       db.events.bulkPut(e)
       e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
     }, 1000)
-    this.loadAndWatchProfiles()
+
+    return inst;
   }
   
   async public loadAndWatchProfiles(): void {
-    this.connectWS()
+    await this.connectWS()
     const profiles = await db.profiles.toArray()
     const newProfiles = profiles.filter(p=>!p.synced)
     const oldProfiles = profiles.filter(p=>p.synced)
@@ -38,17 +48,18 @@ export class Data {
       : 0
     this.events = []
     const sub = (name, filter, keys) => {
+        console.log(`sub`, { name, filter, keys })
       if (keys.length > 0) {
-        this.pool.sub({
-          cb: Data.instance.onEvent,
-          filter: filter
-        }, name)
+        this.pool.subscribe((e: Event) => {
+            Data.instance.onEvent(e)
+        }, name, filter);
       }
     }
     sub('fromNewProfiles', {authors: newKeys}, newKeys)
     sub('toNewProfiles', {'#p': newKeys}, newKeys)
     sub('fromnewProfiles', {authors: oldKeys, since: syncFromTS}, oldKeys)
     sub('tonewProfiles', {'#p': oldKeys, since: syncFromTS}, oldKeys)
+
     const syncInterval = setInterval(() => {
       if (Data.instance.events.length == 0) {
         console.log('Synced all profiles')
@@ -65,19 +76,26 @@ export class Data {
             .modify({synced: true})
         })
       }
-    }, 5 * 1000);
+    }, 5 * 1000)
+
+    console.log(`loadAndWatchProfiles`, { _: this })
   }
   
-  async private onEvent(event: IEvent, relay: string): void {
+  async private onEvent(event: IEvent): void {
     await tick()
     Data.instance.events.push(event)
   }
 
-  public connectWS(): void {
+  public async connectWS(): void {
     if (this.pool) return
+    
+  	const pool = mkPool()
+
     const relay = 'wss://relay.nostr.info'
-  	this.pool = relayPool()
-  	this.pool.addRelay(relay, {read: true, write: true})
+
+    await pool.connect(relay, true);
+
+    this.pool = pool
   }
 
   public static get instance() {
