@@ -26,7 +26,7 @@ export class Data {
     setInterval(() => {
       // worker.port.postMessage('test')
       inst.events = [...new Set(inst.events)]
-      const e = inst.events.splice(-100)
+      const e = inst.events.splice(-1000)
       db.events.bulkPut(e)
       e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
     }, 1000)
@@ -48,7 +48,6 @@ export class Data {
       : 0
     this.events = []
     const sub = (name, filter, keys) => {
-        console.log(`sub`, { name, filter, keys })
       if (keys.length > 0) {
         this.pool.subscribe((e: Event) => {
             Data.instance.onEvent(e)
@@ -57,8 +56,8 @@ export class Data {
     }
     sub('fromNewProfiles', {authors: newKeys}, newKeys)
     sub('toNewProfiles', {'#p': newKeys}, newKeys)
-    sub('fromnewProfiles', {authors: oldKeys, since: syncFromTS}, oldKeys)
-    sub('tonewProfiles', {'#p': oldKeys, since: syncFromTS}, oldKeys)
+    sub('fromOldProfiles', {authors: oldKeys, since: syncFromTS}, oldKeys)
+    sub('toOldProfiles', {'#p': oldKeys, since: syncFromTS}, oldKeys)
 
     const syncInterval = setInterval(() => {
       if (Data.instance.events.length == 0) {
