@@ -8,7 +8,6 @@
   const rexp = /#\[(.*?)\]/g
   const replaceTags = (_: string, $1: number) => {
     const tag = event.tags[$1] || []
-    console.log(tag)
     if (tag[0] == 'e') return `<a href="/event/${tag[1]}">Event ${tag[1]}</a>`
     if (tag[0] == 'p') return `<a href="/${tag[1]}">Profile ${tag[1]}</a>`
     return tag[0] + tag[1]
