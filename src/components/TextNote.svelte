@@ -28,6 +28,7 @@
 <style>
 .note {
   margin-left: 60px;
+  overflow-x: auto;
 }
 
 .tn {

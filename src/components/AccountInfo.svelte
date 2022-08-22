@@ -19,15 +19,16 @@
 </div>
 
 <style>
+.accountInfo {
+  width: 10em;
+  height: 3em;
+  overflow-y: visible;
+  font-weight: bold;
+}
 img {
   width: 3em;
   height: 3em;
   object-fit: cover;
-}
-.accountInfo {
-  width: 10em;
-  height: 10em;
-  font-weight: bold;
 }
 .pubkey {
   width: 8em;

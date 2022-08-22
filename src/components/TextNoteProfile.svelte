@@ -1,9 +1,8 @@
 <script type="ts">
-import { liveQuery } from "dexie"
 import { profileCache } from '../stores'
-import type { IProfile } from '../db'
-import { db } from '../db'
+
 export let pubkey: string
+
 let p = $profileCache
 $: profile = p.get(pubkey)
 $: avatar = profile?.avatar || ''

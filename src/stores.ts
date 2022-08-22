@@ -3,7 +3,7 @@ import type { IProfile } from "./db"
 import { liveQuery } from "dexie"
 import { writable } from 'svelte/store'
 
-export const activeProfile = liveQuery(async () => {
+export const activeProfile = liveQuery(async (): IProfile|undefined => {
   const pubkey = (await db.config.get('activePubkey'))?.value
   if (pubkey) {
     const profile = await db.profiles.get(pubkey)
