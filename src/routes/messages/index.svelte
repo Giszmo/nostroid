@@ -17,7 +17,7 @@
   $: active = $activeProfile as IProfile
   let other: IProfile|undefined
   let open = (c: string) => {
-    other = $profileCache.get(c)
+    other = $profileCache.get(c) || {pubkey: c} as IProfile
     show = 10
   }
   let back = () => {
