@@ -1,5 +1,6 @@
 <script type="ts">
-  import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation'
+  import { base } from '$app/paths'
   import { db } from "../db"
   import type { IProfile } from "../db"
   import { activeProfile } from '../stores'
@@ -15,7 +16,7 @@
     // goto(`/`)
   }
   const showPubkey = () => {
-    goto(`/${profile?.pubkey}`)
+    goto(`${base}/${profile?.pubkey}`)
   }
     
   const deleteProfile = () => {

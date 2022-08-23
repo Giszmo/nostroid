@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import logo from './nostroid-logo.svg';
+	import { page } from '$app/stores'
+  import { base } from '$app/paths'
+	import logo from './nostroid-logo.svg'
 	import AccountInfo from '../../components/AccountInfo.svelte'
 </script>
 
@@ -10,26 +11,29 @@
 			<img src={logo} alt="App Logo" />
 		</span>
 	</div>
+  <script>
+    var global = global || window;
+  </script>
 
 	<nav>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
 		</svg>
 		<ul>
-			<li class:active={$page.url.pathname === '/profiles'}>
-				<a sveltekit:prefetch href="/profiles">Profiles</a>
+			<li class:active={$page.url.pathname === `${base}/profiles`}>
+				<a sveltekit:prefetch href="{base}/profiles">Profiles</a>
 			</li>
-			<li class:active={$page.url.pathname === '/'}>
-				<a sveltekit:prefetch href="/">Feed</a>
+			<li class:active={$page.url.pathname === `${base}`}>
+				<a sveltekit:prefetch href="{base}">Feed</a>
 			</li>
-			<li class:active={$page.url.pathname === '/notifications'}>
-				<a sveltekit:prefetch href="/notifications">Notifications</a>
+			<li class:active={$page.url.pathname === `${base}/notifications`}>
+				<a sveltekit:prefetch href="{base}/notifications">Notifications</a>
 			</li>
-			<li class:active={$page.url.pathname === '/messages'}>
-				<a sveltekit:prefetch href="/messages">Messages</a>
+			<li class:active={$page.url.pathname === `${base}/messages`}>
+				<a sveltekit:prefetch href="{base}/messages">Messages</a>
 			</li>
-			<li class:active={$page.url.pathname === '/settings'}>
-				<a sveltekit:prefetch href="/settings">Settings</a>
+			<li class:active={$page.url.pathname === `${base}/settings`}>
+				<a sveltekit:prefetch href="{base}/settings">Settings</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">

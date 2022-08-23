@@ -1,5 +1,6 @@
 <script type="ts">
-  import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation'
+  import { base } from '$app/paths'
   import type { IEvent } from "../db"
   import TagList from './TagList.svelte'
   
@@ -8,7 +9,7 @@
   export let oddRow = false
   
   const select = (id: string) => {
-    goto(`/event/${id}`)
+    goto(`${base}/event/${id}`)
   }
 </script>
 

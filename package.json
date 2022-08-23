@@ -39,6 +39,7 @@
 		"@esbuild-plugins/node-globals-polyfill": "^0.1.1",
 		"@esbuild-plugins/node-modules-polyfill": "^0.1.4",
 		"@fontsource/fira-mono": "^4.5.0",
+		"@sveltejs/adapter-static": "^1.0.0-next.39",
 		"cookie": "^0.4.1",
 		"dexie": "^3.2.2",
 		"events": "^3.3.0",

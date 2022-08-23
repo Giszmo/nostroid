@@ -38,7 +38,8 @@ const config = {
   },
 	build: {
 		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-	}
+	},
+  global: {}
 };
 
 export default config;
