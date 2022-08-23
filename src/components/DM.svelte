@@ -23,9 +23,13 @@
       let other = event.pubkey === active.pubkey
         ? event.tags.filter(t=>t[0]==='p')[0][1]
         : event.pubkey
-      decrypted = decrypt(active.privkey, other, event.content)
+      try {
+        decrypted = decrypt(active.privkey, other, event.content)
+      } catch(e) {
+        decrypted = 'failed to decrypt message...'
+      }
     } else {
-      decrypted = 'can\'t decrypt message...'
+      decrypted = 'not ecrypted for us...'
     }
     text = marked
       .parseInline(decrypted)
@@ -50,6 +54,7 @@
 .bubble {
   overflow-x: auto;
   padding: 5px;
+  margin-right: 20%;
   border-radius: 0 10px 10px 0;
   background-color: lightyellow;
 }
@@ -59,5 +64,7 @@
 .bubble.them {
   border-radius: 10px 0 0 10px;
   background-color: lightblue;
+  margin-right: unset;
+  margin-left: 20%;
 }
 </style>

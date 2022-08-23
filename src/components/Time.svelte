@@ -11,7 +11,11 @@
   const now = Date.now() / 1000
   const elapsed = now - t
   let relativeTime: string
-  if (elapsed < S_PER_MINUTE) {
+  if (elapsed < -S_PER_MONTH) {
+    relativeTime = 'in the far future'
+  } else if (elapsed < 0) {
+    relativeTime = 'in the future'
+  } else if (elapsed < S_PER_MINUTE) {
     relativeTime = Math.round(elapsed) + ' seconds ago'
   } else if (elapsed < S_PER_HOUR) {
     relativeTime = Math.round(elapsed/S_PER_MINUTE) + ' minutes ago'

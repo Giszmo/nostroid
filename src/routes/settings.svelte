@@ -58,7 +58,7 @@ const sendPersist = () => {
 	Data.instance.pool.setPrivateKey(p.privkey)
 	let e = {
 		pubkey: p.pubkey,
-		created_at: Math.floor((new Date()).getTime() / 1000),
+		created_at: Math.floor(Date.now() / 1000),
 		kind: 0,
 		tags: [],
 		content: JSON.stringify(

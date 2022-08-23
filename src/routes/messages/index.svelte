@@ -5,6 +5,9 @@
   import { liveQuery } from "dexie"
   import { type IProfile, type IEvent, db } from "../../db"
   import { activeProfile } from '../../stores'
+  import { encrypt } from 'nostr-tools/nip04.js'
+  import { getEventHash, signEvent } from 'nostr-tools/event.js'
+	import { Data } from '../../data'
 
   let searchInput = ''
   let show = 10
@@ -57,11 +60,37 @@
   $: conversation = (other
     ? (conversations.get(other.pubkey) || []).sort((a,b)=>a.created_at-b.created_at)
     : []) as Array<IEvent>
-  let newMessage = ''
-  $: {
-    if (newMessage.endsWith('a')) {
-      newMessage = ''
+  let newMessage: string = ''
+  let newEvent: IEvent|undefined
+  const processNewEvent = async () => {
+    if (active?.privkey && other && newMessage.length != 0) {
+      newEvent = {
+        pubkey: active?.pubkey,
+        kind: 4,
+        content: encrypt(active.privkey, other.pubkey, newMessage),
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [['p',other.pubkey]],
+        id: '',
+        sig: ''
+      }
+      newEvent.id = getEventHash(newEvent)
+      newEvent.sig = await signEvent(newEvent, active.privkey)
+    } else {
+      newEvent = undefined
     }
+    if (newMessage.endsWith('\n')) {
+      console.log(newEvent)
+      Data.instance.pool.setPrivateKey(active.privkey)
+      Data.instance.pool.publish(newEvent)
+      newMessage = ''
+      newEvent = undefined
+    }
+  }
+  $: {
+    active
+    other
+    newMessage
+    processNewEvent()
   }
 </script>
 
@@ -82,8 +111,11 @@
     {#each conversation.slice(-show) as event (event.id)}
       <DM event={event}/>
     {/each}
-    {#if show < conversation.length }
-      <input bind:value={newMessage}>
+    {#if active?.privkey }
+      {#if newEvent}
+        <DM event={newEvent}/>
+      {/if}
+      <textarea bind:value={newMessage}></textarea>
     {/if}
   {:else}
     <label>Search DMs: <input bind:value={searchInput}></label>
@@ -94,6 +126,10 @@
 </div>
 
 <style>
+textarea {
+  width: 100%;
+  height: 1em;
+}
 .otherHeader {
   border-radius: 10px 10px 0 0;
   padding: 15px 5px 5px 5px;
