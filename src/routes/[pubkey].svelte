@@ -6,7 +6,6 @@
 	import Event from '../components/Event.svelte'
 
 	const pubkey = $page.params.pubkey
-  console.log(pubkey)
 	let p = liveQuery(() => db.profiles.get(pubkey))
   // profile.subscribe({
   //   next: result => console.log("Got result:", JSON.stringify(result)),

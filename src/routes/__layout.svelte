@@ -5,13 +5,13 @@
 </script>
 
 <Header />
-
+<div style="width:100%;text-align:center"><Debug /></div>
 <main>
 	<slot />
 </main>
 
 <footer>
-	<p><Debug /> GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
+	<p>GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
 </footer>
 
 <style>

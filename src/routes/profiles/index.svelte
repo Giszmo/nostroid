@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { generatePrivateKey, getPublicKey } from 'nostr-tools'
+	import { randomKeypair } from 'teahouse'
 	import { bech32, fromWords } from '../../lib/bech32.js'
+	import { getPublicKey, utils } from '@noble/secp256k1';
 	import Profile from '../../components/Profile.svelte'
 	import { db } from "../../db"
 	import type { IProfile } from "../../db"
@@ -41,12 +42,11 @@
 		}
 		switch (radioWhat) {
 			case "gen":
-				const privkey = generatePrivateKey()
-				const pubkey = getPublicKey(privkey)
+			    const keys = randomKeypair()
 				profile = {
 					name: newProfileName,
-					privkey: privkey,
-					pubkey: pubkey,
+					privkey: keys.sk,
+					pubkey: keys.pk,
 					avatar: ''
 				}
 				break
@@ -92,7 +92,7 @@
 				profile = {
 					name: newProfileName,
 					privkey: k,
-					pubkey: getPublicKey(k),
+					pubkey: utils.bytesToHex(getPublicKey(k)),
 					avatar: ''
 				}
 				break
