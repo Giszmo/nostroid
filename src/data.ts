@@ -2,7 +2,6 @@ import { relayPool } from 'nostr-tools'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
 import { liveQuery } from "dexie"
-import { tick } from 'svelte'
 // const worker = new Worker(new URL('./worker.js', import.meta.url))
 
 export class Data {
@@ -18,10 +17,39 @@ export class Data {
       // worker.port.postMessage('test')
       Data.instance.events = [...new Set(Data.instance.events)]
       const e = Data.instance.events.splice(-100)
-      db.events.bulkPut(e)
-      e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
+      if (e.length > 0) {
+        db.events.bulkPut(e)
+        e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
+      }
+      Data.instance.loadMissingProfiles()
     }, 1000)
     this.loadAndWatchProfiles()
+  }
+  
+  async private loadMissingProfiles(): void {
+    this.connectWS()
+    const profiles = (await db.profiles.toArray())
+      .filter(it=>it.missing)
+    if (profiles.length > 0) {
+      profiles.forEach(it=>{
+        delete it.missing
+        it.fetching = true
+      })
+      await db.profiles.bulkPut(profiles)
+      const s = this.pool.sub({
+        cb: Data.instance.onEvent,
+        filter: {authors: profiles.map(it=>it.pubkey), kinds: [0]}
+      })
+      setTimeout(() => {
+        s.unsub()
+        db.profiles
+          .where("pubkey")
+          .anyOf(profiles.map(it=>it.pubkey))
+          .modify(profile => {
+            delete profile.fetching
+          })
+      }, 10000);
+    }
   }
   
   async public loadAndWatchProfiles(): void {
@@ -65,11 +93,10 @@ export class Data {
             .modify({synced: true})
         })
       }
-    }, 5 * 1000);
+    }, 5 * 1000)
   }
   
   async private onEvent(event: IEvent, relay: string): void {
-    await tick()
     Data.instance.events.push(event)
   }
 

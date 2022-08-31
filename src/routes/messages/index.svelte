@@ -1,8 +1,8 @@
 <script lang="ts">
   import DM from '../../components/DM.svelte'
   import TextNoteProfile from '../../components/TextNoteProfile.svelte'
-  import { profileCache } from '../../stores'
-  import { liveQuery } from "dexie"
+  import { cProfiles } from '../../stores'
+  import { liveQuery, type Observable } from "dexie"
   import { type IProfile, type IEvent, db } from "../../db"
   import { activeProfile } from '../../stores'
   import { encrypt } from 'nostr-tools/nip04.js'
@@ -11,25 +11,62 @@
 
   let searchInput = ''
   let show = 10
+  let active: IProfile|undefined
+  let other: IProfile|undefined
+  /** conversations by correspondence pubkey **/
+  let conversations: Map<string, Array<IEvent>> = new Map()
+  let newMessage: string = ''
+  let newEvent: IEvent|undefined
+  
   let showMore = () => {
     show += 10
   }
-  $: active = $activeProfile as IProfile
-  let other: IProfile|undefined
+  
   let open = (c: string) => {
-    other = $profileCache.get(c) || {pubkey: c} as IProfile
+    other = $cProfiles.get(c)
     show = 10
   }
+  
   let back = () => {
     other = undefined
   }
-  /** conversations by correspondence pubkey **/
-  let conversations: Map<string, Array<IEvent>> = new Map()
+  
+  /**
+   * Update the event to be sent
+   **/
+  const processNewEvent = async () => {
+    let privkey = active?.privkey
+    let pubkey = active?.pubkey
+    if (privkey && pubkey && other && newMessage.length != 0) {
+      newEvent = {
+        pubkey: pubkey,
+        kind: 4,
+        content: encrypt(privkey, other.pubkey, newMessage),
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [['p',other.pubkey]],
+        id: '',
+        sig: ''
+      }
+      newEvent.id = getEventHash(newEvent)
+      newEvent.sig = await signEvent(newEvent, privkey)
+      if (newMessage.endsWith('\n')) {
+        Data.instance.pool.setPrivateKey(privkey)
+        Data.instance.pool.publish(newEvent)
+        newMessage = ''
+        newEvent = undefined
+      }
+    } else {
+      newEvent = undefined
+    }
+  }
+  
   $: {
-    if ($events && active) {
+    active = $activeProfile as IProfile
+    let evs = $events
+    if (evs && active) {
       conversations.clear()
-      ;($events as Array<IEvent>).forEach(ev => {
-        let o = ev.pubkey === active.pubkey
+      ;(evs as Array<IEvent>).forEach(ev => {
+        let o = ev.pubkey === active?.pubkey
           ? ev.tags.filter(t=>t[0]==='p')?.[0]?.[1]
           : ev.pubkey
         // let c = conversations.get(o) || []
@@ -41,8 +78,9 @@
       conversations = conversations
     }
   }
+
   $: events = liveQuery(async () => {
-    const pubkey = active.pubkey
+    const pubkey = active?.pubkey
     if (pubkey == undefined) {
       return []
     }
@@ -50,44 +88,20 @@
       .events
       .orderBy('created_at').reverse()
       .filter((it) =>
-        (it.pubkey == active.pubkey
+        (it.pubkey == pubkey
           ||
-          it.tags.find(t=>t[0]==='p' && t[1]===active.pubkey) != undefined
+          it.tags.find(t=>t[0]==='p' && t[1]===pubkey) != undefined
         )
         &&
         it.kind === 4
       )
       .toArray()
-  })
+    })
+  
   $: conversation = (other
     ? (conversations.get(other.pubkey) || []).sort((a,b)=>a.created_at-b.created_at)
     : []) as Array<IEvent>
-  let newMessage: string = ''
-  let newEvent: IEvent|undefined
-  const processNewEvent = async () => {
-    if (active?.privkey && other && newMessage.length != 0) {
-      newEvent = {
-        pubkey: active?.pubkey,
-        kind: 4,
-        content: encrypt(active.privkey, other.pubkey, newMessage),
-        created_at: Math.floor(Date.now() / 1000),
-        tags: [['p',other.pubkey]],
-        id: '',
-        sig: ''
-      }
-      newEvent.id = getEventHash(newEvent)
-      newEvent.sig = await signEvent(newEvent, active.privkey)
-    } else {
-      newEvent = undefined
-    }
-    if (newMessage.endsWith('\n')) {
-      console.log(newEvent)
-      Data.instance.pool.setPrivateKey(active.privkey)
-      Data.instance.pool.publish(newEvent)
-      newMessage = ''
-      newEvent = undefined
-    }
-  }
+  
   $: {
     active
     other
@@ -121,7 +135,7 @@
     {/if}
   {:else}
     <label>Search DMs: <input bind:value={searchInput}></label>
-    {#each [...conversations] as p (p) }
+    {#each [...conversations] as p (p[0]) }
       <div on:click={() => open(p[0])}><TextNoteProfile pubkey={p[0]} /> ({p[1].length} messages)</div>
     {/each}
   {/if}

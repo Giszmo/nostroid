@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { activeProfile } from '../stores'
-	// import { db } from "../db"
 	import type { IProfile } from "../db"
 	import { Data } from '../data'
-  // import { liveQuery } from "dexie"
-	// import type { Observable } from "dexie"
 
 	let name = ''
 	let avatar = ''

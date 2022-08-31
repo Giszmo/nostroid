@@ -39,7 +39,7 @@
 <li><strong>Avatar: </strong>{#if profile?.avatar}<img src={profile?.avatar} alt='The Avatar'>{:else}no{/if}</li>
 </ul>
 
-{#if $events }
+{#if $events instanceof Array }
 {#each $events as event, i}
   <Event {event} showButtons={true} oddRow={i % 2 === 0} />
 {/each}

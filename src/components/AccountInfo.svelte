@@ -1,19 +1,17 @@
 <script type="ts">
   import type { IProfile } from "../db"
-  // import { db } from "../db"
-  // import { liveQuery } from "dexie"
   import { activeProfile } from '../stores'
+  import noPic from '$lib/assets/noProfilePic.png'
 
   $: profile = $activeProfile as IProfile
+  $: avatar = profile?.avatar || noPic
 </script>
 
 <div class="accountInfo">
   <div class='name'>{profile?.name || '???'}<br></div>
   <div class='pubkey'>{profile?.pubkey}</div>
   <p>
-    {#if profile?.avatar}
-    <img src={profile.avatar} alt="user's avatar">
-    {/if}
+    <img src={avatar} alt="user's avatar">
     {@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
   </p>
 </div>

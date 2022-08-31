@@ -1,5 +1,6 @@
 import Dexie from 'dexie'
-import { profileCache } from './stores.ts'
+import { cProfiles } from './stores.ts'
+import { ProfileCache } from './stores.ts'
 
 export interface IProfile {
   pubkey: string
@@ -65,18 +66,19 @@ export class NostroidDexie extends Dexie {
           profile.avatar = metadata.picture || ''
           profile.nip05 = metadata.nip05 || ''
           db.profiles.put(profile)
-          profileCache.update(oldMap => {
-            let newMap = new Map(oldMap)
-            newMap.set(profile.pubkey, profile)
-            return newMap
+          cProfiles.update(oldCache => {
+            let newCache = new ProfileCache()
+            newCache.backing = oldCache.backing
+            newCache.set(profile.pubkey, profile)
+            return newCache
           })
         }
       }
     } else {
       db.transaction('rw', db.profiles, db.events, async () => {
         let profiles = await db.profiles.toArray()
-        let metaDataEvents = new Map<string, IEvent>();
-        (await db.events
+        let metaDataEvents = new Map<string, IEvent>()
+        ;(await db.events
           .where({
             kind: 0
           })
@@ -84,7 +86,8 @@ export class NostroidDexie extends Dexie {
           .sort((a,b) => b.created_at - a.created_at)
           .forEach(e => {
             if (metaDataEvents.get(e.pubkey)) {
-              // TODO: document side effect
+              // delete older metadata events if we already found one sorting
+              // newest to oldest.
               db.events.delete(e.id)
             } else {
               metaDataEvents.set(e.pubkey, e)
@@ -94,13 +97,15 @@ export class NostroidDexie extends Dexie {
           let metadataEvent = metaDataEvents.get(p.pubkey)
           let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
           if (metadata) {
-      			p.name = metadata.name || ''
-      			p.avatar = metadata.picture || ''
-      			p.nip05 = metadata.nip05 || ''
+            p.name = metadata.name || ''
+            p.avatar = metadata.picture || ''
+            p.nip05 = metadata.nip05 || ''
           }
         })
-        profileCache.update(oldMap => {
-          return new Map([...oldMap, ...(profiles.map(x => [x.pubkey, x]))])
+        cProfiles.update(oldCache => {
+          let newCache = new ProfileCache()
+          newCache.backing = new Map([...(oldCache.backing), ...(profiles.map(x => [x.pubkey, x]))])
+          return newCache
         })
         db.profiles.bulkPut(profiles)
       })
@@ -124,6 +129,6 @@ db.on('populate', () => {
     '32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245',
     '47bae3a008414e24b4d91c8c170f7fce777dedc6780a462d010761dca6482327',
     'f43c1f9bff677b8f27b602725ea0ad51af221344f69a6b352a74991a4479bac3'
-  ].map(it=>{return {pubkey:it}})
+  ].map(it=>{return {pubkey:it, isAccount: true}})
   db.profiles.bulkAdd(debugProfiles)
 })

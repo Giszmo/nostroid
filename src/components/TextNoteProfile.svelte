@@ -1,11 +1,12 @@
 <script type="ts">
-import { profileCache } from '../stores'
+import { cProfiles } from '../stores'
+import noPic from '$lib/assets/noProfilePic.png'
 
 export let pubkey: string
 
-let p = $profileCache
+let p = $cProfiles
 $: profile = p.get(pubkey)
-$: avatar = profile?.avatar || ''
+$: avatar = profile?.avatar
 let id = pubkey
 $: {
   const nip05 = profile?.nip05
@@ -16,7 +17,7 @@ $: {
 </script>
 
 <div class="profile">
-  <img src={avatar} alt="user's avatar">
+  <img src={avatar || noPic} alt="user's avatar">
   <div class="info">
     {profile?.name || 'no name set'}<br>
     {@html id}

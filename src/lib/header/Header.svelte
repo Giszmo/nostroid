@@ -20,19 +20,19 @@
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
 		</svg>
 		<ul>
-			<li class:active={$page.url.pathname === `${base}/profiles`}>
+			<li class:active={$page.url.pathname === `${base}/profiles/`}>
 				<a sveltekit:prefetch href="{base}/profiles">Profiles</a>
 			</li>
-			<li class:active={$page.url.pathname === `${base}`}>
+			<li class:active={$page.url.pathname === `${base}/`}>
 				<a sveltekit:prefetch href="{base}">Feed</a>
 			</li>
-			<li class:active={$page.url.pathname === `${base}/notifications`}>
+			<li class:active={$page.url.pathname === `${base}/notifications/`}>
 				<a sveltekit:prefetch href="{base}/notifications">Notifications</a>
 			</li>
-			<li class:active={$page.url.pathname === `${base}/messages`}>
+			<li class:active={$page.url.pathname === `${base}/messages/`}>
 				<a sveltekit:prefetch href="{base}/messages">Messages</a>
 			</li>
-			<li class:active={$page.url.pathname === `${base}/settings`}>
+			<li class:active={$page.url.pathname === `${base}/settings/`}>
 				<a sveltekit:prefetch href="{base}/settings">Settings</a>
 			</li>
 		</ul>

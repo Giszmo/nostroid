@@ -29,7 +29,7 @@
         decrypted = 'failed to decrypt message...'
       }
     } else {
-      decrypted = 'not ecrypted for us...'
+      decrypted = 'not meant for us...'
     }
     text = marked
       .parseInline(decrypted)

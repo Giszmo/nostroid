@@ -4,10 +4,11 @@
   import { db } from "../db"
   import type { IProfile } from "../db"
   import { activeProfile } from '../stores'
-
+  import noPic from '$lib/assets/noProfilePic.png'
   export let profile: IProfile
   
   $: active = $activeProfile as IProfile
+  $: avatar = profile.avatar || noPic
   const select = async () => {
     db.config.put({
       key: 'activePubkey',
@@ -26,9 +27,7 @@
 
 <div on:mouseenter={select} class="profile { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
 <span class="pubkey">{profile?.pubkey?.slice(0,10)}</span>
-{#if profile?.avatar}
-<img src={profile.avatar} alt="user's avatar">
-{/if}
+<img src={avatar} alt="user's avatar">
 {profile?.name || '???'}
 {@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
 {#if active?.pubkey == profile.pubkey }
