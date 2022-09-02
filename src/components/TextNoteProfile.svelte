@@ -4,15 +4,15 @@ import noPic from '$lib/assets/noProfilePic.png'
 
 export let pubkey: string
 
-let p = $cProfiles
+$: p = $cProfiles
 $: profile = p.get(pubkey)
 $: avatar = profile?.avatar
 let id = pubkey
 $: {
   const nip05 = profile?.nip05
   id = nip05
-  ? `${nip05} (<a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">verify</a>)`
-  : pubkey
+    ? `${nip05} (<a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">verify</a>)`
+    : pubkey
 }
 </script>
 
@@ -27,7 +27,7 @@ $: {
 <style>
 .profile {
   width: 100%;
-  height: 3em;
+  min-height: 3em;
 }
 
 .info {
@@ -40,5 +40,6 @@ img {
   height: 3em;
   float: left;
   object-fit: cover;
+  border-radius: 50%;
 }
 </style>

@@ -21,13 +21,14 @@ export class Data {
         db.events.bulkPut(e)
         e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
       }
-      Data.instance.loadMissingProfiles()
+      Data.instance.loadMissingEvents()
     }, 1000)
     this.loadAndWatchProfiles()
   }
   
-  async private loadMissingProfiles(): void {
+  async private loadMissingEvents(): void {
     this.connectWS()
+    // profiles
     const profiles = (await db.profiles.toArray())
       .filter(it=>it.missing)
     if (profiles.length > 0) {
@@ -48,7 +49,30 @@ export class Data {
           .modify(profile => {
             delete profile.fetching
           })
-      }, 10000);
+      }, 10000)
+    }
+    // events
+    const events = (await db.events.toArray())
+      .filter(it=>it.missing)
+    if (events.length > 0) {
+      events.forEach(it=>{
+        delete it.missing
+        it.fetching = true
+      })
+      await db.events.bulkPut(events)
+      const s = this.pool.sub({
+        cb: Data.instance.onEvent,
+        filter: {ids: events.map(it=>it.id)}
+      })
+      setTimeout(() => {
+        s.unsub()
+        db.events
+          .where("id")
+          .anyOf(events.map(it=>it.id))
+          .modify(event => {
+            delete event.fetching
+          })
+      }, 10000)
     }
   }
   

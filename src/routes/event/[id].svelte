@@ -7,11 +7,11 @@
 	
   let id = ''
   let event:IEvent|undefined
+  
   onMount(async () => {
     id = $page.params.id
-  	event = await db.events.get(id)
-	})
-  
+    event = await db.events.get(id)
+  })
 </script>
 
 <svelte:head>

@@ -40,6 +40,7 @@
 img {
   width: 1em;
   height: 1em;
+  border-radius: 50%;
   object-fit: cover;
 }
 .profile {

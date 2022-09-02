@@ -69,8 +69,6 @@
         let o = ev.pubkey === active?.pubkey
           ? ev.tags.filter(t=>t[0]==='p')?.[0]?.[1]
           : ev.pubkey
-        // let c = conversations.get(o) || []
-        // c.push(ev)
         if (o) {
           conversations.set(o, [...(conversations.get(o) || []), ev])
         }

@@ -27,6 +27,7 @@ img {
   width: 3em;
   height: 3em;
   object-fit: cover;
+  border-radius: 50%;
 }
 .pubkey {
   width: 8em;
