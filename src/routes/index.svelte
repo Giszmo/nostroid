@@ -9,15 +9,17 @@
   import { flip } from 'svelte/animate'
 
   let show = 10
+  let since = Date.now() / 1000 - 30 * 24 * 60 * 60 // initially load one month
   $: active = $activeProfile as IProfile
   $: events = liveQuery(async () => {
     const pubkey = active.pubkey
     if (pubkey == undefined) {
       return []
     }
-    return await db
+    return (await db
       .events
-      .orderBy('created_at').reverse()
+      .where('created_at')
+      .above(since)
       .filter((it) =>
         it.kind === 1
         &&
@@ -25,7 +27,8 @@
           ||
         it.tags.findIndex(tag => tag[0] == 'p' && tag[1] == active.pubkey) >= 0)
       )
-      .toArray()
+      .sortBy('created_at'))
+      .reverse() 
   })
 
   activeProfile.subscribe(() => {
@@ -34,6 +37,9 @@
 
   let showMore = () => {
     show += 10
+    if ($events instanceof Array && show + 10 > $events.length) {
+      since -= 30 * 24 * 60 * 60
+    }
   }
   
   const [send, receive] = crossfade({

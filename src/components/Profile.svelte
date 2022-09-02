@@ -25,33 +25,50 @@
   }
 </script>
 
-<div on:mouseenter={select} class="profile { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
-<span class="pubkey">{profile?.pubkey?.slice(0,10)}</span>
-<img src={avatar} alt="user's avatar">
-{profile?.name || '???'}
-{@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
-{#if active?.pubkey == profile.pubkey }
-    <button on:click={showPubkey}>Show Profile</button>
+<div on:click={select} class="profile { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
+<img src={avatar} alt="user's avatar"><br>
+<div class="name">
+  {profile?.name || '???'}
+  {profile?.privkey ? '🔑' : ''}
+</div>
+<div class="controlls { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
+    <button on:click={showPubkey}>Show</button>
     <button on:click={deleteProfile}>Delete</button>
-{/if}
+</div>
 </div>
 
 <style>
+.profile {
+  background-color: lightgray;
+  border: 2px solid darkgray;
+  text-align: center;
+  display: inline-grid;
+  min-height: 15em;
+  margin: .5em;
+  padding: .5em;
+  border-radius: 15px;
+}
 img {
-  width: 1em;
-  height: 1em;
+  width: 8em;
+  height: 8em;
   border-radius: 50%;
   object-fit: cover;
+  margin: 1em;
 }
-.profile {
-  height: 1.7em;
-  margin: .2em;
-  padding: .1em;
+.name {
+  font-weight: bold;
+  font-size: 1.5em;
 }
 .selectedProfile {
   background-color: lightgreen;
 }
 .pubkey {
   font-family: monospace
+}
+.controlls {
+  display: none;
+}
+.controlls.selectedProfile {
+  display: block;
 }
 </style>
