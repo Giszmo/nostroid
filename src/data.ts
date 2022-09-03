@@ -12,8 +12,26 @@ export class Data {
   
   private constructor() {
     db.updateProfileFromMeta()
+    let testData = 4
+    window.onunhandledrejection = function (event) {
+  event.preventDefault();
+  let reason = event.reason;
+  console.warn('Unhandled promise rejection:', (reason && (reason.stack || reason)));
+}
+    if (typeof Worker === "undefined") {
+        alert('no webworker')
+    } else {
+        let worker = new SharedWorker('service-worker.ts?type=1')
+        worker.port.addEventListener('message', (e) => {
+            console.log('worker said：', e.data)
+        }, false)
+        worker.port.start()
+        console.log('worker started')
+        window.worker = worker
+    }
     setInterval(() => {
-      // worker.port.postMessage('test')
+      console.log(`sending ${testData} to worker ...`)
+      window.worker.port.postMessage(testData++)
       Data.instance.events = [...new Set(Data.instance.events)]
       const e = Data.instance.events.splice(-100)
       if (e.length > 0) {
@@ -35,10 +53,12 @@ export class Data {
         delete it.missing
         it.fetching = true
       })
-      await db.profiles.bulkPut(profiles)
-      const s = this.pool.sub({
-        cb: Data.instance.onEvent,
-        filter: {authors: profiles.map(it=>it.pubkey), kinds: [0]}
+      db.profiles.bulkPut(profiles)
+      .then(() => {
+        const s = this.pool.sub({
+          cb: Data.instance.onEvent,
+          filter: {authors: profiles.map(it=>it.pubkey), kinds: [0]}
+        })
       })
       setTimeout(() => {
         s.unsub()
