@@ -28,8 +28,8 @@
 <div on:click={select} class="profile { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
 <img src={avatar} alt="user's avatar"><br>
 <div class="name">
+  <div class="keys" class:has-keys={profile?.privkey}>🔑</div>
   {profile?.name || '???'}
-  {profile?.privkey ? '🔑' : ''}
 </div>
 <div class="controlls { active?.pubkey == profile?.pubkey ? "selectedProfile" : ""}">
     <button on:click={showPubkey}>Show</button>
@@ -47,6 +47,10 @@
   margin: .5em;
   padding: .5em;
   border-radius: 15px;
+  filter: grayscale(0.7) contrast(1.2);
+}
+.profile:hover {
+  filter: none;
 }
 img {
   width: 8em;
@@ -55,15 +59,23 @@ img {
   object-fit: cover;
   margin: 1em;
 }
+.keys {
+  display: none;
+  /* background-color: rgba(.2,.2,.2,.4); */
+  padding: 5px;
+  /* border-radius: 5px; */
+  filter: drop-shadow(0 0 3px green);
+}
+.keys.has-keys {
+  display: unset;
+}
 .name {
   font-weight: bold;
   font-size: 1.5em;
 }
 .selectedProfile {
   background-color: lightgreen;
-}
-.pubkey {
-  font-family: monospace
+  filter: none;
 }
 .controlls {
   display: none;

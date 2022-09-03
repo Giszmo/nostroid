@@ -43,24 +43,24 @@
   }
   
   const [send, receive] = crossfade({
-		duration: d => Math.sqrt(d * 2000),
+    duration: d => Math.sqrt(d * 2000),
 
-		fallback(node, params) {
-			const style = getComputedStyle(node)
-			const transform = style.transform === 'none'
+    fallback(node, _) {
+      const style = getComputedStyle(node)
+      const transform = style.transform === 'none'
         ? ''
         : style.transform
 
-			return {
-				duration: 200,
-				easing: quintInOut,
-				css: t => `
-					transform: ${transform} scale(${t});
-					opacity: ${t}
-				`
-			}
-		}
-	})
+      return {
+        duration: 200,
+        easing: quintInOut,
+        css: t => `
+        transform: ${transform} scale(${t});
+        opacity: ${t}
+        `
+      }
+    }
+  })
 </script>
 
 <svelte:head>
@@ -76,7 +76,7 @@
   {/if}
   {#each $events.slice(0, show).reverse() as event (event.id)}
     <p in:receive="{{key: event.id}}"
-				out:send="{{key: event.id}}"
+        out:send="{{key: event.id}}"
         animate:flip="{{duration: 800}}">
       <TextNote event={event}/>
     </p>

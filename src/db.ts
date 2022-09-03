@@ -26,6 +26,13 @@ export interface IEvent {
   sig: string
 }
 
+export interface INotification {
+  pubkey: string
+  created_at: number
+  type: string
+  event: string
+}
+
 export interface ITag {
   id: number
   event: string
@@ -41,11 +48,12 @@ export class NostroidDexie extends Dexie {
 
   constructor() {
     super('data4')
-    this.version(7).stores({
+    this.version(8).stores({
       profiles: '&pubkey',
       config: '&key',
       events: '&id, pubkey, kind, created_at, [pubkey+kind], *tags',
-      tags: '++id, event, key, value'
+      tags: '++id, event, key, value',
+      notifications: '++id, pubkey'
     })
   }
   
