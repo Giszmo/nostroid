@@ -1,7 +1,6 @@
 import { relayPool } from 'nostr-tools'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
-import { liveQuery } from "dexie"
 // const worker = new Worker(new URL('./worker.js', import.meta.url))
 
 export class Data {
