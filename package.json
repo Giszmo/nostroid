@@ -44,7 +44,7 @@
 		"dexie": "^3.2.2",
 		"events": "^3.3.0",
 		"marked": "^4.0.18",
-		"nostr-tools": "^0.23.4",
+		"nostr-tools": "^0.24.0",
 		"process": "^0.11.10",
 		"svelte-markdown": "^0.2.2"
 	}

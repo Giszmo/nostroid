@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { activeProfile } from '../stores'
 	import type { IProfile } from "../db"
-	import { Data } from '../data'
+	// import { Data } from '../data'
 
 	let name = ''
 	let avatar = ''
@@ -52,21 +52,21 @@ const reset = async () => {
 
 const sendPersist = () => {
 	const p = $activeProfile as IProfile
-	Data.instance.pool.setPrivateKey(p.privkey)
-	let e = {
-		pubkey: p.pubkey,
-		created_at: Math.floor(Date.now() / 1000),
-		kind: 0,
-		tags: [],
-		content: JSON.stringify(
-			{
-				name: name,
-				picture: avatar,
-				nip05: nip05
-			}
-		)
-	}
-	Data.instance.pool.publish(e)
+	// Data.instance.pool.setPrivateKey(p.privkey)
+	// let e = {
+	// 	pubkey: p.pubkey,
+	// 	created_at: Math.floor(Date.now() / 1000),
+	// 	kind: 0,
+	// 	tags: [],
+	// 	content: JSON.stringify(
+	// 		{
+	// 			name: name,
+	// 			picture: avatar,
+	// 			nip05: nip05
+	// 		}
+	// 	)
+	// }
+	// Data.instance.pool.publish(e)
 }
 
 $: {

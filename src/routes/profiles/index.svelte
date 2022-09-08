@@ -5,7 +5,7 @@
   import { db } from "../../db"
   import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
-  import { Data } from '../../data'
+  // import { Data } from '../../data'
 
   let profiles = liveQuery(() => db.profiles.toArray())
   
@@ -90,7 +90,7 @@
     }
     try {
       await db.profiles.put(profile)
-      Data.instance.loadAndWatchProfiles()
+      // Data.instance.loadAndWatchProfiles()
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }
