@@ -21,19 +21,19 @@
 		</svg>
 		<ul>
 			<li class:active={$page.url.pathname === `${base}/profiles/`}>
-				<a sveltekit:prefetch href="{base}/profiles">Profiles</a>
+				<a data-sveltekit-prefetch href="{base}/profiles">Profiles</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/`}>
-				<a sveltekit:prefetch href="{base}">Feed</a>
+				<a data-sveltekit-prefetch href="{base}">Feed</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/notifications/`}>
-				<a sveltekit:prefetch href="{base}/notifications">Notifications</a>
+				<a data-sveltekit-prefetch href="{base}/notifications">Notifications</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/messages/`}>
-				<a sveltekit:prefetch href="{base}/messages">Messages</a>
+				<a data-sveltekit-prefetch href="{base}/messages">Messages</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/settings/`}>
-				<a sveltekit:prefetch href="{base}/settings">Settings</a>
+				<a data-sveltekit-prefetch href="{base}/settings">Settings</a>
 			</li>
 		</ul>
 		<svg viewBox="0 0 2 3" aria-hidden="true">

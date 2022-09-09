@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores'
-	import { db } from "../../db"
-	import Event from "../../components/Event.svelte"
-	import type { IEvent } from "../../db"
+	import { db } from "../../../db"
+	import Event from "../../../components/Event.svelte"
+	import type { IEvent } from "../../../db"
   import { onMount } from 'svelte'
 	
   let id = ''

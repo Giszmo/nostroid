@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores'
-	import { db } from "../db"
-	import type { IProfile } from "../db"
+	import { db } from "../../db"
+	import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
-	import Event from '../components/Event.svelte'
+	import Event from '../../components/Event.svelte'
 
 	const pubkey = $page.params.pubkey
   console.log(pubkey)

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { activeProfile } from '../stores'
-	import type { IProfile } from "../db"
-	import { Data } from '../data'
+	import { activeProfile } from '../../stores'
+	import type { IProfile } from "../../db"
+	import { Data } from '../../data'
 
 	let name = ''
 	let avatar = ''
