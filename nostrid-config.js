@@ -1,18 +1,17 @@
-// const id = '/chat';
-const id = '';
-const scope = `${id}/`;
 /** @type {import('@vite-pwa/sveltekit').SvelteKitPWAOptions} */
 const nostroidPWA = {
+	base: '/',
+	scope: '/',
 	srcDir: 'src',
 	mode: 'development',
 	filename: 'custom-sw.ts',
 	strategies: 'injectManifest',
 	registerType: 'prompt',
 	manifest: {
+		id: '/',
 		short_name: 'Nostroid',
 		name: 'Nostroid',
-		start_url: scope,
-		scope,
+		start_url: '/',
 		display: 'standalone',
 		theme_color: '#ffffff',
 		background_color: '#ffffff',
@@ -36,18 +35,17 @@ const nostroidPWA = {
 		]
 	},
 	injectManifest: {
-		globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
-		rollupFormat: 'iife'
+		globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'] /*,
+		rollupFormat: 'iife'*/
 	},
 	devOptions: {
 		enabled: true,
 		type: 'module',
-		navigateFallback: scope
+		navigateFallback: '/app-shell/'
 	},
 	kit: {
-		// base: id,
-		outDir: 'build',
-		trailingSlash: 'always'
+		trailingSlash: 'always',
+		adapterFallback: 'app-shell.html'
 	}
 };
 

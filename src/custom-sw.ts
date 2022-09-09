@@ -24,7 +24,10 @@ precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
 let allowlist: undefined | RegExp[];
-if (import.meta.env.DEV) allowlist = [new RegExp(`${base}/`)];
-
 // to allow work offline
-registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/`), { allowlist }));
+if (import.meta.env.DEV) {
+	allowlist = [new RegExp(`${base}/`)];
+	registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/`), { allowlist }));
+} else {
+	registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/app-shell/`), { allowlist }));
+}

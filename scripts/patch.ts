@@ -31,6 +31,22 @@ const patchReadableStream = () => {
 			{ encoding: 'utf-8' }
 		);
 	}
+	content = readFileSync('./node_modules/vite-plugin-pwa/dist/index.js', { encoding: 'utf-8' });
+	if (content.includes('format: "es",')) {
+		writeFileSync(
+			'./node_modules/vite-plugin-pwa/dist/index.js',
+			content.replace('format: "es",', 'format: "iife",'),
+			{ encoding: 'utf-8' }
+		);
+	}
+	content = readFileSync('./node_modules/vite-plugin-pwa/dist/index.mjs', { encoding: 'utf-8' });
+	if (content.includes('format: "es",')) {
+		writeFileSync(
+			'./node_modules/vite-plugin-pwa/dist/index.mjs',
+			content.replace('format: "es",', 'format: "iife",'),
+			{ encoding: 'utf-8' }
+		);
+	}
 };
 
 patchReadableStream();

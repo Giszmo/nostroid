@@ -23,6 +23,7 @@ specifiers:
   events: ^3.3.0
   marked: ^4.1.0
   nostr-tools: ^0.24.1
+  pnpm: ^7.11.0
   prettier: ^2.7.1
   prettier-plugin-svelte: ^2.7.0
   process: ^0.11.10
@@ -63,6 +64,7 @@ devDependencies:
   eslint-config-prettier: 8.5.0_eslint@8.23.0
   eslint-plugin-svelte3: 4.0.0_jtvgu4usxe4xoavzb5jpyaoyje
   esno: 0.16.3
+  pnpm: 7.11.0
   prettier: 2.7.1
   prettier-plugin-svelte: 2.7.0_nk6d2fkgcllkkdynqbuearcure
   svelte: 3.50.1
@@ -2070,7 +2072,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001393
-      electron-to-chromium: 1.4.246
+      electron-to-chromium: 1.4.247
       node-releases: 2.0.6
       update-browserslist-db: 1.0.7_browserslist@4.21.3
     dev: true
@@ -2377,8 +2379,8 @@ packages:
       jake: 10.8.5
     dev: true
 
-  /electron-to-chromium/1.4.246:
-    resolution: {integrity: sha512-/wFCHUE+Hocqr/LlVGsuKLIw4P2lBWwFIDcNMDpJGzyIysQV4aycpoOitAs32FT94EHKnNqDR/CVZJFbXEufJA==}
+  /electron-to-chromium/1.4.247:
+    resolution: {integrity: sha512-FLs6R4FQE+1JHM0hh3sfdxnYjKvJpHZyhQDjc2qFq/xFvmmRt/TATNToZhrcGUFzpF2XjeiuozrA8lI0PZmYYw==}
     dev: true
 
   /emoji-regex/8.0.0:
@@ -3996,6 +3998,12 @@ packages:
     hasBin: true
     dev: true
 
+  /pnpm/7.11.0:
+    resolution: {integrity: sha512-cxh4TfCE8L4ZbLBN72kTGKTYP7X08nrIzoQ2rQCKihAcIHAdNIgsk4bEJyE1xHjE+bNJt9skwr7aJv3LpvUawQ==}
+    engines: {node: '>=14.6'}
+    hasBin: true
+    dev: true
+
   /postcss/8.4.16:
     resolution: {integrity: sha512-ipHE1XBvKzm5xI7hiHCZJCSugxvsdq2mPnsq5+UF+VHCjiBvtDrlxJfMBToWaP9D5XlgNmcFGqoHmUn0EYEaRQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -5114,14 +5122,14 @@ packages:
     dev: true
 
   file:vite-plugin-pwa-0.12.7.tgz_hmwovejfmhdkcygyi2ttcxz6n4:
-    resolution: {integrity: sha512-qCQ7rzS2J+u84cTYKC1cqirpkjyLxm4SF2Ng1YmV1XAsobTwYW7BmUPimOT7sXuc0U7KF5hwF84PyIzp3hnYug==, tarball: file:vite-plugin-pwa-0.12.7.tgz}
+    resolution: {integrity: sha512-8IPJFTv0VthKqAS/whD71eXLgunEp/jdsHWLjhtEySKcR+nABKEmP+ul9tZEdnmIFlwKTHJuNW8vJkT+X5gQYw==, tarball: file:vite-plugin-pwa-0.12.7.tgz}
     id: file:vite-plugin-pwa-0.12.7.tgz
     name: vite-plugin-pwa
     version: 0.12.7
     peerDependencies:
-      vite: ^2.0.0 || ^3.0.0-0
-      workbox-build: ^6.4.0
-      workbox-window: ^6.4.0
+      vite: ^3.1.0
+      workbox-build: ^6.5.4
+      workbox-window: ^6.5.4
     dependencies:
       debug: 4.3.4
       fast-glob: 3.2.12
@@ -5135,7 +5143,7 @@ packages:
     dev: true
 
   file:vite-pwa-sveltekit-0.12.7.tgz_vite-plugin-pwa@0.12.7:
-    resolution: {integrity: sha512-cFDvD7c3r0bZhRYfxu6cXauMPyXSdQRtAPbYbfLHI7RmOGEuvjOrTB2obN4iCizL11GtGK1+F2pZJpaBxQHH5Q==, tarball: file:vite-pwa-sveltekit-0.12.7.tgz}
+    resolution: {integrity: sha512-CNog16dy5KFn2YvSZIKxWRxu6pFCwAa6XVB0UTEWrUGjcTb+yigBPZkPiJsb/a40QDFFvXUje/Pj4RpipXyBJw==, tarball: file:vite-pwa-sveltekit-0.12.7.tgz}
     id: file:vite-pwa-sveltekit-0.12.7.tgz
     name: '@vite-pwa/sveltekit'
     version: 0.12.7

@@ -2,7 +2,7 @@ import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
 import { nostroidPWA } from './nostrid-config.js';
 
-const { trailingSlash, base, outDir } = nostroidPWA.kit;
+const { trailingSlash, adapterFallback: fallback } = nostroidPWA.kit;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -12,8 +12,7 @@ const config = {
 	// compilerOptions: { customElement: true },
 
 	kit: {
-		adapter: adapter({ out: outDir }),
-		paths: { base: base },
+		adapter: adapter({ fallback }),
 		trailingSlash: trailingSlash
 	}
 };
