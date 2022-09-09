@@ -27,7 +27,7 @@ let allowlist: undefined | RegExp[];
 // to allow work offline
 if (import.meta.env.DEV) {
 	allowlist = [new RegExp(`${base}/`)];
-	registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/`), { allowlist }));
+	registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/app-shell/`), { allowlist }));
 } else {
 	registerRoute(new NavigationRoute(createHandlerBoundToURL(`${base}/app-shell/`), { allowlist }));
 }
