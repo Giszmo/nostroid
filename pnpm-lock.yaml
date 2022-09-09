@@ -23,7 +23,6 @@ specifiers:
   events: ^3.3.0
   marked: ^4.1.0
   nostr-tools: ^0.24.1
-  pnpm: ^7.11.0
   prettier: ^2.7.1
   prettier-plugin-svelte: ^2.7.0
   process: ^0.11.10
@@ -64,7 +63,6 @@ devDependencies:
   eslint-config-prettier: 8.5.0_eslint@8.23.0
   eslint-plugin-svelte3: 4.0.0_jtvgu4usxe4xoavzb5jpyaoyje
   esno: 0.16.3
-  pnpm: 7.11.0
   prettier: 2.7.1
   prettier-plugin-svelte: 2.7.0_nk6d2fkgcllkkdynqbuearcure
   svelte: 3.50.1
@@ -3995,12 +3993,6 @@ packages:
   /playwright-core/1.25.2:
     resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
     engines: {node: '>=14'}
-    hasBin: true
-    dev: true
-
-  /pnpm/7.11.0:
-    resolution: {integrity: sha512-cxh4TfCE8L4ZbLBN72kTGKTYP7X08nrIzoQ2rQCKihAcIHAdNIgsk4bEJyE1xHjE+bNJt9skwr7aJv3LpvUawQ==}
-    engines: {node: '>=14.6'}
     hasBin: true
     dev: true
 
