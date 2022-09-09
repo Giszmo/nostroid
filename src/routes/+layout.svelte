@@ -2,12 +2,34 @@
 	import Header from '$lib/header/Header.svelte';
 	import Debug from '../components/Debug.svelte'
 	import '../app.css';
+	import { onMount } from 'svelte'
+	import { browser, dev } from '$app/environment'
+	import { base } from '$app/paths'
+
+	const loadRPC = browser
+	// const loadRPC = !dev && browser
+
+	let ReloadPrompt
+	onMount(async () => {
+		loadRPC && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+	})
+
 </script>
+
+<svelte:head>
+    {#if browser}
+	<!--{#if !dev}-->
+		<link rel="manifest" href="/manifest.webmanifest">
+	{/if}
+</svelte:head>
 
 <Header />
 
 <main>
 	<slot />
+	{#if ReloadPrompt}
+		<svelte:component this={ReloadPrompt} />
+	{/if}
 </main>
 
 <footer>

@@ -1,45 +1,44 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
+import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { nostroidPWA } from './nostrid-config.js';
 
-/** @type {import('vite').UserConfig} */
-const config = {
+export default defineConfig({
 	plugins: [
 		sveltekit(),
+		SvelteKitPWA(nostroidPWA),
 		NodeGlobalsPolyfillPlugin({
-        process: true,
-        buffer: true
-    }),
+			process: true,
+			buffer: true
+		}),
 		NodeModulesPolyfillPlugin()
 	],
 	ssr: {
-    noExternal: [
-			'nostr-tools'
-		]
-  },
+		noExternal: ['nostr-tools']
+	},
 	resolve: {
-    alias: {
-      process: "process/browser",
-      stream: 'rollup-plugin-node-polyfills/polyfills/stream',
-      util: 'rollup-plugin-node-polyfills/polyfills/util',
-    }
-  },
+		alias: {
+			process: 'process/browser',
+			stream: 'rollup-plugin-node-polyfills/polyfills/stream',
+			util: 'rollup-plugin-node-polyfills/polyfills/util'
+		}
+	},
 	optimizeDeps: {
 		esbuildOptions: {
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
-					buffer: true,
+					buffer: true
 				}),
 				NodeModulesPolyfillPlugin()
 			]
 		}
-  },
+	},
 	build: {
 		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-	},
-  global: {}
-};
-
-export default config;
+	}
+	//global: {}
+});
