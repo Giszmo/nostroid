@@ -7,7 +7,7 @@
   import { activeProfile } from '../../stores'
   import { encrypt } from 'nostr-tools/nip04.js'
   import { getEventHash, signEvent } from 'nostr-tools/event.js'
-	import { Data } from '../../data'
+	// import { Data } from '../../data'
 
   let searchInput = ''
   let show = 10
@@ -50,8 +50,8 @@
       newEvent.id = getEventHash(newEvent)
       newEvent.sig = await signEvent(newEvent, privkey)
       if (newMessage.endsWith('\n')) {
-        Data.instance.pool.setPrivateKey(privkey)
-        Data.instance.pool.publish(newEvent)
+        // Data.instance.pool.setPrivateKey(privkey)
+        // Data.instance.pool.publish(newEvent)
         newMessage = ''
         newEvent = undefined
       }

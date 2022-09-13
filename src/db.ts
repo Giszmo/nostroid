@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
-import { cProfiles } from './stores.ts'
-import { ProfileCache } from './stores.ts'
+// import { cProfiles } from './stores.ts'
+// import { ProfileCache } from './stores.ts'
 
 export interface IProfile {
   pubkey: string
@@ -58,6 +58,7 @@ export class NostroidDexie extends Dexie {
   }
   
   public async updateProfileFromMeta(pubkey) {
+    console.log('updateProfileFromMeta')
     if (pubkey) {
       let profile = await db.profiles.get(pubkey)
       if (profile) {
@@ -74,12 +75,12 @@ export class NostroidDexie extends Dexie {
           profile.avatar = metadata.picture || ''
           profile.nip05 = metadata.nip05 || ''
           db.profiles.put(profile)
-          cProfiles.update(oldCache => {
-            let newCache = new ProfileCache()
-            newCache.backing = oldCache.backing
-            newCache.set(profile.pubkey, profile)
-            return newCache
-          })
+          // cProfiles.update(oldCache => {
+          //   let newCache = new ProfileCache()
+          //   newCache.backing = oldCache.backing
+          //   newCache.backing.set(profile.pubkey, profile)
+          //   return newCache
+          // })
         }
       }
     } else {
@@ -110,11 +111,11 @@ export class NostroidDexie extends Dexie {
             p.nip05 = metadata.nip05 || ''
           }
         })
-        cProfiles.update(oldCache => {
-          let newCache = new ProfileCache()
-          newCache.backing = new Map([...(oldCache.backing), ...(profiles.map(x => [x.pubkey, x]))])
-          return newCache
-        })
+        // cProfiles.update(oldCache => {
+        //   let newCache = new ProfileCache()
+        //   newCache.backing = new Map([...(oldCache.backing), ...(profiles.map(x => [x.pubkey, x]))])
+        //   return newCache
+        // })
         db.profiles.bulkPut(profiles)
       })
     }

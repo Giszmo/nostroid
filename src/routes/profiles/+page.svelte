@@ -5,7 +5,7 @@
   import { db } from "../../db"
   import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
-  import { Data } from '../../data'
+  // import { Data } from '../../data'
 
   let profiles = liveQuery(() => db.profiles.toArray())
   
@@ -50,6 +50,7 @@
         profile.pubkey = getPublicKey(profile.privkey)
         break
       case "pub":
+        profile.imported = true
         var pubkey = ''
         if (newProfilePubkey.startsWith('npub')) {
           const x = bech32().decode(newProfilePubkey)
@@ -68,6 +69,7 @@
         profile.pubkey = pubkey
         break
       case "priv":
+        profile.imported = true
         var privkey = ''
         if (newProfilePrivkey.startsWith('nsec')) {
           const x = bech32().decode(newProfilePrivkey)
@@ -90,7 +92,7 @@
     }
     try {
       await db.profiles.put(profile)
-      Data.instance.loadAndWatchProfiles()
+      // Data.instance.loadAndWatchProfiles()
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }

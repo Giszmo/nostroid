@@ -4,17 +4,19 @@ import {
 	precacheAndRoute
 } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { relayPool } from 'nostr-tools';
 import { base } from '$app/paths';
+import { Data } from './data.ts';
+Data.instance.start();
 
 /* eslint-env serviceworker */
 declare let self: ServiceWorkerGlobalScope;
 
-console.log('hi');
-console.log(typeof relayPool);
+console.log('Starting Service Worker ...');
 
 self.addEventListener('message', (event) => {
-	if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+	if (event.data
+    && event.data.type === 'SKIP_WAITING')
+    self.skipWaiting();
 });
 
 // self.__WB_MANIFEST is default injection point

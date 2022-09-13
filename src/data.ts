@@ -1,7 +1,6 @@
 import { relayPool } from 'nostr-tools'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
-// const worker = new Worker(new URL('./worker.js', import.meta.url))
 
 export class Data {
   private static _instance: Data = new this()
@@ -10,12 +9,14 @@ export class Data {
   // event buffer to batch insert
   public events: IEvent[] = []
   
-  private constructor() {
+  private constructor() {}
+  
+  public start() {
     db.updateProfileFromMeta()
     setInterval(() => {
       // worker.port.postMessage('test')
       Data.instance.events = [...new Set(Data.instance.events)]
-      const e = Data.instance.events.splice(-100)
+      const e = Data.instance.events.splice(-5000)
       if (e.length > 0) {
         db.events.bulkPut(e)
         e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
@@ -36,7 +37,7 @@ export class Data {
         it.fetching = true
       })
       await db.profiles.bulkPut(profiles)
-      const s = this.pool.sub({
+      const s = Data.instance.pool.sub({
         cb: Data.instance.onEvent,
         filter: {authors: profiles.map(it=>it.pubkey), kinds: [0]}
       })
@@ -59,7 +60,7 @@ export class Data {
         it.fetching = true
       })
       await db.events.bulkPut(events)
-      const s = this.pool.sub({
+      const s = Data.instance.pool.sub({
         cb: Data.instance.onEvent,
         filter: {ids: events.map(it=>it.id)}
       })
@@ -76,6 +77,7 @@ export class Data {
   }
   
   async public loadAndWatchProfiles(): void {
+    console.log('loadAndWatchProfiles()')
     this.connectWS()
     const profiles = await db.profiles.toArray()
     const newProfiles = profiles.filter(p=>!p.synced)
@@ -87,10 +89,10 @@ export class Data {
       // TODO: scan the last day as the user might not reset the timestamp in a long time
       ? priorSyncTS - 24 * 60 * 60
       : 0
-    this.events = []
+    Data.instance.events = []
     const sub = (name, filter, keys) => {
       if (keys.length > 0) {
-        this.pool.sub({
+        Data.instance.pool.sub({
           cb: Data.instance.onEvent,
           filter: filter
         }, name)
@@ -124,10 +126,10 @@ export class Data {
   }
 
   public connectWS(): void {
-    if (this.pool) return
+    if (Data.instance?.pool) return
     const relay = 'wss://relay.nostr.info'
-  	this.pool = relayPool()
-  	this.pool.addRelay(relay, {read: true, write: true})
+  	Data.instance.pool = relayPool()
+  	Data.instance.pool.addRelay(relay, {read: true, write: true})
   }
 
   public static get instance() {
