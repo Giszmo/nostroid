@@ -2,12 +2,11 @@
   import DM from '../../components/DM.svelte'
   import TextNoteProfile from '../../components/TextNoteProfile.svelte'
   import { cProfiles } from '../../stores'
-  import { liveQuery, type Observable } from "dexie"
+  import { liveQuery } from "dexie"
   import { type IProfile, type IEvent, db } from "../../db"
   import { activeProfile } from '../../stores'
   import { encrypt } from 'nostr-tools/nip04.js'
-  import { getEventHash, signEvent } from 'nostr-tools/event.js'
-	// import { Data } from '../../data'
+  import { sendPersistEvent } from '../../nostrHelper'
 
   let searchInput = ''
   let show = 10
@@ -47,12 +46,8 @@
         id: '',
         sig: ''
       }
-      newEvent.id = getEventHash(newEvent)
-      newEvent.sig = await signEvent(newEvent, privkey)
       if (newMessage.endsWith('\n')) {
-        let e = newEvent as any
-        e.outbox = true
-        db.events.put(e)
+        sendPersistEvent(4, newEvent.tags, newEvent.content, privkey)
         newMessage = ''
         newEvent = undefined
       }

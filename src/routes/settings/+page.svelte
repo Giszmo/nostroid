@@ -1,9 +1,7 @@
 <script lang="ts">
-  import {getEventHash, signEvent } from 'nostr-tools/event.js'
   import { activeProfile } from '../../stores'
-  import { db } from "../../db"
-  import type { IEvent, IProfile } from "../../db"
-  // import { Data } from '../../data'
+  import { sendPersistEvent } from '../../nostrHelper'
+  import type { IProfile } from "../../db"
 
   let name = ''
   let avatar = ''
@@ -53,27 +51,14 @@ const reset = async () => {
 
 const sendPersist = async () => {
   const p = $activeProfile as IProfile
-  let e = <IEvent>{
-    id: '',
-    sig: '',
-    pubkey: p.pubkey,
-    created_at: Math.floor(Date.now() / 1000),
-    kind: 0,
-    tags: [],
-    content: JSON.stringify(
+  sendPersistEvent(0, [], JSON.stringify(
       {
         name: name,
         picture: avatar,
         nip05: nip05
       }
-    ),
-    outbox: true
-  }
+    ), p.privkey)
   cancelPersist()
-  e.id = getEventHash(e)
-  e.sig = await signEvent(e, p.privkey)
-  db.events.put(e)
-  // Data.instance.pool.publish(e)
 }
 
 $: {
