@@ -8,21 +8,12 @@
 	const pubkey = $page.params.pubkey
   console.log(pubkey)
 	let p = liveQuery(() => db.profiles.get(pubkey))
-  // profile.subscribe({
-  //   next: result => console.log("Got result:", JSON.stringify(result)),
-  //   error: error => console.error(error)
-  // })
   $: profile = $p as IProfile
   
-	let events = liveQuery(
-		() => db
-			.events
-			.orderBy('created_at').reverse()
-			.filter((it) =>
-				it.pubkey == pubkey
-			)
-			.toArray()
-  )
+	let events = liveQuery(() => db.events
+		.orderBy('created_at').reverse()
+		.filter((it) => it.pubkey == pubkey)
+		.toArray())
 
 </script>
 

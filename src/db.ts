@@ -1,6 +1,4 @@
 import Dexie from 'dexie'
-// import { cProfiles } from './stores.ts'
-// import { ProfileCache } from './stores.ts'
 
 export interface IProfile {
   pubkey: string
@@ -57,68 +55,45 @@ export class NostroidDexie extends Dexie {
     })
   }
   
-  public async updateProfileFromMeta(pubkey) {
-    console.log('updateProfileFromMeta')
-    if (pubkey) {
-      let profile = await db.profiles.get(pubkey)
-      if (profile) {
-        let metadataEvent = (await db.events
-          .where({
-            kind: 0,
-            pubkey: pubkey
-          })
-          .toArray())
-          .sort((a,b) => b.created_at - a.created_at)[0]
-        let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
-        if (metadata) {
-          profile.name = metadata.name || ''
-          profile.avatar = metadata.picture || ''
-          profile.nip05 = metadata.nip05 || ''
-          db.profiles.put(profile)
-          // cProfiles.update(oldCache => {
-          //   let newCache = new ProfileCache()
-          //   newCache.backing = oldCache.backing
-          //   newCache.backing.set(profile.pubkey, profile)
-          //   return newCache
-          // })
-        }
+  public async updateProfileFromMeta(pubkeys) {
+    console.log(`updateProfileFromMeta(${pubkeys})`)
+    if (pubkeys && pubkeys.length === 0) {
+      return
+    }
+    db.transaction('rw', db.profiles, db.events, async () => {
+      let profiles: Array<IProfile>
+      if (pubkeys) {
+        profiles = await db.profiles.where('pubkey').anyOf(pubkeys).toArray()
+      } else {
+        profiles = await db.profiles.toArray()
       }
-    } else {
-      db.transaction('rw', db.profiles, db.events, async () => {
-        let profiles = await db.profiles.toArray()
-        let metaDataEvents = new Map<string, IEvent>()
-        ;(await db.events
-          .where({
-            kind: 0
-          })
-          .toArray())
-          .sort((a,b) => b.created_at - a.created_at)
-          .forEach(e => {
-            if (metaDataEvents.get(e.pubkey)) {
-              // delete older metadata events if we already found one sorting
-              // newest to oldest.
-              db.events.delete(e.id)
-            } else {
-              metaDataEvents.set(e.pubkey, e)
-            }
-          })
-        profiles.forEach(p => {
-          let metadataEvent = metaDataEvents.get(p.pubkey)
-          let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
-          if (metadata) {
-            p.name = metadata.name || ''
-            p.avatar = metadata.picture || ''
-            p.nip05 = metadata.nip05 || ''
+      let metaDataEvents = new Map<string, IEvent>()
+      ;(await db.events
+        .where({
+          kind: 0
+        })
+        .toArray())
+        .sort((a,b) => b.created_at - a.created_at)
+        .forEach(e => {
+          if (metaDataEvents.get(e.pubkey)) {
+            // delete older metadata events if we already found one sorting
+            // newest to oldest.
+            db.events.delete(e.id)
+          } else {
+            metaDataEvents.set(e.pubkey, e)
           }
         })
-        // cProfiles.update(oldCache => {
-        //   let newCache = new ProfileCache()
-        //   newCache.backing = new Map([...(oldCache.backing), ...(profiles.map(x => [x.pubkey, x]))])
-        //   return newCache
-        // })
-        db.profiles.bulkPut(profiles)
+      profiles.forEach(p => {
+        let metadataEvent = metaDataEvents.get(p.pubkey)
+        let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
+        if (metadata) {
+          p.name = metadata.name || ''
+          p.avatar = metadata.picture || ''
+          p.nip05 = metadata.nip05 || ''
+        }
       })
-    }
+      db.profiles.bulkPut(profiles)
+    })
   }
 }
 

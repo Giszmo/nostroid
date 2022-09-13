@@ -19,14 +19,16 @@ export class Data {
       const e = Data.instance.events.splice(-5000)
       if (e.length > 0) {
         db.events.bulkPut(e)
-        e.filter(it=>it.kind===0).forEach(m=>db.updateProfileFromMeta(m.pubkey))
+        const updatedProfiles = e.filter(it=>it.kind===0).map(it=>it.pubkey)
+        db.updateProfileFromMeta(updatedProfiles)
       }
-      Data.instance.loadMissingEvents()
+      Data.instance.downloadMissingEvents()
+      Data.instance.broadcastOutbox()
     }, 1000)
     this.loadAndWatchProfiles()
   }
   
-  async private loadMissingEvents(): void {
+  async private downloadMissingEvents(): void {
     this.connectWS()
     // profiles
     const profiles = (await db.profiles.toArray())
@@ -73,6 +75,20 @@ export class Data {
             delete event.fetching
           })
       }, 10000)
+    }
+  }
+  
+  async private broadcastOutbox(): void {
+    this.connectWS()
+    // events
+    const events = (await db.events.where('created_at').above(Math.floor(Date.now() / 1000 - 60 * 60)).toArray())
+      .filter(it=>it.outbox)
+    if (events.length > 0) {
+      events.forEach(e => {
+        delete e.outbox
+        Data.instance.pool.publish(e)
+      })
+      await db.events.bulkPut(events)
     }
   }
   

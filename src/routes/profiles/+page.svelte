@@ -92,7 +92,6 @@
     }
     try {
       await db.profiles.put(profile)
-      // Data.instance.loadAndWatchProfiles()
     } catch (error) {
       error = `Failed to add ${profile}: ${error}`
     }

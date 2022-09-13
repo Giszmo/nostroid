@@ -52,23 +52,10 @@ export const cProfiles = writable(new ProfileCache());
 
 let profiles = liveQuery(() => db.profiles.toArray());
 profiles.subscribe(p => {
-    cProfiles.update(old => {
-      let newCache = new ProfileCache()
-      newCache.backing = new Map(p.map(x => [x.pubkey, x]))
-      return newCache
-    })
+  console.log(`updating profile cache (->${p.length} profiles)`)
+  cProfiles.update(old => {
+    let newCache = new ProfileCache()
+    newCache.backing = new Map(p.map(x => [x.pubkey, x]))
+    return newCache
+  })
 })
-// const onProfilesChanged = () => {
-//   console.log(profiles);
-//   console.log('here')
-//   console.log(`new list of profiles is ${$profiles?.length} long.`)
-//   // cProfiles.update(old => {
-//   //   let newCache = new ProfileCache()
-//   //   newCache.backing = new Map(...(p.map(x => [x.pubkey, x])))
-//   //   return newCache
-//   // })
-// }
-// $: {
-//   profiles;
-//   onProfilesChanged();
-// }

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import {getEventHash, signEvent } from 'nostr-tools/event.js'
   import { activeProfile } from '../../stores'
-  import type { IProfile } from "../../db"
+  import { db } from "../../db"
+  import type { IEvent, IProfile } from "../../db"
   // import { Data } from '../../data'
 
   let name = ''
@@ -19,11 +21,11 @@
   })()
 }
 
-let interval
+var interval: any // NodeJs.Timer? number?
 let delayS = 10
 let msg = ''
 
-const persist = () => {
+const persistLater = () => {
   cancelPersist()
   interval = setInterval(() => {
     if (delayS > 0) {
@@ -31,7 +33,6 @@ const persist = () => {
       delayS-=0.1
     } else {
       sendPersist()
-      cancelPersist()
     }
   }, 100)
 }
@@ -43,17 +44,18 @@ const cancelPersist = () => {
 }
 
 const reset = async () => {
-  clearInterval(interval)
+  cancelPersist()
   let active = (await $activeProfile) as IProfile
   name = active.name || ''
   avatar = active.avatar || ''
   nip05 = active.nip05 || ''
 }
 
-const sendPersist = () => {
+const sendPersist = async () => {
   const p = $activeProfile as IProfile
-  // Data.instance.pool.setPrivateKey(p.privkey)
-  let e = {
+  let e = <IEvent>{
+    id: '',
+    sig: '',
     pubkey: p.pubkey,
     created_at: Math.floor(Date.now() / 1000),
     kind: 0,
@@ -64,8 +66,13 @@ const sendPersist = () => {
         picture: avatar,
         nip05: nip05
       }
-    )
+    ),
+    outbox: true
   }
+  cancelPersist()
+  e.id = getEventHash(e)
+  e.sig = await signEvent(e, p.privkey)
+  db.events.put(e)
   // Data.instance.pool.publish(e)
 }
 
@@ -77,7 +84,7 @@ $: {
   if (name === a.name && avatar === a.avatar && nip05 === a.nip05) {
     cancelPersist()
   } else {
-    persist()
+    persistLater()
   }
 }
 

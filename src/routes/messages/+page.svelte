@@ -50,8 +50,9 @@
       newEvent.id = getEventHash(newEvent)
       newEvent.sig = await signEvent(newEvent, privkey)
       if (newMessage.endsWith('\n')) {
-        // Data.instance.pool.setPrivateKey(privkey)
-        // Data.instance.pool.publish(newEvent)
+        let e = newEvent as any
+        e.outbox = true
+        db.events.put(e)
         newMessage = ''
         newEvent = undefined
       }
