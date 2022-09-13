@@ -23,11 +23,11 @@
 			<li class:active={$page.url.pathname === `${base}/profiles/`}>
 				<a data-sveltekit-prefetch href="{base}/profiles">Profiles</a>
 			</li>
-			<li class:active={$page.url.pathname === `${base}/`}>
-				<a data-sveltekit-prefetch href="{base}">Feed</a>
-			</li>
 			<li class:active={$page.url.pathname === `${base}/notifications/`}>
 				<a data-sveltekit-prefetch href="{base}/notifications">Notifications</a>
+			</li>
+      <li class:active={$page.url.pathname === `${base}/`}>
+				<a data-sveltekit-prefetch href="{base}/">Feed</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/messages/`}>
 				<a data-sveltekit-prefetch href="{base}/messages">Messages</a>
