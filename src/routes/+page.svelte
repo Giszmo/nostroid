@@ -2,8 +2,8 @@
 </script>
 
 <svelte:head>
-	<title>Todo</title>
+	<title>Feed</title>
 	<meta name="description" content="To be implemented ..." />
 </svelte:head>
 
-<h1>Todo</h1>
+<h1>Feed</h1>

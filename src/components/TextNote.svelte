@@ -83,7 +83,7 @@
 
 .tn {
   border: 2px solid gray;
-  border-radius: 5px;
+  border-radius: 15px;
   padding: 15px;
 }
 </style>

@@ -10,16 +10,7 @@
   let event: Observable<IEvent|undefined> = liveQuery(async () => {
     let x = await db.events.get(content.eventId)
     if (!x) {
-      db.events.add(<IEvent>{
-        id: content.eventId,
-        pubkey: '',
-        created_at: 0,
-        kind: -1,
-        tags: [],
-        content: '',
-        sig: '',
-        missing: true
-      })
+      db.missingEvents.add({id: content.eventId})
     }
     return x
    })

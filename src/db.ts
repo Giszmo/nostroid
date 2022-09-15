@@ -6,7 +6,15 @@ export interface IProfile {
   name?: string
   avatar?: string
   nip05?: string
-  isAccount: boolean
+  /**
+   * "degree of separation"
+   * 
+   *     0: our account
+   *     1: direct follow of one of our accounts
+   *     2: follow of a follow
+   *     ...
+   **/
+  degree: number
 }
 
 export interface IConfig {
@@ -38,20 +46,33 @@ export interface ITag {
   value: string
 }
 
+export interface IMissing {
+  id: string
+}
+
 export class NostroidDexie extends Dexie {
   profiles!: Dexie.Table<IProfile>
   config!: Dexie.Table<IConfig>
   events!: Dexie.Table<IEvent>
   tags!: Dexie.Table<ITag>
+  missingEvents!: Dexie.Table<IMissing>
 
   constructor() {
     super('data4')
-    this.version(8).stores({
-      profiles: '&pubkey',
+    this.version(12).stores({
+      profiles: '&pubkey, degree',
       config: '&key',
       events: '&id, pubkey, kind, created_at, [pubkey+kind], *tags',
+      missingEvents: '&id',
       tags: '++id, event, key, value',
       notifications: '++id, pubkey'
+    }).upgrade(tx => {
+      return tx.table("profiles").toCollection().modify(profile => {
+        profile.degree = profile.isAccount
+          ? 0
+          : 1000
+        delete profile.isAccount
+      })
     })
   }
   
@@ -113,6 +134,6 @@ db.on('populate', () => {
     '32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245',
     '47bae3a008414e24b4d91c8c170f7fce777dedc6780a462d010761dca6482327',
     'f43c1f9bff677b8f27b602725ea0ad51af221344f69a6b352a74991a4479bac3'
-  ].map(it=>{return {pubkey:it, isAccount: true}})
+  ].map(it=>{return {pubkey:it, degree: 0}})
   db.profiles.bulkAdd(debugProfiles)
 })

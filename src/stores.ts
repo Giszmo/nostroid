@@ -11,7 +11,7 @@ export const activeProfile = liveQuery(async (): Promise<IProfile | undefined> =
       return profile;
     }
   }
-  return { name: '', pubkey: '', isAccount: false };
+  return { name: '', pubkey: '', degree: 100 };
 });
 
 /**
@@ -31,7 +31,7 @@ export class ProfileCache {
       profile = {
         pubkey: pubkey,
         missing: true,
-        isAccount: false
+        degree: 100
       } as IProfile;
       db.profiles.add(profile);
       this.backing.set(pubkey, profile);

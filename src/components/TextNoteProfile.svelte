@@ -41,5 +41,6 @@ img {
   float: left;
   object-fit: cover;
   border-radius: 50%;
+  margin: 10px;
 }
 </style>

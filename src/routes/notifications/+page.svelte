@@ -2,7 +2,7 @@
   import TextNote from '../../components/TextNote.svelte'
   import { liveQuery } from "dexie"
   import { db } from "../../db"
-  import type { IProfile } from "../../db"
+  import type { IEvent, IProfile } from "../../db"
   import { activeProfile } from '../../stores'
   import { crossfade } from 'svelte/transition'
   import { quintInOut } from 'svelte/easing'
@@ -23,13 +23,41 @@
       .filter((it) =>
         it.kind === 1
         &&
-        (it.pubkey == active.pubkey
-          ||
+        // (it.pubkey == active.pubkey
+        //   ||
         it.tags.findIndex(tag => tag[0] == 'p' && tag[1] == active.pubkey) >= 0)
-      )
+      // )
       .sortBy('created_at'))
       .reverse() 
   })
+
+  $: {(async () => {
+    // load secondary events
+    let evs = $events as Array<IEvent>
+    if (evs == undefined) {
+      return
+    }
+    const secondaryEvents: Map<string, IEvent> = new Map()
+    // get referenced events
+    let evIds: Array<string> = [
+      ...new Set(
+        evs.flatMap(e =>
+          e.tags.filter(it => it[0] === 'e').map(it => it[1])
+        ))]
+    let missingEvents: Array<string> = []
+    let referencedEvents = await db.events.bulkGet(evIds)
+    evIds.forEach((key, index) => {
+      let val = referencedEvents[index]
+      if (val) {
+        secondaryEvents.set(key, val)
+      } else {
+        missingEvents.push(key)
+      }
+    })
+    let mes = missingEvents.map(it=>{return {id: it}})
+    db.missingEvents.bulkPut(mes)
+  })()
+}
 
   activeProfile.subscribe(() => {
     show = 10
@@ -64,15 +92,15 @@
 </script>
 
 <svelte:head>
-   <title>Feed</title>
+   <title>Notifications</title>
   <meta name="description" content="Showing nostr events" />
 </svelte:head>
 
 <div class="todos">
-  <h1>Feed</h1>
+  <h1>Notifications</h1>
   {#if $events instanceof Array }
   {#if show < $events.length }
-    <button on:click={showMore}>Show Older Messages</button>
+    <button on:click={showMore}>Show Older Events</button>
   {/if}
   {#each $events.slice(0, show).reverse() as event (event.id)}
     <p in:receive="{{key: event.id}}"

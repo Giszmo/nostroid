@@ -37,7 +37,7 @@
           privkey: '',
           pubkey: '',
           avatar: '',
-          isAccount: true
+          degree: 0
         }
     error = ""
     if (newProfileName.length == 0) {
@@ -110,7 +110,7 @@
 <div class="todos">
   <h1>Profiles</h1>
   {#if $profiles instanceof Array }
-  {#each ($profiles.filter(it=>it.isAccount)) as profile (profile.pubkey)}
+  {#each ($profiles.filter(it=>it.degree == 0)) as profile (profile.pubkey)}
     <Profile {profile} />
   {/each}
   {/if}
