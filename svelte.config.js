@@ -1,6 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
-import { nostroidPWA } from './nostrid-config.js';
+import { nostroidPWA } from './nostroid-config.js';
 
 const { trailingSlash, adapterFallback: fallback } = nostroidPWA.kit;
 

@@ -4,7 +4,7 @@ import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
-import { nostroidPWA } from './nostrid-config.js';
+import { nostroidPWA } from './nostroid-config.js';
 
 export default defineConfig({
 	plugins: [
