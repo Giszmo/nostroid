@@ -15,6 +15,7 @@ export interface IProfile {
    *     ...
    **/
   degree: number
+  index: number
 }
 
 export interface IConfig {
@@ -59,21 +60,20 @@ export class NostroidDexie extends Dexie {
 
   constructor() {
     super('data4')
-    this.version(12).stores({
-      profiles: '&pubkey, degree',
+    this.version(20).stores({
+      profiles: '&pubkey, degree, index',
       config: '&key',
       events: '&id, pubkey, kind, created_at, [pubkey+kind], *tags',
       missingEvents: '&id',
       tags: '++id, event, key, value',
       notifications: '++id, pubkey'
-    }).upgrade(tx => {
-      return tx.table("profiles").toCollection().modify(profile => {
-        profile.degree = profile.isAccount
-          ? 0
-          : 1000
-        delete profile.isAccount
-      })
     })
+    // .upgrade(tx => {
+    //   var index = Math.floor(Date.now() / 1000)
+    //   return tx.table("profiles").toCollection().modify(profile => {
+    //     profile.index = index++
+    //   })
+    // })
   }
   
   public async updateProfileFromMeta(pubkeys) {
@@ -90,9 +90,7 @@ export class NostroidDexie extends Dexie {
       }
       let metaDataEvents = new Map<string, IEvent>()
       ;(await db.events
-        .where({
-          kind: 0
-        })
+        .where({kind: 0})
         .toArray())
         .sort((a,b) => b.created_at - a.created_at)
         .forEach(e => {
@@ -120,6 +118,7 @@ export class NostroidDexie extends Dexie {
 
 export const db = new NostroidDexie()
 db.on('populate', () => {
+  const index = Math.floor(Date.now() / 1000)
   const debugProfiles = [
     '46fcbe3065eaf1ae7811465924e48923363ff3f526bd6f73d7c184b16bd8ce4d',
     '8c0da4862130283ff9e67d889df264177a508974e2feb96de139804ea66d6168',
@@ -134,6 +133,6 @@ db.on('populate', () => {
     '32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245',
     '47bae3a008414e24b4d91c8c170f7fce777dedc6780a462d010761dca6482327',
     'f43c1f9bff677b8f27b602725ea0ad51af221344f69a6b352a74991a4479bac3'
-  ].map(it=>{return {pubkey:it, degree: 0}})
+  ].map((it, id)=>{return {pubkey:it, degree: 0, index:index + id}})
   db.profiles.bulkAdd(debugProfiles)
 })

@@ -5,9 +5,12 @@
   import { db } from "../../db"
   import type { IProfile } from "../../db"
   import { liveQuery } from "dexie"
-  // import { Data } from '../../data'
+  import { dndzone } from 'svelte-dnd-action'
+  import {flip} from "svelte/animate"
 
-  let profiles = liveQuery(() => db.profiles.toArray())
+  let profiles = liveQuery(async () => {
+    return (await db.profiles.orderBy('index').toArray())
+  })
   
   let newProfileName = "nostroid-user"
   let newProfilePrivkey = ""
@@ -37,7 +40,8 @@
           privkey: '',
           pubkey: '',
           avatar: '',
-          degree: 0
+          degree: 0,
+          index: Math.floor(Date.now() / 1000)
         }
     error = ""
     if (newProfileName.length == 0) {
@@ -100,6 +104,21 @@
     newProfileName = "nostroid-user"
   }
   let radioWhat = "gen"
+
+  const flipDurationMs = 200
+  function handleConsider(e: CustomEvent<DndEvent>) {
+    items = e.detail.items as {id: string; profile: IProfile}[];
+  }
+  function handleFinalize(e: CustomEvent<DndEvent>) {
+    items = e.detail.items as {id: string; profile: IProfile}[];
+    var index=0
+    const p = items.map(it => {
+      it.profile.index=index++
+      return it.profile
+    })
+    db.profiles.bulkPut(p)
+  }
+  $: items = ($profiles as IProfile[])?.filter(it=>it?.degree==0)?.map(it=>{return {id: it.pubkey, profile: it}})
 </script>
 
 <svelte:head>
@@ -109,10 +128,16 @@
 
 <div class="todos">
   <h1>Profiles</h1>
-  {#if $profiles instanceof Array }
-  {#each ($profiles.filter(it=>it.degree == 0)) as profile (profile.pubkey)}
-    <Profile {profile} />
-  {/each}
+  {#if items instanceof Array }
+    <section use:dndzone="{{items, flipDurationMs}}"
+      on:consider="{handleConsider}"
+      on:finalize="{handleFinalize}">
+      {#each items as idProfile(idProfile.id)}
+        <div animate:flip="{{duration:flipDurationMs}}">
+        <Profile profile={idProfile.profile} />
+        </div>
+      {/each}
+    </section>
   {/if}
   <p>New Profile</p>
   <p>

@@ -41,9 +41,10 @@
 .profile {
   background-color: lightgray;
   border: 2px solid darkgray;
-  text-align: center;
-  display: inline-grid;
-  min-height: 15em;
+  text-align: left;
+  /* display: inline-grid; */
+  height: 5em;
+  width: 20em;
   margin: .5em;
   padding: .5em;
   border-radius: 15px;
@@ -53,11 +54,12 @@
   filter: none;
 }
 img {
-  width: 8em;
-  height: 8em;
+  width: 3.5em;
+  height: 3.5em;
   border-radius: 50%;
   object-fit: cover;
   margin: 1em;
+  float: left;
 }
 .keys {
   display: none;
@@ -72,6 +74,8 @@ img {
 .name {
   font-weight: bold;
   font-size: 1.5em;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 .selectedProfile {
   background-color: lightgreen;
