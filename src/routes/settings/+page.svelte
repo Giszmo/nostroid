@@ -9,12 +9,13 @@
   let nip05 = ''
   
   $: {(async () => {
-    let active = (await $activeProfile) as IProfile
-    if (active && active?.pubkey && active?.pubkey != pk) {
-      pk = active.pubkey
-      name = active.name || ''
-      avatar = active.avatar || ''
-      nip05 = active.nip05 || ''
+    if ($activeProfile && $activeProfile?.pubkey && $activeProfile?.pubkey != pk) {
+      pk = $activeProfile.pubkey
+      name = $activeProfile.name || ''
+      avatar = $activeProfile.avatar || ''
+      nip05 = $activeProfile.nip05 || ''
+    } else {
+      cancelPersist()
     }
   })()
 }
@@ -82,20 +83,24 @@ $: {
 
 <div>
   <h1>Settings</h1>
-  {#if $activeProfile?.privkey != undefined }
-    <label>PK: <input bind:value={pk} disabled></label><br>
-    <label>Name: <input bind:value={name}></label><br>
-    <label>Avatar: <input bind:value={avatar}></label><br>
-    <label>nip05: <input bind:value={nip05}></label><br>
-    {@html msg}
-    <button on:click={cancelPersist}>Cancel</button>
-    <button on:click={sendPersist}>Save</button>
-    <button on:click={reset}>Reset</button>
+  {#if $activeProfile }
+    {#if $activeProfile?.privkey != undefined }
+      <label>PK: <input bind:value={pk} disabled></label><br>
+      <label>Name: <input bind:value={name}></label><br>
+      <label>Avatar: <input bind:value={avatar}></label><br>
+      <label>nip05: <input bind:value={nip05}></label><br>
+      {@html msg}
+      <button on:click={cancelPersist}>Cancel</button>
+      <button on:click={sendPersist}>Save</button>
+      <button on:click={reset}>Reset</button>
+    {:else}
+      <strong>PK</strong>: <span>{pk}</span><br>
+      <strong>Name</strong>: <span>{name}</span><br>
+      <strong>Avatar</strong>: <span>{avatar}</span><br>
+      <strong>nip05</strong>: <span>{nip05}</span><br>
+    {/if}
   {:else}
-    <strong>PK</strong>: <span>{pk}</span><br>
-    <strong>Name</strong>: <span>{name}</span><br>
-    <strong>Avatar</strong>: <span>{avatar}</span><br>
-    <strong>nip05</strong>: <span>{nip05}</span><br>
+    Select a profile!
   {/if}
 </div>
 

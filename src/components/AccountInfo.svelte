@@ -1,18 +1,15 @@
 <script type="ts">
-  import type { IProfile } from "../db"
   import { activeProfile } from '../stores'
   import noPic from '$lib/assets/noProfilePic.png'
 
-  $: profile = $activeProfile as IProfile
-  $: avatar = profile?.avatar || noPic
 </script>
 
 <div class="accountInfo">
-  <div class='name'>{profile?.name || '???'}<br></div>
-  <div class='pubkey'>{profile?.pubkey}</div>
+  <div class='name'>{$activeProfile?.name || '???'}<br></div>
+  <div class='pubkey'>{$activeProfile?.pubkey}</div>
   <p>
-    <img src={avatar} alt="user's avatar">
-    {@html profile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
+    <img src={$activeProfile?.avatar || noPic} alt="user's avatar">
+    {@html $activeProfile?.privkey ? '🔑' : '&nbsp;&nbsp;&nbsp;'}
   </p>
 </div>
 

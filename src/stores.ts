@@ -3,15 +3,12 @@ import type { IProfile } from './db';
 import { liveQuery } from 'dexie';
 import { writable } from 'svelte/store';
 
-export const activeProfile:Observable<IProfile> = liveQuery(async (): Promise<IProfile | undefined> => {
-  const pubkey = (await db.config.get('activePubkey'))?.value;
+export const activeProfile:Observable<IProfile|undefined> = liveQuery(async (): Promise<IProfile | undefined> => {
+  const pubkey = (await db.config.get('activePubkey'))?.value
   if (pubkey) {
-    const profile = await db.profiles.get(pubkey);
-    if (profile) {
-      return profile;
-    }
+    return await db.profiles.get(pubkey)
   }
-  return { name: '', pubkey: '', degree: 100 };
+  return undefined
 });
 
 /**

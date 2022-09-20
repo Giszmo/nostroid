@@ -6,7 +6,6 @@
 	import Event from '../../components/Event.svelte'
 
 	const pubkey = $page.params.pubkey
-  console.log(pubkey)
 	let p = liveQuery(() => db.profiles.get(pubkey))
   $: profile = $p as IProfile
   
@@ -14,7 +13,6 @@
 		.orderBy('created_at').reverse()
 		.filter((it) => it.pubkey == pubkey)
 		.toArray())
-
 </script>
 
 <svelte:head>

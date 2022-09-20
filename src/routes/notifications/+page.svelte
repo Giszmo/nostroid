@@ -9,19 +9,22 @@
   import { flip } from 'svelte/animate'
 
   let show = 10
-  $: active = $activeProfile as IProfile
   $: events = liveQuery(async () => {
-    const pubkey = active.pubkey
+    const pubkey = $activeProfile?.pubkey
     if (pubkey == undefined) {
+      console.log('returning []')
       return []
     }
     return (await db
       .events
       .where('tags')
-      .startsWith(`p»${active.pubkey}`)
+      .startsWith(`p»${pubkey}`)
       .filter((it) => it.kind === 1)
       .sortBy('created_at'))
-      .reverse() 
+      .reverse().filter((value, index, self)=>
+        index === self.findIndex((t) => (
+          t.id === value.id
+        )))
   })
 
   $: {(async () => {
@@ -48,9 +51,9 @@
       }
     })
     let mes = missingEvents.map(it=>{return {id: it}})
-    db.missingEvents.bulkPut(mes)
-  })()
-}
+    db.missingEvents.bulkPut(missingEvents.map(it=>{return {id: it}}))
+    // TODO: do something with secondaryEvents!
+  })()}
 
   activeProfile.subscribe(() => {
     show = 10
@@ -58,9 +61,6 @@
 
   let showMore = () => {
     show += 10
-    if ($events instanceof Array && show + 10 > $events.length) {
-      since -= 30 * 24 * 60 * 60
-    }
   }
   
   const [send, receive] = crossfade({
@@ -85,7 +85,7 @@
 </script>
 
 <svelte:head>
-   <title>Notifications</title>
+  <title>Notifications</title>
   <meta name="description" content="Showing nostr events" />
 </svelte:head>
 

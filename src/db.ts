@@ -1,4 +1,5 @@
 import Dexie from 'dexie'
+import { getPublicKey } from 'nostr-tools'
 
 export interface IProfile {
   pubkey: string
@@ -118,7 +119,20 @@ export class NostroidDexie extends Dexie {
 export const db = new NostroidDexie()
 db.on('populate', () => {
   const index = Math.floor(Date.now() / 1000)
-  const debugProfiles = [
+  const debugProfiles = []
+  ;[
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // Alice
+    'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' // Bob
+  ].forEach((it, id)=>{
+    debugProfiles.push({
+      pubkey: getPublicKey(it),
+      privkey: it,
+      missing: true,
+      degree: 0,
+      index: index+id
+    })
+  })
+  ;[
     '46fcbe3065eaf1ae7811465924e48923363ff3f526bd6f73d7c184b16bd8ce4d',
     '8c0da4862130283ff9e67d889df264177a508974e2feb96de139804ea66d6168',
     'b2d670de53b27691c0c3400225b65c35a26d06093bcc41f48ffc71e0907f9d4a',
@@ -132,6 +146,14 @@ db.on('populate', () => {
     '32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245',
     '47bae3a008414e24b4d91c8c170f7fce777dedc6780a462d010761dca6482327',
     'f43c1f9bff677b8f27b602725ea0ad51af221344f69a6b352a74991a4479bac3'
-  ].map((it, id)=>{return {pubkey:it, missing: true, degree: 0, index:index + id}})
+  ].forEach((it, id)=>{
+    debugProfiles.push({
+      pubkey: it,
+      missing: true,
+      degree: 0,
+      index: index + id + 2
+    })
+  })
   db.profiles.bulkAdd(debugProfiles)
 })
+getPublicKey

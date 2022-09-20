@@ -56,7 +56,7 @@
   }
   
   const updateConversations = (evs:Array<IEvent>) => {
-    conversations.clear()
+    conversations = new Map()
     ;evs.forEach(ev => {
       let o = ev.pubkey === $activeProfile?.pubkey
         ? ev.tags
@@ -70,10 +70,10 @@
   }
 
   $: {
-    let evs = $events
-    if (evs && $activeProfile) {
-      updateConversations(evs as Array<IEvent>)
-    }
+    let evs = $activeProfile
+      ? $events || []
+      : []
+    updateConversations(evs as Array<IEvent>)
   }
   
   const getEventsForFromPubkey = async (p: string|undefined) => {

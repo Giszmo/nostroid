@@ -14,14 +14,16 @@
       key: 'activePubkey',
       value: profile.pubkey
     })
-    // goto(`/`)
   }
   const showPubkey = () => {
     goto(`${base}/${profile?.pubkey}`)
   }
     
-  const deleteProfile = () => {
-    db.profiles.delete(profile.pubkey)
+  const deleteProfile = async () => {
+    await db.profiles.delete(profile.pubkey)
+    if (profile.pubkey == active?.pubkey) {
+      db.config.delete('activePubkey')
+    }
   }
 </script>
 

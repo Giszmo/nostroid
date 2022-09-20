@@ -1,4 +1,5 @@
 import { relayPool } from 'nostr-tools'
+import { validateEvent } from 'nostr-tools'
 import { db } from "./db"
 import type { IProfile, IEvent } from "./db"
 
@@ -7,8 +8,8 @@ export class Data {
   public pool
   private lastEventTs = Date.now()
 
-  // event buffer to batch insert
-  public events: IEvent[] = []
+  // event buffer to batch verify and insert
+  public events: object[] = []
   
   private constructor() {}
   
@@ -18,30 +19,43 @@ export class Data {
     db.updateProfileFromMeta()
   }
   
+  // check for work constantly
   async private storeEventsLoop() {
     const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
     while (true) {
-      Data.instance.events = [...new Set(Data.instance.events)]
-      const e = Data.instance.events.splice(-5000)
-      const t = Date.now()
+      Data.instance.events = Data.instance.events.filter((value, index, self)=>
+        index === self.findIndex((t) => (
+          t.id === value.id
+        )))
+      const t1 = Date.now()
+      let e = Data.instance.events.splice(-500).filter(e=>validateEvent(e))
+      const t2 = Date.now()
       if (e.length > 0) {
+        this.checkSignatures(e)
+        e.forEach(event=>{
+          event.tags = event.tags?.map(it=>it.join('»')) || []
+        })
         await db.events.bulkPut(e)
-        const dt = Date.now() - t
-        console.log(`BulkPut took ${dt}ms for ${e.length} events.`)
+        const dt1 = t2 - t1
+        const dt2 = Date.now() - t2
+        console.log(`It took ${dt1}ms to verify and ${dt2}ms to store ${e.length} events.`)
         const updatedProfiles = e.filter(it=>it.kind===0).map(it=>it.pubkey)
         await db.updateProfileFromMeta(updatedProfiles)
       }
       Data.instance.downloadMissingEvents()
       Data.instance.broadcastOutbox()
-      await snooze(500)
+      await snooze(200)
     }
+  }
+  
+  private checkSignatures(evs: Array<IEvent>) {
+    return evs.filter(e=>validateEvent(e))
   }
   
   async private downloadMissingEvents() {
     this.connectWS()
-    // profiles
-    const profiles = (await db.profiles.toArray())
-      .filter(it=>it.missing)
+    // load missing profile meta data
+    const profiles = (await db.profiles.toArray()).filter(it=>it.missing)
     if (profiles.length > 0) {
       profiles.forEach(it=>{
         delete it.missing
@@ -62,8 +76,9 @@ export class Data {
           })
       }, 10000)
     }
-    // events
+    // load events marked as missing (we only know their IDs)
     const events = (await db.missingEvents.toArray())
+      // TODO: Should we try to get them again after a while? When relays change?
       .filter(it=>it.requested == undefined)
     if (events.length > 0) {
       console.log(`fetching ${events.length} missing events.`)
@@ -235,7 +250,6 @@ export class Data {
   }
   
   async private onEvent(event: IEvent, relay: string): void {
-    event.tags = event.tags.map(it=>it.join('»'))
     Data.instance.events.push(event)
     Data.instance.lastEventTs = Date.now()
   }
