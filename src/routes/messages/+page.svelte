@@ -10,7 +10,6 @@
 
   let searchInput = ''
   let show = 10
-  let active: IProfile|undefined
   let other: IProfile|undefined
   /** conversations by correspondence pubkey **/
   let conversations: Map<string, Array<IEvent>> = new Map()
@@ -34,15 +33,15 @@
    * Update the event to be sent
    **/
   const processNewEvent = async () => {
-    let privkey = active?.privkey
-    let pubkey = active?.pubkey
+    let privkey = $activeProfile?.privkey
+    let pubkey = $activeProfile?.pubkey
     if (privkey && pubkey && other && newMessage.length != 0) {
       newEvent = {
         pubkey: pubkey,
         kind: 4,
-        content: encrypt(privkey, other.pubkey, newMessage),
+        content: encrypt(privkey, other.pubkey, newMessage.trim()),
         created_at: Math.floor(Date.now() / 1000),
-        tags: [['p',other.pubkey]],
+        tags: [`p»${other.pubkey}`],
         id: '',
         sig: ''
       }
@@ -56,48 +55,50 @@
     }
   }
   
-  $: {
-    active = $activeProfile as IProfile
-    let evs = $events
-    if (evs && active) {
-      conversations.clear()
-      ;(evs as Array<IEvent>).forEach(ev => {
-        let o = ev.pubkey === active?.pubkey
-          ? ev.tags.filter(t=>t[0]==='p')?.[0]?.[1]
-          : ev.pubkey
-        if (o) {
-          conversations.set(o, [...(conversations.get(o) || []), ev])
-        }
-      })
-      conversations = conversations
-    }
+  const updateConversations = (evs:Array<IEvent>) => {
+    conversations.clear()
+    ;evs.forEach(ev => {
+      let o = ev.pubkey === $activeProfile?.pubkey
+        ? ev.tags
+          .filter(t=>t.startsWith('p»'))?.[0]?.split('»',3)[1]
+        : ev.pubkey
+      if (o) {
+        conversations.set(o, [...(conversations.get(o) || []), ev])
+        conversations = conversations
+      }
+    })
   }
 
-  $: events = liveQuery(async () => {
-    const pubkey = active?.pubkey
-    if (pubkey == undefined) {
-      return []
+  $: {
+    let evs = $events
+    if (evs && $activeProfile) {
+      updateConversations(evs as Array<IEvent>)
     }
-    return await db
-      .events
-      .orderBy('created_at').reverse()
-      .filter((it) =>
-        (it.pubkey == pubkey
-          ||
-          it.tags.find(t=>t[0]==='p' && t[1]===pubkey) != undefined
-        )
-        &&
-        it.kind === 4
-      )
-      .toArray()
-    })
+  }
+  
+  const getEventsForFromPubkey = async (p: string|undefined) => {
+    const t1 = Date.now()
+    if (!p)
+      return []
+    let twoEvs = await Promise.all([
+      db.events.where('pubkey').equals(p).toArray(),
+      db.events.where('tags').startsWith(`p»${p}`).toArray()
+    ])
+    const retVal = [... new Set(twoEvs.flatMap(it=>it.filter(it=>it.kind === 4)))]
+      .sort((a,b)=>b.created_at-a.created_at)
+    const dt = Date.now() - t1
+    console.log(`Loading ${retVal.length} DMs took ${dt}ms.`)
+    return retVal
+  }
+
+  $: events = liveQuery(() => getEventsForFromPubkey($activeProfile?.pubkey))
   
   $: conversation = (other
     ? (conversations.get(other.pubkey) || []).sort((a,b)=>a.created_at-b.created_at)
     : []) as Array<IEvent>
   
   $: {
-    active
+    $activeProfile
     other
     newMessage
     processNewEvent()
@@ -121,7 +122,7 @@
     {#each conversation.slice(-show) as event (event.id)}
       <DM event={event}/>
     {/each}
-    {#if active?.privkey }
+    {#if $activeProfile?.privkey }
       {#if newEvent}
         <DM event={newEvent}/>
       {/if}
@@ -146,5 +147,6 @@ textarea {
   background-color: lightblue;
   text-align: center;
   margin: 5px;
+  display: flex;
 }
 </style>

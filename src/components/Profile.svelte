@@ -63,9 +63,6 @@ img {
 }
 .keys {
   display: none;
-  /* background-color: rgba(.2,.2,.2,.4); */
-  padding: 5px;
-  /* border-radius: 5px; */
   filter: drop-shadow(0 0 3px green);
 }
 .keys.has-keys {

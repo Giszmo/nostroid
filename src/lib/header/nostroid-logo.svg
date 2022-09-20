@@ -1,77 +1,53 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="27.357571mm"
-   height="27.357571mm"
-   viewBox="0 0 27.357571 27.357571"
-   version="1.1"
-   id="svg8"
-   inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
-   sodipodi:docname="nostroid-logo.svg">
-  <defs
-     id="defs2" />
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="5.9115232"
-     inkscape:cx="70.33624"
-     inkscape:cy="61.161384"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
-     inkscape:document-rotation="0"
-     showgrid="false"
-     lock-margins="true"
-     fit-margin-top="0.2"
-     fit-margin-left="0.2"
-     fit-margin-right="0.2"
-     fit-margin-bottom="0.2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1016"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
-  <metadata
-     id="metadata5">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-31.267297,-71.030101)">
-    <text
-       xml:space="preserve"
-       style="font-size:7.05556px;line-height:125%;font-family:KacstOne;-inkscape-font-specification:'KacstOne, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#9cf1ff;stroke-width:0.00127076;stroke-linejoin:round"
-       x="44.961422"
-       y="87.377426"
-       id="text835"><tspan
-         sodipodi:role="line"
-         id="tspan833"
-         x="44.961422"
-         y="87.377426"
-         style="fill:#1d165c;fill-opacity:1;stroke:none;stroke-width:0.00127076;stroke-opacity:1">nos roid</tspan></text>
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#1d165c;stroke-width:1.565;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 44.645149,97.48157 c 0,-23.544049 0.264217,-25.468954 -13.177852,-25.468954 h 26.163739"
-       id="path837"
-       sodipodi:nodetypes="ccc" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="557.8" height="557.8" version="1.1" viewBox="0 0 147.6 147.6" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <rect y="-.0004809" width="147.6" height="147.6" ry="0" fill="#c2c2c2" stroke-linecap="round" stroke-linejoin="round" stroke-width=".2646"/>
+ <g transform="translate(-35.91 -36.77)">
+  <g>
+   <path d="m95.35 74.42-6.985 0.656 2.634 36.92s-7.695 4.093-7.55 20.09-0.285 27.84-0.285 27.84l4.249-1.322 8.764-56.24s5.853-27.49-0.827-27.94z" fill="#fff" fill-rule="evenodd"/>
+   <path d="m120.5 160c4.19-6.662 3.662-19.02 3.68-24.52 0.02-5.616-3.972-17.72-4.765-18.31-1.055-0.778-8.655 1.592-8.539-1.35 0.029-0.736 2.143-1.514 2.21-2.98 0.068-1.466-1.912-3.622-0.838-3.863 1.393-0.313 1.701-1.426 2.49-3.172 0.734-1.623 0.504-4.818 1.67-4.722 4.04 0.332 4.875-15.17 4.536-14.9-0.49 0.702-1.846-4.555-2.343-6.299-0.212-0.744-3.045-4.298-5.363-4.17-2.318 0.129-18.23 12.01-19.14 16.25-0.913 4.234 0.209 19.32-1.18 22.89-1.388 3.574-1.72 4.935-1.72 4.935" fill-rule="evenodd"/>
+   <ellipse cx="104.7" cy="169.9" rx="44.8" ry="11.67" fill="#202020" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width=".2646"/>
+   <g fill-rule="evenodd">
+    <g stroke="#000">
+     <path d="m92.31 75.94c-5.322 11.11-1.665 13.32-2.451 16.65s1.263 11.87 2.226 12.49c-0.23 3.058-0.142 6.25 0.797 9.802l-0.523 2.14-1.367-1.562c-7.48 5.715-5.753 11.32-5.883 16.94l1.696-0.274c-0.14 4.05-0.597 8.135 0.419 12.06l-2.755 1.497-0.563 14.64-1.306-0.128c2.305-17.01-4.24-33 6.936-48.06 1.862-2.507 0.59-2.698 0.389-4.034-1.204-7.996-9.335-22.39-9.335-22.39z" stroke-width=".2646px"/>
+     <path d="m69.92 118.8 13.83-31.11 2.62-0.024 1.331 8.762-14.53 25.66c-11.95-8.564-15.42-19.33-13.42-32.06l24-2.33" fill="#fea91b" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.789"/>
+     <path d="m89.65 70.45c-16.19-0.943-27.75 6.867-29.9 19.59l24-2.33 7.618-11.81-2.126-2.026z" fill="#de2101" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.773"/>
+     <path d="m91.16 119.8c-4.262 35.22-1.009 36.13-7.51 44.69l36.81-4.471" stroke-width=".2646px"/>
+    </g>
+    <path d="m90.1 172.7c4.155-14.52 6.06-36.44 8.854-49.51 0.296-1.388 7.798-1.408 8.374-0.201 4.659 9.77 1.3 22.74 6.163 37.07-8.486 2.388-14.75 10.24-23.39 12.65z" fill="#fefefe"/>
+    <path d="m92.35 152.6c-0.72-0.07-2.34-5.176-3.678-8.788-0.62-1.67-1.138-14.55-0.385-15.73 0.952-1.493 4.083-6.512 5.057-6.624 0.973-0.112 2.885 2.05 3.143 2.867 0.259 0.816-3.268 28.36-4.137 28.28zm-6.28 0.089s2.134-4.705 2.767-4.673c0.902 0.045 2.45 4.598 3.203 5.433 0.603 0.667-0.151 4.14 0.081 6.005 0.486 3.899-1.33 8.91-1.806 10.68-0.31 1.152 0.377 3.558 0.377 3.558s-3.91 4.156-4.762 3.78c-1.54-0.676-2.976-11.98-2.696-12.91s1.846-3.803 1.846-3.803z" fill="#197dec"/>
+   </g>
+   <ellipse transform="rotate(14.5)" cx="125" cy="132.4" rx="1.896" ry="4.319" fill="#fff"/>
+   <path d="m112.9 125.5c0.334-1.112 4.039-7.64 4.924-7.283 0.885 0.358 2.57 4.933 3.071 7.792 0.501 2.858-1.74 17.12-1.47 18.62 0.583 3.266 4.642 6.041-0.398 9.92-1.751 1.347-3.453-0.035-3.543-0.636-1.113-7.484-2.584-28.42-2.584-28.42z" fill="#197dec" fill-rule="evenodd"/>
+   <ellipse transform="rotate(12.39)" cx="150" cy="116.8" rx="1.04" ry="2.537" fill="#fff"/>
+   <g fill-rule="evenodd">
+    <path d="m118.1 157.3c3.666 0.531 3.191 4.436 1.918 12.51-1.272 8.071-3.042 9.964-4.353 10.08-1.312 0.114-1.148-0.483-2.87-2.401-0.626-0.696-0.06-5.69 0.674-10.67 0.734-4.981 1.635-9.947 4.63-9.513z" fill="#197dec"/>
+    <path d="m113.1 114.7 12.35-43.84 12.5-0.067-11.4 44.42zm23.11-0.637 12.35-43.84 12.5-0.067-11.4 44.42z"/>
+    <path d="m150.3 114.6-12.35-43.84-12.5-0.067 11.4 44.42z" fill="#616161"/>
+    <path d="m94.8 106.5c-0.612 2.064 5.305 5.36 12.89 3.655 7.59-1.704 6.182-8.019 7.628-11.71 1.447-3.69 2.795-2.82 3.028-5.722 0.234-2.902-0.858-10.58-4.076-11.4-4.456-1.13-12.06-7.075-19.35 3.507-2.413 3.5-3.627 0.659-4.944 1.218-1.318 0.56 0.034 13.44 0.544 15.39 1.332 5.09 3.298 4.22 3.455 4.113s-0.832-13.66 0.496-13.69-0.151 3.56 1.24 5.75 3.735 2.289 3.801 2.959-0.892 0.475-0.912 1.23c-0.02 0.756 1.054 1.082 1.013 1.714-0.048 0.714-3.28-0.503-3.307 0.13-0.027 0.632 3.942 1.113 3.947 1.856 5e-3 0.744-5.358-1.373-5.456 0.999z" fill="#197dec"/>
+    <path d="m109.7 105.5c0.672 0.18 2.618-4.636 3.81-7.89s1.63-4.947 0.726-5.11c-0.904-0.164-1.772 3.185-2.892 6.416-1.12 3.23-2.493 6.341-1.644 6.584z" fill="#202020"/>
+    <path d="m109.3 78.2c4.574-1.543 5.929-1.044 8.396 1.799 1.233 1.421 0.364 3.023 1.42 4.505 1.283 1.804 1.04 2.399 0.563 3.174-0.952 1.55-1.713-3.867-2.718-5.126-1.005-1.258-8.02-2.785-8.02-2.785z" fill="#fff"/>
+   </g>
   </g>
+  <g fill-rule="evenodd" stroke-width=".2646px">
+   <path d="m113.2 72.18c-0.255 8.458-18.86 4.85-18.13 0.155l-0.955-0.125c0.836 1.634 0.288 3.346-0.156 5.052l2.724 0.516 0.268 4.747c1.437-0.582 6.153 2.221 7.565 2.13 1.413-0.09 6.854-2.205 6.854-2.205l-0.076-4.8 1.906-1.9c1.106-0.853 1.05-2.226 1.186-3.515z" stroke="#000"/>
+   <path d="m113 74.04c0.914-1.46 3.102-18.73-0.55-20.01-3.68-1.286-14.99-1.164-15.82-0.203-1.176 1.36-3.426 18.06-0.64 20.62 3.429 3.11 13.82 4.246 17.01-0.412z" fill="#197dec" stroke="#197dec"/>
+   <path d="m119 39.92-1.997-0.385-4.174 14.23c0.065 4.474-2.223 7.169-2.872 8.343-0.65 1.173-1.09 10.77-1.09 10.77l1.313-0.178c-1.204-8.955 4.045-18.19 3.04-0.52l1.186 0.054c-0.34-5.513 1.618-11.09-0.254-16.66 2.175-4.25-1.85 3.88 4.848-15.66zm-28.44 0.085 1.997-0.385 4.175 14.23c-0.066 4.474 1.854 8.04 2.504 9.214s-0.099 9.995-0.099 9.995l-1.324-0.129c2.115-7.371-3.733-18.26-2.728-0.598l-0.955-0.125c0.34-5.513-0.593-10.98 1.278-16.55-3.186-3.208 1.85 3.88-4.848-15.66z" stroke="#000"/>
+   <path d="m112.2 72.02c-0.27-11.54-0.71-6-0.967 0.687 0.359 0.05 0.995-0.946 0.967-0.687z" stroke="#000"/>
+  </g>
+  <ellipse cx="100" cy="56.66" rx="1.518" ry="2.229" fill="#fff" stroke="#fff" stroke-linecap="round" stroke-width="1.565"/>
+  <g fill-rule="evenodd">
+   <path d="m102.9 80.56c2.944 0.62 2.223 1.054 2.06 1.515zm1.729 0.116c2.988 0.348 2.31 0.846 2.19 1.32zm1.535-0.102c3.005 0.136 2.364 0.68 2.278 1.161zm-4.663-0.133c2.82 1.046 2.044 1.368 1.816 1.801zm-1.04-0.068c2.578 1.55 1.755 1.723 1.45 2.106z" fill="#e6e6e6" stroke="#e6e6e6" stroke-width=".2646px"/>
+   <path d="m96.02 72.16c0.27-11.54 0.71-6 0.967 0.687-0.359 0.051-0.996-0.946-0.967-0.687z" stroke="#000" stroke-width=".2646px"/>
+   <path d="m104.3 112c-4.015 0.033-7.625-0.599-7.248-0.184a8.241 8.241 0 0 0 1.552 1.312s-4.158-0.4-4.276-0.08 2.884 3.196 8.779 3.145c3.606-0.017 9.48-1.435 9.202-3.873-0.13-1.136-3.994-0.352-8.009-0.32z" fill="#197dec" stroke="#000" stroke-linejoin="round" stroke-width=".2646"/>
+  </g>
+ </g>
 </svg>

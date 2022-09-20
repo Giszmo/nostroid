@@ -28,7 +28,7 @@ export interface IEvent {
   pubkey: string
   created_at: number
   kind: number
-  tags: string[][]
+  tags: string[] // the nostr tag elements get joined with '»' for searchability
   content: string
   sig: string
 }
@@ -60,7 +60,7 @@ export class NostroidDexie extends Dexie {
 
   constructor() {
     super('data4')
-    this.version(20).stores({
+    this.version(22).stores({
       profiles: '&pubkey, degree, index',
       config: '&key',
       events: '&id, pubkey, kind, created_at, [pubkey+kind], *tags',
@@ -68,16 +68,15 @@ export class NostroidDexie extends Dexie {
       tags: '++id, event, key, value',
       notifications: '++id, pubkey'
     })
-    // .upgrade(tx => {
-    //   var index = Math.floor(Date.now() / 1000)
-    //   return tx.table("profiles").toCollection().modify(profile => {
-    //     profile.index = index++
-    //   })
-    // })
+    .upgrade(tx => {
+      return tx.table("events").toCollection().modify(event => {
+        event.tags = event.tags.map(it=>it.split(',').join('»'))
+      })
+    })
   }
   
   public async updateProfileFromMeta(pubkeys) {
-    console.log(`updateProfileFromMeta(${pubkeys})`)
+    console.log(`updateProfileFromMeta(${pubkeys?.length})`)
     if (pubkeys && pubkeys.length === 0) {
       return
     }
@@ -133,6 +132,6 @@ db.on('populate', () => {
     '32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245',
     '47bae3a008414e24b4d91c8c170f7fce777dedc6780a462d010761dca6482327',
     'f43c1f9bff677b8f27b602725ea0ad51af221344f69a6b352a74991a4479bac3'
-  ].map((it, id)=>{return {pubkey:it, degree: 0, index:index + id}})
+  ].map((it, id)=>{return {pubkey:it, missing: true, degree: 0, index:index + id}})
   db.profiles.bulkAdd(debugProfiles)
 })

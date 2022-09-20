@@ -9,7 +9,6 @@
   import { flip } from 'svelte/animate'
 
   let show = 10
-  let since = Date.now() / 1000 - 30 * 24 * 60 * 60 // initially load one month
   $: active = $activeProfile as IProfile
   $: events = liveQuery(async () => {
     const pubkey = active.pubkey
@@ -18,15 +17,9 @@
     }
     return (await db
       .events
-      .where('created_at')
-      .above(since)
-      .filter((it) =>
-        it.kind === 1
-        &&
-        // (it.pubkey == active.pubkey
-        //   ||
-        it.tags.findIndex(tag => tag[0] == 'p' && tag[1] == active.pubkey) >= 0)
-      // )
+      .where('tags')
+      .startsWith(`p»${active.pubkey}`)
+      .filter((it) => it.kind === 1)
       .sortBy('created_at'))
       .reverse() 
   })
@@ -42,7 +35,7 @@
     let evIds: Array<string> = [
       ...new Set(
         evs.flatMap(e =>
-          e.tags.filter(it => it[0] === 'e').map(it => it[1])
+          e.tags.filter(it => it.startsWith('e»')).map(it => it.split('»',3)[1])
         ))]
     let missingEvents: Array<string> = []
     let referencedEvents = await db.events.bulkGet(evIds)

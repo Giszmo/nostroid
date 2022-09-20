@@ -15,7 +15,10 @@ export const sendPersistEvent = async (kind, tags, content, privkey) => {
     content: content,
     outbox: true
   }
-  e.id = getEventHash(e)
-  e.sig = await signEvent(e, privkey)
+  let event = JSON.parse(JSON.stringify(e))
+  event.tags = event.tags.map(it=>it.split('»'))
+  event.id = getEventHash(event)
+  e.id = event.id
+  e.sig = await signEvent(event, privkey)
   db.events.add(e)
 }

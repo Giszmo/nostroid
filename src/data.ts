@@ -13,23 +13,31 @@ export class Data {
   private constructor() {}
   
   public start() {
+    this.storeEventsLoop()
+    this.loadAndWatchProfiles()
     db.updateProfileFromMeta()
-    setInterval(() => {
-      // worker.port.postMessage('test')
+  }
+  
+  async private storeEventsLoop() {
+    const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
+    while (true) {
       Data.instance.events = [...new Set(Data.instance.events)]
       const e = Data.instance.events.splice(-5000)
+      const t = Date.now()
       if (e.length > 0) {
-        db.events.bulkPut(e)
+        await db.events.bulkPut(e)
+        const dt = Date.now() - t
+        console.log(`BulkPut took ${dt}ms for ${e.length} events.`)
         const updatedProfiles = e.filter(it=>it.kind===0).map(it=>it.pubkey)
-        db.updateProfileFromMeta(updatedProfiles)
+        await db.updateProfileFromMeta(updatedProfiles)
       }
       Data.instance.downloadMissingEvents()
       Data.instance.broadcastOutbox()
-    }, 1000)
-    this.loadAndWatchProfiles()
+      await snooze(500)
+    }
   }
   
-  async private downloadMissingEvents(): void {
+  async private downloadMissingEvents() {
     this.connectWS()
     // profiles
     const profiles = (await db.profiles.toArray())
@@ -79,14 +87,15 @@ export class Data {
     if (events.length > 0) {
       events.forEach(e => {
         delete e.outbox
-        Data.instance.pool.publish(e)
+        const event = JSON.parse(JSON.stringify(e))
+        event.tags=event.tags.map(it=>it.split('»'))
+        Data.instance.pool.publish(event)
       })
       await db.events.bulkPut(events)
     }
   }
   
   async public loadAndWatchProfiles(): void {
-    console.log('loadAndWatchProfiles()')
     this.connectWS()
     const profiles = await db.profiles.toArray()
     // "new" profiles are those we never synced ever
@@ -127,7 +136,6 @@ export class Data {
     // timestamp is stored once in config, while profiles that were synced this
     // time are being marked as "synced"
     const syncInterval = setInterval(() => {
-      console.log('checking ...')
       if (Date.now() - Data.instance.lastEventTs > 3000) {
         console.log('Synced all profiles')
         clearInterval(syncInterval)
@@ -136,15 +144,13 @@ export class Data {
           value: (new Date().getTime()) / 1000
         })
         // mark all profiles synced
-        db.transaction('rw', db.profiles, () => {
-          db.profiles
-            .where('pubkey')
-            .anyOf(profiles.map(it=>it.pubkey))
-            .modify({synced: true})
-        })
+        db.profiles
+          .where('pubkey')
+          .anyOf(profiles.map(it=>it.pubkey))
+          .modify({synced: true})
+        this.getRelevantProfiles()
       }
     }, 200)
-    this.getRelevantProfiles()
   }
   
   async private getRelevantProfiles() {
@@ -166,7 +172,7 @@ export class Data {
       .toArray())
       .map(it => [
         it.pubkey,
-        it.tags.filter(it=>it[0] == 'p').map(it=>it[1])
+        it.tags.filter(it=>it.startsWith('p»')).map(it=>it.split('»',3)[1])
       ]))
     
     const profiles = await db.profiles.toArray()
@@ -195,7 +201,7 @@ export class Data {
         console.log(`Exploring ${all.size} follows to the ${i}-th degree. No more follows found in the ${i+1}-th degree ...`)
         break
       }
-      follows[i + 1] = new Set([...fArray])
+      follows[i + 1] = newSet
     }
     
     profiles.forEach(profile=>{
@@ -208,16 +214,28 @@ export class Data {
     })
     // for the remaining pubkeys, request profiles
     all.forEach(pubkey=>{
-      profiles.push({
-        pubkey: pubkey,
-        missing: true,
-        degree: follows.findIndex(it=>it.has(pubkey))
-      } as IProfile)
+      if (pubkey) {
+        profiles.push(<IProfile>{
+          pubkey: pubkey,
+          missing: true,
+          degree: follows.findIndex(it=>it.has(pubkey))
+        } as IProfile)
+      }
     })
-    db.profiles.bulkPut(profiles)
+    // TODO: Somehow there are two rogue profiles:
+    // {"pubkey":"messages","degree":2,"synced":true}
+    // {"missing":true,"degree":2}
+    // the former really does exist and I'm not sure what re-creates it.
+    // the latter ... I have no idea but it smells like a bigger issue.
+    profiles.forEach(it=>{
+      // console.log(`putting ${JSON.stringify(it)}`)
+      db.profiles.put(it)
+    })
+    // db.profiles.bulkPut(profiles)
   }
   
   async private onEvent(event: IEvent, relay: string): void {
+    event.tags = event.tags.map(it=>it.join('»'))
     Data.instance.events.push(event)
     Data.instance.lastEventTs = Date.now()
   }
