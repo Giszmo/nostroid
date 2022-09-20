@@ -29,6 +29,10 @@
     other = undefined
   }
   
+  activeProfile.subscribe(() => {
+    other = undefined
+  })
+
   /**
    * Update the event to be sent
    **/
