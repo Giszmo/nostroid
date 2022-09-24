@@ -39,6 +39,8 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-	},
-  global: {}
+	}, 
+	define: { 
+		'global.process':  JSON.stringify('window.process')
+	}
 });
