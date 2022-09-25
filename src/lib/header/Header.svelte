@@ -11,9 +11,7 @@
 			<img src={logo} alt="App Logo" />
 		</span>
 	</div>
-  <script>
-    var global = global || window;
-  </script>
+
 
 	<nav>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
