@@ -156,7 +156,7 @@ export class Data {
         clearInterval(syncInterval)
         db.config.put({
           key: 'priorSyncTS',
-          value: (new Date().getTime()) / 1000
+          value: Math.floor((new Date().getTime()) / 1000)
         })
         // mark all profiles synced
         db.profiles
