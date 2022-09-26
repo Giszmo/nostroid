@@ -27,7 +27,12 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
+		include: ['nostr-tools > create-hash', 'nostr-tools > create-hmac'],
 		esbuildOptions: {
+			// Node.js global to browser globalThis
+			define: {
+				global: 'globalThis'
+			},
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
@@ -38,8 +43,10 @@ export default defineConfig({
 		}
 	},
 	build: {
-		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-	}, 
-	define: { 
-	}
+		sourcemap: 'inline', // helpful for debugging, maybe remove in production
+		rollupOptions: {
+			plugins: [rollupNodePolyFill()]
+		}
+	},
+	define: {}
 });
