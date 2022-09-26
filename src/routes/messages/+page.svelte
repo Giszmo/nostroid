@@ -135,7 +135,7 @@
   {:else}
     <label>Search DMs: <input bind:value={searchInput}></label>
     {#each [...conversations] as p (p[0]) }
-      <div on:click={() => open(p[0])}><TextNoteProfile pubkey={p[0]} /> ({p[1].length} messages)</div>
+      <div class='conversation' on:click={() => open(p[0])}><TextNoteProfile pubkey={p[0]} /> ({p[1].length} messages)</div>
     {/each}
   {/if}
 </div>
@@ -152,5 +152,8 @@ textarea {
   text-align: center;
   margin: 5px;
   display: flex;
+}
+.conversation {
+  clear: both;
 }
 </style>
