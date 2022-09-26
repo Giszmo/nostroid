@@ -3,24 +3,20 @@
 	import Debug from '../components/Debug.svelte'
 	import '../app.css';
 	import { onMount } from 'svelte'
-	import { browser, dev } from '$app/environment'
-	import { base } from '$app/paths'
+	import { pwaInfo } from 'virtual:pwa-info'
 
-	const loadRPC = browser
-	// const loadRPC = !dev && browser
 
 	let ReloadPrompt
 	onMount(async () => {
-		loadRPC && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+		pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
 	})
+
+	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ''
 
 </script>
 
 <svelte:head>
-    {#if browser}
-	<!--{#if !dev}-->
-		<link rel="manifest" href="/manifest.webmanifest">
-	{/if}
+	{@html webManifest }
 </svelte:head>
 
 <Header />

@@ -35,8 +35,8 @@ const nostroidPWA = {
 		]
 	},
 	injectManifest: {
-		globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'] /*,
-		rollupFormat: 'iife'*/
+		globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,woff,woff2}'],
+		rollupFormat: 'iife'
 	},
 	devOptions: {
 		enabled: true,

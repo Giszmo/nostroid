@@ -31,19 +31,13 @@ const patchReadableStream = () => {
 			{ encoding: 'utf-8' }
 		);
 	}
-	content = readFileSync('./node_modules/vite-plugin-pwa/dist/index.js', { encoding: 'utf-8' });
-	if (content.includes('format: "es",')) {
+	content = readFileSync('./node_modules/rollup-plugin-node-polyfills/polyfills/util.js', {
+		encoding: 'utf-8'
+	});
+	if (content.includes('if (isUndefined(global.process)) {')) {
 		writeFileSync(
-			'./node_modules/vite-plugin-pwa/dist/index.js',
-			content.replace('format: "es",', 'format: "iife",'),
-			{ encoding: 'utf-8' }
-		);
-	}
-	content = readFileSync('./node_modules/vite-plugin-pwa/dist/index.mjs', { encoding: 'utf-8' });
-	if (content.includes('format: "es",')) {
-		writeFileSync(
-			'./node_modules/vite-plugin-pwa/dist/index.mjs',
-			content.replace('format: "es",', 'format: "iife",'),
+			'./node_modules/rollup-plugin-node-polyfills/polyfills/util.js',
+			content.replace('if (isUndefined(global.process)) {', 'if (isUndefined(self.process)) {'),
 			{ encoding: 'utf-8' }
 		);
 	}
