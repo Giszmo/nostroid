@@ -41,11 +41,11 @@ const nostroidPWA = {
 	devOptions: {
 		enabled: true,
 		type: 'module',
-		navigateFallback: '/app-shell/'
+		navigateFallback: '/'
 	},
 	kit: {
 		trailingSlash: 'always',
-		adapterFallback: 'app-shell.html'
+		adapterFallback: 'index.html'
 	}
 };
 
