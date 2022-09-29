@@ -30,6 +30,6 @@
 
 {#if $events instanceof Array }
 {#each $events as event, i}
-  <Event {event} showButtons={true} oddRow={i % 2 === 0} />
+  <Event {event} oddRow={i % 2 === 0} />
 {/each}
 {/if}

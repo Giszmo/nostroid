@@ -5,7 +5,6 @@
   import TagList from './TagList.svelte'
   
   export let event: IEvent
-  export let showButtons = false
   export let oddRow = false
   
   const select = (id: string) => {
