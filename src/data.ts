@@ -1,12 +1,13 @@
-import { relayPool } from 'nostr-tools';
-import { validateEvent } from 'nostr-tools';
+// import { relayPool } from 'nostr-tools';
+// import { validateEvent } from 'nostr-tools';
+import { relayPool } from './lib/nostr-tools';
+import { validateEvent } from './lib/nostr-tools';
 import { db } from './db';
 import type { IProfile, IEvent } from './db';
 
 export class Data {
 	private static _instance: Data = new this();
 	public pool;
-	private lastEventTs = Date.now();
 
 	// event buffer to batch verify and insert
 	public events: object[] = [];
@@ -26,18 +27,15 @@ export class Data {
 			Data.instance.events = Data.instance.events.filter(
 				(value, index, self) => index === self.findIndex((t) => t.id === value.id)
 			);
-			const t1 = Date.now();
-			const e = Data.instance.events.splice(-500).filter((e) => validateEvent(e));
-			const t2 = Date.now();
+			const t = Date.now();
+			const e = Data.instance.events.splice(-500);
 			if (e.length > 0) {
-				this.checkSignatures(e);
 				e.forEach((event) => {
 					event.tags = event.tags?.map((it) => it.join('»')) || [];
 				});
 				await db.events.bulkPut(e);
-				const dt1 = t2 - t1;
-				const dt2 = Date.now() - t2;
-				console.log(`It took ${dt1}ms to verify and ${dt2}ms to store ${e.length} events.`);
+				const dt = Date.now() - t;
+				console.log(`It took ${dt}ms to store ${e.length} events.`);
 				const updatedProfiles = e.filter((it) => it.kind === 0).map((it) => it.pubkey);
 				await db.updateProfileFromMeta(updatedProfiles);
 			}
@@ -45,10 +43,6 @@ export class Data {
 			Data.instance.broadcastOutbox();
 			await snooze(200);
 		}
-	}
-
-	private checkSignatures(evs: Array<IEvent>) {
-		return evs.filter((e) => validateEvent(e));
 	}
 
 	private async downloadMissingEvents() {
@@ -64,16 +58,15 @@ export class Data {
 			const s = Data.instance.pool.sub({
 				cb: Data.instance.onEvent,
 				filter: { authors: profiles.map((it) => it.pubkey), kinds: [0] }
-			});
-			setTimeout(() => {
-				s.unsub();
+			}, undefined, () => {
+        s.unsub();
 				db.profiles
 					.where('pubkey')
 					.anyOf(profiles.map((it) => it.pubkey))
 					.modify((profile) => {
 						delete profile.fetching;
 					});
-			}, 10000);
+      });
 		}
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
@@ -91,10 +84,9 @@ export class Data {
 			const s = Data.instance.pool.sub({
 				cb: Data.instance.onEvent,
 				filter: { ids: events.map((it) => it.id) }
-			});
-			setTimeout(() => {
-				s.unsub();
-			}, 10000);
+			}, undefined, () => {
+        s.unsub();
+      });
 		}
 	}
 
@@ -158,15 +150,10 @@ export class Data {
 				cb: Data.instance.onEvent,
 				filter: filters
 			},
-			'fromToAllProfiles'
-		);
-		// finish sync. mark all profiles as synced with timestamp.
-		// timestamp is stored once in config, while profiles that were synced this
-		// time are being marked as "synced"
-		const syncInterval = setInterval(() => {
-			if (Date.now() - Data.instance.lastEventTs > 3000) {
-				console.log('Synced all profiles');
-				clearInterval(syncInterval);
+			'fromToAllProfiles',
+      () => {
+        // EOSE
+        console.log('Synced all profiles');
 				db.config.put({
 					key: 'priorSyncTS',
 					value: Math.floor(new Date().getTime() / 1000)
@@ -177,8 +164,8 @@ export class Data {
 					.anyOf(profiles.map((it) => it.pubkey))
 					.modify({ synced: true });
 				this.getRelevantProfiles();
-			}
-		}, 200);
+      }
+		);
 	}
 
 	private async getRelevantProfiles() {
@@ -264,7 +251,6 @@ export class Data {
 
 	private async onEvent(event: IEvent, relay: string): void {
 		Data.instance.events.push(event);
-		Data.instance.lastEventTs = Date.now();
 	}
 
 	public connectWS(): void {

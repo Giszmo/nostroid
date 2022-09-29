@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { generatePrivateKey, getPublicKey } from 'nostr-tools'
+  // import { generatePrivateKey, getPublicKey } from 'nostr-tools'
+  import { generatePrivateKey, getPublicKey } from '../../lib/nostr-tools'
   import { bech32, fromWords } from '../../lib/bech32.js'
   import Profile from '../../components/Profile.svelte'
   import { db } from "../../db"

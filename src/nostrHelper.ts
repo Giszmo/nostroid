@@ -1,7 +1,9 @@
 import { db } from "./db"
 import type { IEvent } from "./db"
-import { getPublicKey } from 'nostr-tools'
-import {getEventHash, signEvent } from 'nostr-tools/event.js'
+// import { getPublicKey } from 'nostr-tools'
+// import {getEventHash, signEvent } from 'nostr-tools/event.js'
+import { getPublicKey } from './lib/nostr-tools'
+import {getEventHash, signEvent } from './lib/nostr-tools/event.js'
 
 export const sendPersistEvent = async (kind, tags, content, privkey) => {
   let pubkey = getPublicKey(privkey)

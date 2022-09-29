@@ -1,7 +1,8 @@
 <script type="ts">
   import type { IEvent } from '../db'
   import { marked } from 'marked'
-  import { decrypt } from 'nostr-tools/nip04.js'
+  // import { decrypt } from 'nostr-tools/nip04.js'
+  import { decrypt } from '../lib/nostr-tools/nip04.js'
   import { activeProfile } from '../stores'
   import Time from './Time.svelte'
   import { tagLinky } from './TagLinky'

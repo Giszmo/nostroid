@@ -5,7 +5,8 @@
   import { liveQuery } from "dexie"
   import { type IProfile, type IEvent, db } from "../../db"
   import { activeProfile } from '../../stores'
-  import { encrypt } from 'nostr-tools/nip04.js'
+  // import { encrypt } from 'nostr-tools/nip04.js'
+  import { encrypt } from '../../lib/nostr-tools/nip04.js'
   import { sendPersistEvent } from '../../nostrHelper'
 
   let searchInput = ''

@@ -1,5 +1,6 @@
 import Dexie from 'dexie'
-import { getPublicKey } from 'nostr-tools'
+// import { getPublicKey } from 'nostr-tools'
+import { getPublicKey } from './lib/nostr-tools'
 
 export interface IProfile {
   pubkey: string
