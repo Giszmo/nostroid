@@ -1,6 +1,6 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
-/* PARA NOSTR-UTILS NORMAL */
+/* NOSTR-UTILS NORMAL */
 // import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
@@ -28,7 +28,7 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		/* PARA NOSTR-UTILS SUBMODULE */
+		/* NOSTR-UTILS SUBMODULE */
 		include: [
 			'nostr-tools',
 			'nostr-tools > create-hash',
@@ -37,7 +37,7 @@ export default defineConfig({
 			'workbox-routing',
 			'workbox-window'
 		],
-		/* PARA NOSTR-UTILS ORIGINAL
+		/* NOSTR-UTILS ORIGINAL
 		include: [
 			'nostr-tools > create-hash',
 			'nostr-tools > create-hmac',
@@ -50,7 +50,7 @@ export default defineConfig({
 			define: {
 				global: 'globalThis'
 			},
-			/* PARA NOSTR-UTILS SUBMODULE */
+			/* NOSTR-UTILS SUBMODULE */
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
@@ -70,7 +70,7 @@ export default defineConfig({
 	},
 	build: {
 		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-		/* PARA NOSTR-UTILS NORMAL
+		/* NOSTR-UTILS NORMAL
 		rollupOptions: {
 			plugins: [rollupNodePolyFill()]
 		}
