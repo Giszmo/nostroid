@@ -4,7 +4,9 @@
 	"packageManager": "pnpm@7.11.0",
 	"scripts": {
 		"dev": "vite dev",
+		"dev-submodule": "vite --config vite.config.submodule.ts dev",
 		"build": "vite build",
+		"build-submodule": "vite  --config vite.config.submodule.ts build",
 		"package": "svelte-kit package",
 		"preview": "vite preview",
 		"test": "playwright test",

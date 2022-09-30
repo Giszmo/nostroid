@@ -1,6 +1,5 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
@@ -28,8 +27,9 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		include: [
+			'nostr-tools',
 			'nostr-tools > create-hash',
-			'nostr-tools > create-hmac',
+			'nostr-tools > buffer',
 			'workbox-precaching',
 			'workbox-routing',
 			'workbox-window'
@@ -42,17 +42,13 @@ export default defineConfig({
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
-					buffer: true
-				}),
-				NodeModulesPolyfillPlugin()
+					buffer: false
+				})
 			]
 		}
 	},
 	build: {
-		sourcemap: 'inline', // helpful for debugging, maybe remove in production
-		rollupOptions: {
-			plugins: [rollupNodePolyFill()]
-		}
+		sourcemap: 'inline' // helpful for debugging, maybe remove in production
 	},
 	define: {}
 });
