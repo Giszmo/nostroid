@@ -19,6 +19,12 @@ export default defineConfig({
 	ssr: {
 		noExternal: ['nostr-tools']
 	},
+	server: {
+		fs: {
+			// Allow serving files from one level up to the project root
+			allow: ['..']
+		}
+	},
 	resolve: {
 		alias: {
 			process: 'process/browser',
@@ -27,7 +33,13 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		include: ['nostr-tools > create-hash', 'nostr-tools > create-hmac'],
+		include: [
+			'nostr-tools',
+			'nostr-tools > create-hash',
+			'nostr-tools > create-hmac',
+			'nostr-tools > buffer'
+			// 'buffer'
+		],
 		esbuildOptions: {
 			// Node.js global to browser globalThis
 			define: {
@@ -36,17 +48,17 @@ export default defineConfig({
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
-					buffer: true
-				}),
-				NodeModulesPolyfillPlugin()
+					buffer: false
+				})
+				//NodeModulesPolyfillPlugin()
 			]
 		}
 	},
 	build: {
-		sourcemap: 'inline', // helpful for debugging, maybe remove in production
-		rollupOptions: {
+		sourcemap: 'inline' // helpful for debugging, maybe remove in production
+		/*rollupOptions: {
 			plugins: [rollupNodePolyFill()]
-		}
+		}*/
 	},
 	define: {}
 });
