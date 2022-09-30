@@ -1,6 +1,7 @@
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
+/* PARA NOSTR-UTILS NORMAL */
+// import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
@@ -19,12 +20,6 @@ export default defineConfig({
 	ssr: {
 		noExternal: ['nostr-tools']
 	},
-	server: {
-		fs: {
-			// Allow serving files from one level up to the project root
-			allow: ['..']
-		}
-	},
 	resolve: {
 		alias: {
 			process: 'process/browser',
@@ -33,32 +28,53 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
+		/* PARA NOSTR-UTILS SUBMODULE */
 		include: [
 			'nostr-tools',
 			'nostr-tools > create-hash',
-			'nostr-tools > create-hmac',
-			'nostr-tools > buffer'
-			// 'buffer'
+			'nostr-tools > buffer',
+			'workbox-precaching',
+			'workbox-routing',
+			'workbox-window'
 		],
+		/* PARA NOSTR-UTILS ORIGINAL
+		include: [
+			'nostr-tools > create-hash',
+			'nostr-tools > create-hmac',
+			'workbox-precaching',
+			'workbox-routing',
+			'workbox-window'
+		],*/
 		esbuildOptions: {
 			// Node.js global to browser globalThis
 			define: {
 				global: 'globalThis'
 			},
+			/* PARA NOSTR-UTILS SUBMODULE */
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
 					buffer: false
 				})
-				//NodeModulesPolyfillPlugin()
 			]
+			/* NOSTR-UTILS NORMAL
+			plugins: [
+				NodeGlobalsPolyfillPlugin({
+					process: true,
+					buffer: true
+				})
+				NodeModulesPolyfillPlugin()
+			]
+			 */
 		}
 	},
 	build: {
 		sourcemap: 'inline' // helpful for debugging, maybe remove in production
-		/*rollupOptions: {
+		/* PARA NOSTR-UTILS NORMAL
+		rollupOptions: {
 			plugins: [rollupNodePolyFill()]
-		}*/
+		}
+		*/
 	},
 	define: {}
 });
