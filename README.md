@@ -91,23 +91,38 @@ communicate with the nostr relays via Websocket.
   `{missing: true}` or entries in `db.missingEvents` and subsequently fetched by
   the SharedWorker.
 
+## Install dependencies
+
+This project is well tested using [pnpm](https://pnpm.io/). It might work with
+old `npm`, too but if not, please try following the exact instructions here
+before filing issues.
+
+1. `git submodule update --init`
+2. Get [pnpm](https://pnpm.io/)
+3. `pnpm install`
+
 ## Run locally in dev mode
 
 Currently only Chrome / Chromium supports running workers in dev mode. To start
 the server on localhost, run:
 
 ```
-npm install
-npm run dev
+pnpm run dev-submodule
 ```
 
 The server updates automatically as soon as files change.
 
-To test on Firefox or in general for production, run:
+To test it in other browsers than Chrome, build and preview the project:
 
 ```
-npm run build
-npm run preview
+pnpm run build-submodule
+pnpm run preview
 ```
 
-This project also runs with `pnpm`.
+## Deployment
+
+1. Configure your nginx to host static files.
+   [This](https://vite-plugin-pwa.netlify.app/deployment/nginx.html) might be
+   helpful.
+2. `pnpm run build-submodule`
+3. Copy the `build` folder to your server
