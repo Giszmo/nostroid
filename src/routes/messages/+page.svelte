@@ -156,5 +156,9 @@ textarea {
 }
 .conversation {
   clear: both;
+  border-radius: 10px;
+  background-color: lightblue;
+  margin: 5px;
+  padding: 5px;
 }
 </style>
