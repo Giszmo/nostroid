@@ -8,13 +8,15 @@ import type { IProfile, IEvent } from './db';
 export class Data {
 	private static _instance: Data = new this();
 	public pool;
+	private allEventIds: Set<string>
 
 	// event buffer to batch verify and insert
 	public events: object[] = [];
 
 	private constructor() {}
 
-	public start() {
+	public async start() {
+		this.allEventIds = new Set((await db.events.toArray()).map(it => it.id));
 		this.storeEventsLoop();
 		this.loadAndWatchProfiles();
 		db.updateProfileFromMeta();
@@ -59,7 +61,7 @@ export class Data {
 				cb: Data.instance.onEvent,
 				filter: { authors: profiles.map((it) => it.pubkey), kinds: [0] }
 			}, undefined, () => {
-        s.unsub();
+				s.unsub();
 				db.profiles
 					.where('pubkey')
 					.anyOf(profiles.map((it) => it.pubkey))
@@ -120,40 +122,40 @@ export class Data {
 		const newKeys = newProfiles.map((it) => it.pubkey);
 		const oldKeys = oldProfiles.map((it) => it.pubkey);
 		const priorSyncTS = (await db.config.get(`priorSyncTS`))?.value;
-		const syncFromTS = priorSyncTS
-			? // TODO: scan the last day as the user might not reset the timestamp in a long time
-			  priorSyncTS - 24 * 60 * 60
-			: 0;
-		Data.instance.events = [];
-		const sub = (name, filter, keys) => {
-			if (keys.length > 0) {
-				Data.instance.pool.sub(
-					{
-						cb: Data.instance.onEvent,
-						filter: filter
-					},
-					name
-				);
-			}
-		};
+		const syncFromTS = priorSyncTS || 0;
 		const filters = [];
 		const kinds = [0, 1, 3, 4, 5, 7];
-		if (newKeys.length > 0)
-			filters.push({ authors: newKeys, kinds: kinds }, { '#p': newKeys, kinds: kinds });
-		if (oldKeys.length > 0)
+		if (newKeys.length > 0) {
+			filters.push({
+				authors: newKeys,
+				kinds: kinds
+			}, {
+				'#p': newKeys,
+				kinds: kinds
+			});
+		}
+		if (oldKeys.length > 0) {
 			filters.push(
-				{ authors: oldKeys, since: syncFromTS, kinds: kinds },
-				{ '#p': oldKeys, since: syncFromTS, kinds: kinds }
+				{
+					authors: oldKeys,
+					since: syncFromTS,
+					kinds: kinds
+				}, {
+					'#p': oldKeys,
+					since: syncFromTS,
+					kinds: kinds
+				}
 			);
+		}
 		Data.instance.pool.sub(
 			{
 				cb: Data.instance.onEvent,
 				filter: filters
 			},
 			'fromToAllProfiles',
-      () => {
-        // EOSE
-        console.log('Synced all profiles');
+			() => {
+				// EOSE
+				console.log('Synced all profiles');
 				db.config.put({
 					key: 'priorSyncTS',
 					value: Math.floor(new Date().getTime() / 1000)
@@ -164,7 +166,7 @@ export class Data {
 					.anyOf(profiles.map((it) => it.pubkey))
 					.modify({ synced: true });
 				this.getRelevantProfiles();
-      }
+			}
 		);
 	}
 
@@ -181,6 +183,7 @@ export class Data {
 		// Degree 100 is considered unconnected.
 
 		// of all the profiles we know, who is following whom?
+		// Map<pubkey, List<pubkey>>
 		const profileFollows = new Map(
 			(await db.events.where('kind').equals(3).toArray()).map((it) => [
 				it.pubkey,
@@ -249,8 +252,14 @@ export class Data {
 		// db.profiles.bulkPut(profiles)
 	}
 
+	private rereceivedCounter = 0
 	private async onEvent(event: IEvent, relay: string): void {
-		Data.instance.events.push(event);
+		if (!Data.instance.allEventIds.has(event.id)) {
+			Data.instance.events.push(event);
+			Data.instance.allEventIds.add(event.id);
+		} else {
+			Data.instance.rereceivedCounter++;
+		}
 	}
 
 	public connectWS(): void {
