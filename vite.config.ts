@@ -23,7 +23,8 @@ export default defineConfig({
 		alias: {
 			process: 'process/browser',
 			stream: 'rollup-plugin-node-polyfills/polyfills/stream',
-			util: 'rollup-plugin-node-polyfills/polyfills/util'
+			util: 'rollup-plugin-node-polyfills/polyfills/util',
+			buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
 		}
 	},
 	optimizeDeps: {
