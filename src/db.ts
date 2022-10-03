@@ -1,6 +1,7 @@
 import Dexie from 'dexie'
 // import { getPublicKey } from 'nostr-tools'
 import { getPublicKey } from './lib/nostr-tools'
+import { queryName } from './lib/nostr-tools/nip05'
 
 export interface IProfile {
   pubkey: string
@@ -8,6 +9,7 @@ export interface IProfile {
   name?: string
   avatar?: string
   nip05?: string
+  nip05Valid: boolean
   /**
    * "degree of separation"
    * 
@@ -77,6 +79,21 @@ export class NostroidDexie extends Dexie {
     })
   }
   
+  private async nip05Valid(name, pubkey) {
+    if (name == undefined || name.length < 3) {
+      return false
+    }
+    var n = name
+    switch (name.indexOf('@')) {
+      case -1: n = `_@${name}`; break
+      case 0: n = `_${name}`; break
+      default: n = name
+    }
+    const qName = await queryName(n)
+    console.log(`${name}->${n}->${qName}`)
+    return qName == pubkey
+  }
+  
   public async updateProfileFromMeta(pubkeys) {
     console.log(`updateProfileFromMeta(${pubkeys?.length})`)
     if (pubkeys && pubkeys.length === 0) {
@@ -103,15 +120,16 @@ export class NostroidDexie extends Dexie {
             metaDataEvents.set(e.pubkey, e)
           }
         })
-      profiles.forEach(p => {
+      for (const p of profiles) {
         let metadataEvent = metaDataEvents.get(p.pubkey)
         let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
         if (metadata) {
           p.name = metadata.name || ''
           p.avatar = metadata.picture || ''
-          p.nip05 = metadata.nip05 || ''
+          p.nip05 = metadata.nip05
+          p.nip05Valid = this.nip05Valid(metadata.nip05, p.pubkey)
         }
-      })
+      }
       db.profiles.bulkPut(profiles)
     })
   }

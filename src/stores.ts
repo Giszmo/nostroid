@@ -15,10 +15,6 @@ export const activeProfile:Observable<IProfile|undefined> = liveQuery(async (): 
  * A Map but whenever a value is missing, an attempt is made to retrieve it.
  **/
 export class ProfileCache {
-  // public constructor() {
-  //   console.log('ProfileCache constructor()')
-  // }
-
   public backing = new Map<string, IProfile>();
 
   public get(pubkey: string): IProfile {

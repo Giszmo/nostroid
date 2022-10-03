@@ -11,7 +11,9 @@ let id = pubkey
 $: {
   const nip05 = profile?.nip05
   id = nip05
-    ? `${nip05} (<a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">verify</a>)`
+    ? (profile?.nip05Valid
+      ? `${nip05} ✓`
+      : `${nip05} (<a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">invalid?</a>)`)
     : pubkey
 }
 </script>
