@@ -107,7 +107,7 @@ Currently only Chrome / Chromium supports running workers in dev mode. To start
 the server on localhost, run:
 
 ```
-pnpm run dev-submodule
+pnpm run dev
 ```
 
 The server updates automatically as soon as files change.
@@ -115,7 +115,7 @@ The server updates automatically as soon as files change.
 To test it in other browsers than Chrome, build and preview the project:
 
 ```
-pnpm run build-submodule
+pnpm run build
 pnpm run preview
 ```
 
@@ -124,5 +124,5 @@ pnpm run preview
 1. Configure your nginx to host static files.
    [This](https://vite-plugin-pwa.netlify.app/deployment/nginx.html) might be
    helpful.
-2. `pnpm run build-submodule`
+2. `pnpm run build`
 3. Copy the `build` folder to your server
