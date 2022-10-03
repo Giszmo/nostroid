@@ -1,5 +1,5 @@
 <script type="ts">
-  export let tags: string[][] = []
+  export let tags: string[] = []
   // $: height = tags.length
   // $: width = Math.max(...tags.map(it=>it.length))
 </script>

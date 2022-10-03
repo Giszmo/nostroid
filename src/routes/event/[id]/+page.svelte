@@ -2,15 +2,24 @@
 	import { page } from '$app/stores'
 	import { db } from "../../../db"
 	import Event from "../../../components/Event.svelte"
-	import type { IEvent } from "../../../db"
+	import type { IEvent, IMissing } from "../../../db"
   import { onMount } from 'svelte'
-	
-  let id = ''
-  let event:IEvent|undefined
+  import { liveQuery } from "dexie"
+
+  let id: string|undefined
+	let event
+  $: {
+		event = liveQuery<IEvent|undefined>(async () => {
+			const e = await db.events.get(id)
+			if (id && id.length === 64 && !e) {
+				db.missingEvents.put(<IMissing>{id: id})
+			}
+			return e
+		})
+	}
   
   onMount(async () => {
     id = $page.params.id
-    event = await db.events.get(id)
   })
 </script>
 
@@ -20,8 +29,22 @@
 
 <h1>Event {id}</h1>
 
-{#if event}
-<Event {event} />
-{:else}
-Event not found.
-{/if}
+{#await $event}
+	Loading ...
+{:then event}
+	{#if event }
+		<Event {event} />
+	{:else}
+		Event not found.
+	{/if}
+{:catch _}
+	Event not found.
+{/await}
+
+<style>
+h1 {
+	overflow-x: clip;
+  white-space: nowrap;
+	text-overflow: ellipsis;
+}
+</style>
