@@ -30,7 +30,6 @@ export default defineConfig({
 	optimizeDeps: {
 		include: [
 			'nostr-tools > create-hash',
-			'nostr-tools > create-hmac',
 			'workbox-precaching',
 			'workbox-routing',
 			'workbox-window'
