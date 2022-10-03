@@ -97,6 +97,7 @@ This project is well tested using [pnpm](https://pnpm.io/). It might work with
 old `npm`, too but if not, please try following the exact instructions here
 before filing issues.
 
+0. Make sure to have a modern version of `node`. v18.6.0 for example.
 1. `git submodule update --init`
 2. Get [pnpm](https://pnpm.io/)
 3. `pnpm install`
