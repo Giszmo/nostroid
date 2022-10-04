@@ -240,13 +240,7 @@ export class Data {
 				}) as IProfile);
 			}
 		});
-		// TODO: Somehow there are two rogue profiles:
-		// {"pubkey":"messages","degree":2,"synced":true}
-		// {"missing":true,"degree":2}
-		// the former really does exist and I'm not sure what re-creates it.
-		// the latter ... I have no idea but it smells like a bigger issue.
 		profiles.forEach((it) => {
-			// console.log(`putting ${JSON.stringify(it)}`)
 			db.profiles.put(it);
 		});
 		// db.profiles.bulkPut(profiles)

@@ -127,7 +127,7 @@ export class NostroidDexie extends Dexie {
           p.name = metadata.name || ''
           p.avatar = metadata.picture || ''
           p.nip05 = metadata.nip05
-          p.nip05Valid = this.nip05Valid(metadata.nip05, p.pubkey)
+          p.nip05Valid = await this.nip05Valid(metadata.nip05, p.pubkey)
         }
       }
       db.profiles.bulkPut(profiles)
