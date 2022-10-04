@@ -12,7 +12,7 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"postinstall": "esno scripts/patch.ts"
+		"postinstall": "node scripts/patch.mjs"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.25.2",
@@ -26,7 +26,6 @@
 		"eslint": "^8.23.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
-		"esno": "^0.16.3",
 		"prettier": "^2.7.1",
 		"prettier-plugin-svelte": "^2.7.0",
 		"svelte": "^3.50.1",
