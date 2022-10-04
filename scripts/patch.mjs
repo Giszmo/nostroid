@@ -5,7 +5,7 @@ once fixed, we can remove this patch:
 https://github.com/nodejs/readable-stream/issues/487
 */
 const patchReadableStream = () => {
-	let content: string = readFileSync('./node_modules/readable-stream/lib/_stream_readable.js', {
+	let content = readFileSync('./node_modules/readable-stream/lib/_stream_readable.js', {
 		encoding: 'utf-8'
 	});
 	if (content.includes('global.Uint8Array')) {
@@ -38,6 +38,16 @@ const patchReadableStream = () => {
 		writeFileSync(
 			'./node_modules/rollup-plugin-node-polyfills/polyfills/util.js',
 			content.replace('if (isUndefined(global.process)) {', 'if (isUndefined(self.process)) {'),
+			{ encoding: 'utf-8' }
+		);
+	}
+	content = readFileSync('./node_modules/rollup-plugin-node-polyfills/polyfills/buffer-es6.js', {
+		encoding: 'utf-8'
+	});
+	if (content.includes('global.TYPED_ARRAY_SUPPORT')) {
+		writeFileSync(
+			'./node_modules/rollup-plugin-node-polyfills/polyfills/buffer-es6.js',
+			content.replace(/global\.TYPED_ARRAY_SUPPORT/g, 'self.TYPED_ARRAY_SUPPORT'),
 			{ encoding: 'utf-8' }
 		);
 	}
