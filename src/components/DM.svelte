@@ -19,6 +19,7 @@
       try {
         decrypted = decrypt($activeProfile.privkey, other, event.content)
       } catch(e) {
+        console.error(`${e}`)
         decrypted = 'failed to decrypt message...'
       }
     } else {
