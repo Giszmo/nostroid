@@ -1,5 +1,4 @@
 import Dexie from 'dexie'
-// import { getPublicKey } from 'nostr-tools'
 import { getPublicKey } from './lib/nostr-tools'
 import { queryName } from './lib/nostr-tools/nip05'
 
@@ -99,8 +98,8 @@ export class NostroidDexie extends Dexie {
     if (pubkeys && pubkeys.length === 0) {
       return
     }
-    db.transaction('rw', db.profiles, db.events, async () => {
-      let profiles: Array<IProfile>
+    let profiles: Array<IProfile>
+    await db.transaction('rw', db.profiles, db.events, async () => {
       if (pubkeys) {
         profiles = await db.profiles.where('pubkey').anyOf(pubkeys).toArray()
       } else {
@@ -127,11 +126,21 @@ export class NostroidDexie extends Dexie {
           p.name = metadata.name || ''
           p.avatar = metadata.picture || ''
           p.nip05 = metadata.nip05
-          p.nip05Valid = await this.nip05Valid(metadata.nip05, p.pubkey)
+          p.nip05Valid = null
         }
       }
       db.profiles.bulkPut(profiles)
     })
+    this.validateNip05ProfilesNip05(profiles || [])
+  }
+  
+  private async validateNip05ProfilesNip05(profiles: Array<IProfile>) {
+    let profilesWithNip05 = profiles.filter(p => p.nip05)
+    const profilesValidated = await Promise.all(profilesWithNip05.map(async (p) => {
+      p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey)
+      return p
+    }))
+    db.profiles.bulkPut(profilesValidated)
   }
 }
 
@@ -175,4 +184,3 @@ db.on('populate', () => {
   })
   db.profiles.bulkAdd(debugProfiles)
 })
-getPublicKey
