@@ -13,22 +13,37 @@
 </script>
 
 <table class='event { oddRow ? "oddRow" : ""}' on:click={() => select(event.id)}>
-  <tr><td><strong>ID: </strong></td><td>{event?.id}</td></tr>
-  <tr><td><strong>Pubkey: </strong></td><td>{event?.pubkey}</td></tr>
-  <tr><td><strong>Kind: </strong></td><td>{event?.kind}</td></tr>
-  <tr><td><strong>Content: </strong></td><td>{event?.content}</td></tr>
-  <tr><td><strong>Tags: </strong></td><td><TagList tags={event?.tags} /></td></tr>
-  <tr><td><strong>CreatedAt: </strong></td><td>{event?.created_at}</td></tr>
-  <tr><td><strong>Signature: </strong></td><td>{event?.sig}</td></tr>
+  <colgroup>
+    <col class="col-1">
+    <col class="col-2">
+  </colgroup>
+  <tr><td><strong>ID: </strong></td><td class="right">{event?.id}</td></tr>
+  <tr><td><strong>Pubkey: </strong></td><td class="right">{event?.pubkey}</td></tr>
+  <tr><td><strong>Kind: </strong></td><td class="right">{event?.kind}</td></tr>
+  <tr><td><strong>Content: </strong></td><td class="right">{event?.content}</td></tr>
+  <tr><td><strong>Tags: </strong></td><td class="right"><TagList tags={event?.tags} /></td></tr>
+  <tr><td><strong>CreatedAt: </strong></td><td class="right">{event?.created_at}</td></tr>
+  <tr><td><strong>Signature: </strong></td><td class="right">{event?.sig}</td></tr>
 </table>
 
 <style>
   .event {
     border: 2px lightgray;
     border-radius: 5px;
+    width: 100%;
+    table-layout: fixed;
   }
-  
   .oddRow {
     background-color: pink;
+  }
+  .right {
+    word-break: break-all;
+  }
+  .col-1 {
+    width: 10%;
+    min-width: 100px;
+  }
+  .col-2 {
+    width: 90%;
   }
 </style>
