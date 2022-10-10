@@ -3,6 +3,9 @@
   import { base } from '$app/paths'
 	import logo from './nostroid-logo.svg'
 	import AccountInfo from '../../components/AccountInfo.svelte'
+	import MobileNav from '../../components/MobileNav.svelte';
+
+	let showMobileNav = false;
 </script>
 
 <header>
@@ -38,8 +41,15 @@
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
 		</svg>
 	</nav>
+	
+	<i class="menu-icon" on:click={() => showMobileNav = !showMobileNav}>
+		<img src="/icons/menu.svg" alt="menu">
+	</i>
+	{#if showMobileNav}
+		<MobileNav bind:showMobileNav/>
+	{/if}
 
-	<div class="accountInfo">
+	<div class="account-info">
 		<AccountInfo />
 	</div>
 </header>
@@ -48,6 +58,7 @@
 	header {
 		display: flex;
 		justify-content: space-between;
+		padding: 0 .3rem;
 	}
 
 	.corner {
@@ -131,5 +142,22 @@
 
 	a:hover {
 		color: var(--accent-color);
+	}
+	.menu-icon {
+		display: none;
+	}
+	.menu-icon > img {
+		width: 40px;
+	}
+	@media (max-width: 600px) {
+		nav {
+			display: none;
+		}
+		.menu-icon {
+			display: block;
+		}
+		.account-info {
+			display: none;
+		}
 	}
 </style>
