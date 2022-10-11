@@ -9,9 +9,11 @@
 </script>
 
 <nav class="mobile-nav">
-  <i class="close-icon" on:click={()=> showMobileNav = false}>
-    <img src="/icons/close.svg" alt="">
-  </i>
+  <button
+    class="icon-btn close-icon"
+    aria-label="Close"
+    on:click={()=> showMobileNav = false}
+  />
   <div class="account-info">
     <AccountInfo />
   </div>
@@ -63,13 +65,11 @@
   }
   .close-icon {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 2rem;
-    cursor: pointer;
-  }
-  .close-icon > img {
+    top: 0.3rem;
+    right: 0.3rem;
+    background-image: url('/icons/close.svg');
     width: 40px;
+    height: 40px;
   }
   .account-info {
     margin-bottom: 2rem;

@@ -42,9 +42,11 @@
 		</svg>
 	</nav>
 	
-	<i class="menu-icon" on:click={() => showMobileNav = !showMobileNav}>
-		<img src="/icons/menu.svg" alt="menu">
-	</i>
+	<button
+		class="icon-btn menu-icon"
+		aria-label="Menu"
+		on:click={() => showMobileNav = !showMobileNav}
+	/>
 	{#if showMobileNav}
 		<MobileNav bind:showMobileNav/>
 	{/if}
@@ -145,8 +147,7 @@
 	}
 	.menu-icon {
 		display: none;
-	}
-	.menu-icon > img {
+		background-image: url('/icons/menu.svg');
 		width: 40px;
 	}
 	@media (max-width: 780px) {
