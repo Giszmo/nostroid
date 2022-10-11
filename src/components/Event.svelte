@@ -37,13 +37,12 @@
     background-color: pink;
   }
   .right {
-    word-break: break-all;
+    word-break: break-word;
   }
   .col-1 {
-    width: 10%;
-    min-width: 100px;
+    width: 100px;
   }
   .col-2 {
-    width: 90%;
+    
   }
 </style>
