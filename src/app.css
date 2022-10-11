@@ -109,6 +109,10 @@ button:focus:not(:focus-visible) {
 	background-position: center;
 }
 
+.noscroll {
+	overflow: hidden;
+}
+
 @media (min-width: 720px) {
 	h1 {
 		font-size: 2.4rem;

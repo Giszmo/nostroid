@@ -1,11 +1,15 @@
 <script>
-  import { base } from '$app/paths'
-  import { page, navigating } from '$app/stores'
+  import { base } from '$app/paths';
+  import { page, navigating } from '$app/stores';
+	import { onDestroy, onMount } from 'svelte';
 	import AccountInfo from './AccountInfo.svelte';
 
   export let showMobileNav = false;
 
-  $: if ($navigating) showMobileNav = false
+  $: if ($navigating) showMobileNav = false;
+
+  onMount(() => document.body.classList.add('noscroll'));
+  onDestroy(() => document.body.classList.remove('noscroll'));
 </script>
 
 <nav class="mobile-nav">
@@ -37,6 +41,9 @@
 </nav>
 
 <style>
+  body {
+    overflow: hidden;
+  }
   .mobile-nav {
     position: fixed;
     top: 0;
