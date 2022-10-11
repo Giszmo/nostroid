@@ -39,6 +39,6 @@
 		word-wrap: break-word;
 	}
 	.avatar-img {
-		max-width: 100%
+		max-width: 12rem
 	}
 </style>

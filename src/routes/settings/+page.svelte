@@ -108,6 +108,6 @@ $: {
     word-break: break-word;
   }
   .profile-img {
-    max-width: 100%;
+    max-width: 12rem;
   }
 </style>
