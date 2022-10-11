@@ -46,7 +46,7 @@
   text-align: left;
   /* display: inline-grid; */
   height: 5em;
-  width: 20em;
+  max-width: 20em;
   margin: .5em;
   padding: .5em;
   border-radius: 15px;
