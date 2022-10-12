@@ -61,6 +61,7 @@
 		display: flex;
 		justify-content: space-between;
 		padding: 0 .3rem;
+		align-items: center;
 	}
 
 	.corner {
@@ -149,6 +150,7 @@
 		display: none;
 		background-image: url('/icons/menu.svg');
 		width: 40px;
+		height: 40px;
 	}
 	@media (max-width: 780px) {
 		nav {
