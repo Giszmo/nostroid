@@ -41,9 +41,6 @@
 </nav>
 
 <style>
-  body {
-    overflow: hidden;
-  }
   .mobile-nav {
     position: fixed;
     top: 0;
@@ -80,5 +77,11 @@
   }
   .account-info {
     margin-bottom: 2rem;
+  }
+
+  @media (min-width: 780px) {
+    .mobile-nav {
+      display: none;
+    }
   }
 </style>
