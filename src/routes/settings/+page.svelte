@@ -85,7 +85,7 @@ $: {
       <label>PK: <input bind:value={pk} disabled></label><br>
       <label>Name: <input bind:value={name}></label><br>
       <label>Avatar: <input bind:value={avatar}></label><br>
-      <img src={avatar} alt='profile'><br>
+      <img class="profile-img" src={avatar} alt='profile'><br>
       <label>nip05: <input bind:value={nip05}></label><br>
       {@html msg}
       <button on:click={cancelPersist}>Cancel</button>
@@ -95,7 +95,7 @@ $: {
       <strong>PK</strong>: <span>{pk}</span><br>
       <strong>Name</strong>: <span>{name}</span><br>
       <strong>Avatar</strong>: <span>{avatar}</span><br>
-      <img src={avatar} alt='profile'><br>
+      <img class="profile-img" src={avatar} alt='profile'><br>
       <strong>nip05</strong>: <span>{nip05}</span><br>
     {/if}
   {:else}
@@ -104,4 +104,10 @@ $: {
 </div>
 
 <style>
+  span {
+    word-break: break-word;
+  }
+  .profile-img {
+    max-width: 12rem;
+  }
 </style>
