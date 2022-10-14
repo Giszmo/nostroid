@@ -7,7 +7,7 @@
   let avatar = ''
   let pk = ''
   let nip05 = ''
-  let nip05Status: 'checking' | 'valid' | 'invalid' = 'checking';
+  let nip05Status: 'checking' | 'valid' | 'invalid' | '' = '';
   
   let outEvent: {privkey: string, content: string}|undefined
   
@@ -54,10 +54,10 @@ const validate = async () => {
   let valid;
   let a = $activeProfile as IProfile;
   nip05Status = 'checking';
-  nip05Status = nip05 ? ((await db.nip05Valid(nip05, a.pubkey)) ? 'valid' : 'invalid') : 'valid';
+  nip05Status = nip05 ? ((await db.nip05Valid(nip05, a.pubkey)) ? 'valid' : 'invalid') : '';
   if (
     a?.privkey === undefined ||
-    nip05Status !== 'valid' ||
+    (nip05Status !== 'valid' && nip05) ||
     (name === a.name && avatar === a.avatar && nip05 === a.nip05)
   ) {
     valid = false
@@ -111,7 +111,7 @@ const debounce = (..._: any) => {
       <label>
         nip05: 
         <input bind:value={nip05}>
-        <span>{nip05Status || ''}</span>
+        <span>{nip05Status}</span>
       </label>
       <br>
       {@html msg}
