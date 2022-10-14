@@ -78,7 +78,7 @@ export class NostroidDexie extends Dexie {
     })
   }
   
-  private async nip05Valid(name, pubkey) {
+  public async nip05Valid(name, pubkey) {
     if (name == undefined || name.length < 3) {
       return false
     }
