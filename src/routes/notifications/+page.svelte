@@ -92,16 +92,16 @@
 <div class="todos">
   <h1>Notifications</h1>
   {#if $events instanceof Array }
-  {#if show < $events.length }
-    <button on:click={showMore}>Show Older Events</button>
-  {/if}
-  {#each $events.slice(0, show).reverse() as event (event.id)}
-    <p in:receive="{{key: event.id}}"
-        out:send="{{key: event.id}}"
-        animate:flip="{{duration: 800}}">
-      <TextNote event={event}/>
-    </p>
-  {/each}
+    {#each $events.slice(0, show) as event (event.id)}
+      <p in:receive="{{key: event.id}}"
+          out:send="{{key: event.id}}"
+          animate:flip="{{duration: 800}}">
+        <TextNote event={event}/>
+      </p>
+    {/each}
+    {#if show < $events.length }
+      <button on:click={showMore}>Show Older Events</button>
+    {/if}
   {/if}
 </div>
 

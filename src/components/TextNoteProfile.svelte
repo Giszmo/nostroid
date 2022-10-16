@@ -50,5 +50,8 @@ img {
   border-radius: 50%;
   margin: 10px;
 }
+#id {
+  word-break: break-word;
+}
 
 </style>
