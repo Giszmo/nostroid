@@ -56,8 +56,7 @@ export class $Data {
 				await db.updateProfileFromMeta(updatedProfiles);
 			}
 			await yieldMicrotask()
-			Data.broadcastOutbox()
-			Data.downloadMissingEvents();
+			await Promise.race([Data.broadcastOutbox(), Data.downloadMissingEvents()]);
 			await yieldMicrotask()
 			await snooze(delay);
 		}
@@ -266,8 +265,9 @@ export class $Data {
 			}
 		});
 
-
-		db.profiles.bulkPut(profiles)
+		queueMicrotask(()=>{
+			db.profiles.bulkPut(profiles)
+		})
 		await yieldMicrotask()
 	}
 

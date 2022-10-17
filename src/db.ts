@@ -139,6 +139,8 @@ export class NostroidDexie extends Dexie {
 
       return profiles;
     }).then((profiles) => {this.validateNip05ProfilesNip05(profiles ?? [])});
+
+    return false;
   }
 
   private async validateNip05ProfilesNip05(profiles: Array<IProfile>) {
