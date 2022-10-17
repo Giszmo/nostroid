@@ -1,7 +1,7 @@
 import { db } from './db';
 import type { IProfile } from './db';
-import { liveQuery } from 'dexie';
-import { writable } from 'svelte/store';
+import { liveQuery, type Observable } from 'dexie';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export const activeProfile:Observable<IProfile|undefined> = liveQuery(async (): Promise<IProfile | undefined> => {
   const pubkey = (await db.config.get('activePubkey'))?.value
@@ -19,7 +19,7 @@ export class ProfileCache {
 
   public get(pubkey: string): IProfile {
     let profile = this.backing.get(pubkey);
-    if (profile == undefined) {
+    if (profile === undefined) {
       console.log(`pubkey ${pubkey} is missing ... Backing contained ${this.backing.keys.length} entries.`)
       profile = {
         pubkey: pubkey,
@@ -43,12 +43,11 @@ export class ProfileCache {
  **/
 export const cProfiles = writable(new ProfileCache());
 
-let profiles = liveQuery(() => db.profiles.toArray());
+const profiles = liveQuery(() => db.profiles.toArray());
 profiles.subscribe(p => {
   console.log(`updating profile cache (->${p.length} profiles)`)
   cProfiles.update(old => {
-    let newCache = new ProfileCache()
-    newCache.backing = new Map(p.map(x => [x.pubkey, x]))
-    return newCache
+    old.backing = new Map(p.map(x => [x.pubkey, x]))
+    return old
   })
 })

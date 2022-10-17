@@ -1,17 +1,18 @@
 import Dexie from 'dexie'
 import { getPublicKey } from './lib/nostr-tools'
 import { queryName } from './lib/nostr-tools/nip05'
-
+import { chunks, filterMap } from './utils/array'
+import { yieldMicrotask } from './utils/sync'
 export interface IProfile {
   pubkey: string
   privkey?: string
   name?: string
   avatar?: string
   nip05?: string
-  nip05Valid: boolean
+  nip05Valid: boolean | null
   /**
    * "degree of separation"
-   * 
+   *
    *     0: our account
    *     1: direct follow of one of our accounts
    *     2: follow of a follow
@@ -19,6 +20,9 @@ export interface IProfile {
    **/
   degree: number
   index: number
+  fetching?: boolean;
+  missing?: boolean;
+  synced?: boolean;
 }
 
 export interface IConfig {
@@ -27,6 +31,7 @@ export interface IConfig {
 }
 
 export interface IEvent {
+  outbox: any
   id: string
   pubkey: string
   created_at: number
@@ -52,6 +57,8 @@ export interface ITag {
 
 export interface IMissing {
   id: string
+  requested?: boolean | number;
+
 }
 
 export class NostroidDexie extends Dexie {
@@ -77,12 +84,11 @@ export class NostroidDexie extends Dexie {
       })
     })
   }
-  
-  private async nip05Valid(name, pubkey) {
-    if (name == undefined || name.length < 3) {
+  private async nip05Valid(name: string, pubkey: string) {
+    if (typeof name !== 'string' || name.length < 3) {
       return false
     }
-    var n = name
+    let n = name
     switch (name.indexOf('@')) {
       case -1: n = `_@${name}`; break
       case 0: n = `_${name}`; break
@@ -90,16 +96,15 @@ export class NostroidDexie extends Dexie {
     }
     const qName = await queryName(n)
     console.log(`${name}->${n}->${qName}`)
-    return qName == pubkey
+    return qName === pubkey
   }
-  
-  public async updateProfileFromMeta(pubkeys) {
+  public async updateProfileFromMeta(pubkeys: string[]) {
     console.log(`updateProfileFromMeta(${pubkeys?.length})`)
     if (pubkeys && pubkeys.length === 0) {
       return
     }
-    let profiles: Array<IProfile>
     await db.transaction('rw', db.profiles, db.events, async () => {
+      let profiles: Array<IProfile> = []
       if (pubkeys) {
         profiles = await db.profiles.where('pubkey').anyOf(pubkeys).toArray()
       } else {
@@ -129,18 +134,24 @@ export class NostroidDexie extends Dexie {
           p.nip05Valid = null
         }
       }
+
       db.profiles.bulkPut(profiles)
-    })
-    this.validateNip05ProfilesNip05(profiles || [])
+
+      return profiles;
+    }).then((profiles) => {this.validateNip05ProfilesNip05(profiles ?? [])});
   }
-  
+
   private async validateNip05ProfilesNip05(profiles: Array<IProfile>) {
-    let profilesWithNip05 = profiles.filter(p => p.nip05)
-    const profilesValidated = await Promise.all(profilesWithNip05.map(async (p) => {
-      p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey)
+
+    const profilesValidated = await Promise.all(filterMap(profiles, (item) => (item.nip05 && item.nip05Valid === null), async (p) => {
+      if (p.nip05) {
+        p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey);
+      }
       return p
     }))
-    db.profiles.bulkPut(profilesValidated)
+
+    db.profiles.bulkPut(profilesValidated);
+
   }
 }
 

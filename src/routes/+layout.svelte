@@ -5,10 +5,14 @@
 	import { onMount } from 'svelte'
 	import { pwaInfo } from 'virtual:pwa-info'
 
-
 	let ReloadPrompt
+	let worker: Worker;
 	onMount(async () => {
-		pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+		pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default);
+		worker = (await import('../data.service')).DataWorker!;
+
+		worker.postMessage('start');
+
 	})
 
 	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ''

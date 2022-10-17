@@ -5,8 +5,6 @@ import {
 } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
 import { base } from '$app/paths';
-import { Data } from './data';
-Data.instance.start();
 
 /* eslint-env serviceworker */
 declare let self: ServiceWorkerGlobalScope;
