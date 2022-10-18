@@ -37,6 +37,7 @@ export class $Data {
 	// check for work constantly
 	private async storeEventsLoop(): Promise<never> {
 		let delay = 500;
+		let promiseQueue = [];
 		while (true){
 			delay = 500;
 			this.events = (Data.events as IEvent[]).filter(
@@ -49,14 +50,16 @@ export class $Data {
 				e.forEach((event) => {
 					(event as IEvent).tags = (event as IEvent).tags?.map((it) => (it as unknown as string[]).join('»')) || [];
 				});
-				await db.events.bulkPut(e as IEvent[]);
+				promiseQueue.push(db.events.bulkPut(e as IEvent[]));
 				const dt = Date.now() - t;
 				console.log(`It took ${dt}ms to store ${e.length} events.`);
 				const updatedProfiles = filterMap(e, (it) => (it as IEvent).kind === 0, (it) => it.pubkey);
-				await db.updateProfileFromMeta(updatedProfiles);
+				promiseQueue.push(db.updateProfileFromMeta(updatedProfiles));
 			}
-			await yieldMicrotask()
-			await Promise.race([Data.broadcastOutbox(), Data.downloadMissingEvents()]);
+			Data.downloadMissingEvents();
+			Data.broadcastOutbox();
+			await Promise.all(promiseQueue);
+			promiseQueue.length = 0;
 			await yieldMicrotask()
 			await snooze(delay);
 		}
@@ -278,6 +281,7 @@ export class $Data {
 			Data.allEventIds.add(event);
 			Data.events.push(event);
 		} else {
+			Data.allEventIds.delete(event)
 			Data.rereceivedCounter++;
 		}
 	}
