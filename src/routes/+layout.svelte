@@ -1,41 +1,47 @@
 <script lang="ts">
 	import Header from '$lib/header/Header.svelte';
-	import Debug from '../components/Debug.svelte'
+	import Debug from '../components/Debug.svelte';
 	import '../app.css';
-	import { onMount } from 'svelte'
-	import { pwaInfo } from 'virtual:pwa-info'
-	import { db } from '../db'
+	import { onMount } from 'svelte';
+	import { pwaInfo } from 'virtual:pwa-info';
+	import { db } from '../db';
 
 	let err = false;
 
-	let ReloadPrompt
+	let ReloadPrompt;
 	onMount(async () => {
 		// check availability of service worker and indexedDB before registering sw
-		db.open()
-		.catch ((e) => {
-			err = true
+		db.open().catch((e) => {
+			err = true;
 		});
 		if ('serviceWorker' in navigator) {
-			pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+			pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default);
 		} else {
-			err = true
+			err = true;
 		}
-	})
+	});
 
-	$: webManifest = pwaInfo && !err ? pwaInfo.webManifest.linkTag : ''
+	$: webManifest = pwaInfo && !err ? pwaInfo.webManifest.linkTag : '';
 </script>
 
 <svelte:head>
-	{@html webManifest }
+	{@html webManifest}
 </svelte:head>
-
 
 {#if err}
 	<main>
 		<h1>Browser not supported</h1>
 		<p>This app requires access to service workers and indexedDB to work correctly</p>
-		<p>Please make sure that cookies/storage is allowed in your browser settings and that you are not running in incognito mode</p>
-		<p>If you require further help please see our <a href="https://github.com/Giszmo/nostroid/issues" target="_blank">issues page on GitHub</a></p>
+		<p>
+			Please make sure that cookies/storage is allowed in your browser settings and that you are not
+			running in incognito mode
+		</p>
+		<p>
+			If you require further help please see our <a
+				href="https://github.com/Giszmo/nostroid/issues"
+				target="_blank">issues page on GitHub</a
+			>
+		</p>
 	</main>
 {:else}
 	<Header />
