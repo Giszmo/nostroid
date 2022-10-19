@@ -1,12 +1,13 @@
 <script lang="ts">
   import { activeProfile } from '../../stores'
   import { sendPersistEvent } from '../../nostrHelper'
-  import type { IProfile } from "../../db"
+  import { type IProfile, db } from "../../db"
 
   let name = ''
   let avatar = ''
   let pk = ''
   let nip05 = ''
+  let nip05Status: 'checking' | 'valid' | 'invalid' | '' = '';
   
   let outEvent: {privkey: string, content: string}|undefined
   
@@ -45,32 +46,53 @@ const reset = async () => {
 }
 
 const sendPersist = async () => {
-  if (outEvent) {
-    sendPersistEvent(0, [], outEvent.content, outEvent.privkey)
-  }
-  cancelPersist()
+  if (!outEvent || !await validate()) return cancelPersist();
+  sendPersistEvent(0, [], outEvent.content, outEvent.privkey)
 }
 
-$: {
-  let a = $activeProfile as IProfile
-  if (a?.privkey === undefined || (
-    name === a.name && avatar === a.avatar && nip05 === a.nip05)) {
-    outEvent = undefined
-    cancelPersist()
+const validate = async () => {
+  let valid;
+  let a = $activeProfile as IProfile;
+  nip05Status = 'checking';
+  nip05Status = nip05 ? ((await db.nip05Valid(nip05, a.pubkey)) ? 'valid' : 'invalid') : '';
+  if (
+    a?.privkey === undefined ||
+    (nip05Status !== 'valid' && nip05) ||
+    (name === a.name && avatar === a.avatar && nip05 === a.nip05)
+  ) {
+    valid = false
   } else {
-    outEvent = {
-      privkey: a.privkey,
-      content: JSON.stringify(
-        {
-          name: name,
-          picture: avatar,
-          nip05: nip05
-        }
-      )
-    }
-    persistLater()
+    valid = true;
   }
+  return valid;
+};
+
+// only run validate and autosave after not being edited for 700ms
+$: debounce(name, avatar, pk, nip05)
+
+let timer: ReturnType<typeof setTimeout>;
+const debounce = (..._: any) => {
+  clearTimeout(timer)
+  timer = setTimeout(async () => {
+    if (!await validate()) {
+      outEvent = undefined
+      cancelPersist()
+    } else {
+      outEvent = {
+        privkey: $activeProfile.privkey,
+        content: JSON.stringify(
+          {
+            name: name,
+            picture: avatar,
+            nip05: nip05
+          }
+        )
+      }
+      persistLater()
+    }
+  }, 700)
 }
+
 </script>
 
 <svelte:head>
@@ -85,8 +107,13 @@ $: {
       <label>PK: <input bind:value={pk} disabled></label><br>
       <label>Name: <input bind:value={name}></label><br>
       <label>Avatar: <input bind:value={avatar}></label><br>
-      <img src={avatar} alt='profile'><br>
-      <label>nip05: <input bind:value={nip05}></label><br>
+      <img class="profile-img" src={avatar} alt='profile'><br>
+      <label>
+        nip05: 
+        <input bind:value={nip05}>
+        <span>{nip05Status}</span>
+      </label>
+      <br>
       {@html msg}
       <button on:click={cancelPersist}>Cancel</button>
       <button on:click={sendPersist}>Save</button>
@@ -95,7 +122,7 @@ $: {
       <strong>PK</strong>: <span>{pk}</span><br>
       <strong>Name</strong>: <span>{name}</span><br>
       <strong>Avatar</strong>: <span>{avatar}</span><br>
-      <img src={avatar} alt='profile'><br>
+      <img class="profile-img" src={avatar} alt='profile'><br>
       <strong>nip05</strong>: <span>{nip05}</span><br>
     {/if}
   {:else}
@@ -104,4 +131,10 @@ $: {
 </div>
 
 <style>
+  span {
+    word-break: break-word;
+  }
+  .profile-img {
+    max-width: 12rem;
+  }
 </style>

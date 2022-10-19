@@ -13,7 +13,7 @@ $: {
   id = nip05
     ? (profile?.nip05Valid
       ? `${nip05} ✓`
-      : `${nip05} (<a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">invalid?</a>)`)
+      : `${nip05} <a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">?</a>`)
     : pubkey
 }
 </script>
@@ -22,11 +22,12 @@ $: {
   <img src={avatar || noPic} alt="user's avatar">
   <div class="info">
     {profile?.name || 'no name set'}<br>
-    {@html id}
+    <div id="id" class="{profile?.nip05 ? 'nip05' : 'pubkey'} {profile?.nip05Valid ? 'valid' : ''}">{@html id}</div>
   </div>
 </div>
 
 <style>
+
 .profile {
   width: 100%;
   min-height: 3em;
@@ -37,6 +38,10 @@ $: {
   font-weight: bold;
 }
 
+.nip05.valid {
+  color: darkgreen;
+}
+
 img {
   width: 3em;
   height: 3em;
@@ -45,4 +50,8 @@ img {
   border-radius: 50%;
   margin: 10px;
 }
+#id {
+  word-break: break-word;
+}
+
 </style>

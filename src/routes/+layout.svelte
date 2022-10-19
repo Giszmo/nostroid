@@ -4,33 +4,53 @@
 	import '../app.css';
 	import { onMount } from 'svelte'
 	import { pwaInfo } from 'virtual:pwa-info'
+	import { db } from '../db'
 
+	let err = false;
 
 	let ReloadPrompt
 	onMount(async () => {
-		pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+		// check availability of service worker and indexedDB before registering sw
+		db.open()
+		.catch ((e) => {
+			err = true
+		});
+		if ('serviceWorker' in navigator) {
+			pwaInfo && (ReloadPrompt = (await import('../components/ReloadPrompt.svelte')).default)
+		} else {
+			err = true
+		}
 	})
 
-	$: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ''
-
+	$: webManifest = pwaInfo && !err ? pwaInfo.webManifest.linkTag : ''
 </script>
 
 <svelte:head>
 	{@html webManifest }
 </svelte:head>
 
-<Header />
 
-<main>
-	<slot />
-	{#if ReloadPrompt}
-		<svelte:component this={ReloadPrompt} />
-	{/if}
-</main>
+{#if err}
+	<main>
+		<h1>Browser not supported</h1>
+		<p>This app requires access to service workers and indexedDB to work correctly</p>
+		<p>Please make sure that cookies/storage is allowed in your browser settings and that you are not running in incognito mode</p>
+		<p>If you require further help please see our <a href="https://github.com/Giszmo/nostroid/issues" target="_blank">issues page on GitHub</a></p>
+	</main>
+{:else}
+	<Header />
 
-<footer>
-	<p><Debug /> GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
-</footer>
+	<main>
+		<slot />
+		{#if ReloadPrompt}
+			<svelte:component this={ReloadPrompt} />
+		{/if}
+	</main>
+
+	<footer>
+		<p><Debug /> GitHub: <a href="https://github.com/Giszmo/nostroid">nostroid</a></p>
+	</footer>
+{/if}
 
 <style>
 	main {
