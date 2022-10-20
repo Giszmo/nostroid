@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores'
-  import { base } from '$app/paths'
-	import logo from './nostroid-logo.svg'
-	import AccountInfo from '../../components/AccountInfo.svelte'
+	import { page } from '$app/stores';
+	import { base } from '$app/paths';
+	import logo from './nostroid-logo.svg';
+	import AccountInfo from '../../components/AccountInfo.svelte';
 	import MobileNav from '../../components/MobileNav.svelte';
 
 	let showMobileNav = false;
@@ -15,7 +15,6 @@
 		</span>
 	</div>
 
-
 	<nav>
 		<svg viewBox="0 0 2 3" aria-hidden="true">
 			<path d="M0,0 L1,2 C1.5,3 1.5,3 2,3 L2,0 Z" />
@@ -27,7 +26,7 @@
 			<li class:active={$page.url.pathname === `${base}/notifications/`}>
 				<a data-sveltekit-prefetch href="{base}/notifications">Notifications</a>
 			</li>
-      <li class:active={$page.url.pathname === `${base}/`}>
+			<li class:active={$page.url.pathname === `${base}/`}>
 				<a data-sveltekit-prefetch href="{base}/">Feed</a>
 			</li>
 			<li class:active={$page.url.pathname === `${base}/messages/`}>
@@ -41,14 +40,14 @@
 			<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
 		</svg>
 	</nav>
-	
+
 	<button
 		class="icon-btn menu-icon"
 		aria-label="Menu"
-		on:click={() => showMobileNav = !showMobileNav}
+		on:click={() => (showMobileNav = !showMobileNav)}
 	/>
 	{#if showMobileNav}
-		<MobileNav bind:showMobileNav/>
+		<MobileNav bind:showMobileNav />
 	{/if}
 
 	<div class="account-info">
@@ -60,7 +59,7 @@
 	header {
 		display: flex;
 		justify-content: space-between;
-		padding: 0 .3rem;
+		padding: 0 0.3rem;
 		align-items: center;
 	}
 
@@ -69,7 +68,8 @@
 		height: 3em;
 	}
 
-	.corner span,a {
+	.corner span,
+	a {
 		display: flex;
 		align-items: center;
 		justify-content: center;

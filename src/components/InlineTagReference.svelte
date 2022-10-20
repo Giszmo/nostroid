@@ -1,11 +1,11 @@
 <script type="ts">
-  export let content: {k: string, v: string}
+	export let content: { k: string; v: string };
 </script>
 
-<span class='tag'>{content.k}:{content.v}</span>
+<span class="tag">{content.k}:{content.v}</span>
 
 <style>
-.tag {
-  background-color: lightblue;
-}
+	.tag {
+		background-color: lightblue;
+	}
 </style>
