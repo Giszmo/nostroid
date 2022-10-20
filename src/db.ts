@@ -1,7 +1,7 @@
 import Dexie from 'dexie'
 import { getPublicKey } from './lib/nostr-tools'
 import { queryName } from './lib/nostr-tools/nip05'
-import { chunks, filterMap } from './utils/array'
+import { filterMap } from './utils/array'
 import { yieldMicrotask } from './utils/sync'
 export interface IProfile {
   pubkey: string
@@ -31,7 +31,7 @@ export interface IConfig {
 }
 
 export interface IEvent {
-  outbox: any
+  outbox?: true
   id: string
   pubkey: string
   created_at: number
@@ -56,8 +56,8 @@ export interface ITag {
 }
 
 export interface IMissing {
+  requested: number
   id: string
-  requested?: boolean | number;
 
 }
 
@@ -98,15 +98,20 @@ export class NostroidDexie extends Dexie {
     console.log(`${name}->${n}->${qName}`)
     return qName === pubkey
   }
+
   public async updateProfileFromMeta(pubkeys: string[]) {
     console.log(`updateProfileFromMeta(${pubkeys?.length})`)
-    if (pubkeys && pubkeys.length === 0) {
+    if (Array.isArray(pubkeys) && pubkeys.length === 0) {
       return
     }
-    await db.transaction('rw', db.profiles, db.events, async () => {
+
+    const profiles = await db.transaction('rw', db.profiles, db.events, async () => {
       let profiles: Array<IProfile> = []
+
       if (pubkeys) {
-        profiles = await db.profiles.where('pubkey').anyOf(pubkeys).toArray()
+        profiles = (
+          await Promise.all(
+            pubkeys.map((key) => db.profiles.where('pubkey').equals(key).toArray()))).flat();
       } else {
         profiles = await db.profiles.toArray()
       }
@@ -116,7 +121,9 @@ export class NostroidDexie extends Dexie {
         .toArray())
         .sort((a,b) => b.created_at - a.created_at)
         .forEach(e => {
+          if (e.pubkey === 'messages') console.warn(`[DB:events] invalid pubkey. Object: `, e)
           if (metaDataEvents.get(e.pubkey)) {
+            if (e.pubkey === 'messages') console.warn(`[DB:events] deleting pubkey 'messages' from db.events. Object: `, e)
             // delete older metadata events if we already found one sorting
             // newest to oldest.
             db.events.delete(e.id)
@@ -124,33 +131,37 @@ export class NostroidDexie extends Dexie {
             metaDataEvents.set(e.pubkey, e)
           }
         })
-      for (const p of profiles) {
-        let metadataEvent = metaDataEvents.get(p.pubkey)
-        let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
-        if (metadata) {
-          p.name = metadata.name || ''
-          p.avatar = metadata.picture || ''
-          p.nip05 = metadata.nip05
-          p.nip05Valid = null
+        await yieldMicrotask();
+        for (const p of profiles) {
+          let metadataEvent = metaDataEvents.get(p.pubkey)
+          let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
+          if (metadata) {
+            p.name = metadata.name || ''
+            p.avatar = metadata.picture || ''
+            p.nip05 = metadata.nip05
+            p.nip05Valid = null
+          }
         }
-      }
 
-      db.profiles.bulkPut(profiles)
+        db.profiles.bulkPut(profiles)
 
-      return profiles;
-    }).then((profiles) => {this.validateNip05ProfilesNip05(profiles ?? [])});
+        return profiles;
+      });
 
-    return false;
+      this.validateNip05ProfilesNip05(profiles ?? []);
   }
 
   private async validateNip05ProfilesNip05(profiles: Array<IProfile>) {
 
-    const profilesValidated = await Promise.all(filterMap(profiles, (item) => (item.nip05 && item.nip05Valid === null), async (p) => {
-      if (p.nip05) {
-        p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey);
+    const profilesValidated = await Promise.all(filterMap(profiles,
+      (item) => (item.nip05 && item.nip05Valid === null),
+      async (p) => {
+        if (p.nip05) {
+          p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey);
+        }
+        return p
       }
-      return p
-    }))
+    ))
 
     db.profiles.bulkPut(profilesValidated);
 

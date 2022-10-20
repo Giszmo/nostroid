@@ -1,3 +1,4 @@
+type VoidCallback<T> = (item: T, index: number, array: T[]) => void
 type ItemCallback<T, U> = (item: T, index: number, array: T[]) => U
 /**
  * Runs the specified callback for each item in the array,
@@ -131,9 +132,23 @@ export function filterTF<T>(array: T[], predicate: (item: T) => unknown): [T[], 
     return [truthyItems, falseyItems]
 }
 
-
-export function* chunks<T>(arr: T[], n: number): Generator<T[], void> {
-    for (let i = 0; i < arr.length; i += n) {
-      yield arr.slice(i, i + n);
+export function forEach<T>(arr: T[], callback: VoidCallback<T>): void {
+    // eslint-disable-next-line prefer-const
+    let idx = -1, length = arr.length;
+    while (++idx < length) {
+        callback(arr[idx], idx, arr);
     }
 }
+
+
+export function chunks<T>(arr: T[], len = 0): T[][] {
+    const chunks: T[][] = [],
+        n = arr.length;
+    let i = 0;
+
+    while (i < n) {
+      chunks.push(arr.slice(i, i += len));
+    }
+
+    return chunks;
+  }

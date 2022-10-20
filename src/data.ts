@@ -6,14 +6,13 @@ import { validateEvent } from './lib/nostr-tools';
 import { db } from './db';
 import type { IProfile, IEvent } from './db';
 import { snooze, yieldMicrotask } from './utils/sync';
-import { filterMap, filterTF } from './utils/array';
+import { chunks, filterMap, filterTF, forEach } from './utils/array';
 import { deepCloneObj } from './utils/clone';
 
 const itemKinds = [0, 1, 3, 4, 5, 7];
-
 export class $Data {
 	public pool!: RelayPool;
-	private allEventIds!: WeakSet<IEvent>
+	private allEventIds!: Set<IEvent['id']>
 	// event buffer to batch verify and insert
 	public events: (IProfile | IEvent)[] = [];
 	constructor() {
@@ -21,7 +20,7 @@ export class $Data {
 	}
 
 	public async start() {
-		this.allEventIds = new WeakSet((await db.events.toArray()).map(it => it));
+		this.allEventIds = new Set((await db.events.toArray()).map(it => it.id));
 		// Use the `snooze` function to defer intensive code execution since
 		// each of these calls happen synchronously
 		this.storeEventsLoop()
@@ -37,30 +36,38 @@ export class $Data {
 	// check for work constantly
 	private async storeEventsLoop(): Promise<never> {
 		let delay = 500;
-		let promiseQueue = [];
+		const promiseQueue: Promise<unknown>[] = [];
 		while (true){
-			delay = 500;
+			delay = 350;
 			this.events = (Data.events as IEvent[]).filter(
 				(value, index, self) => index === self.findIndex((t) => t.id === value.id)
 			);
-			const t = Date.now();
+
+			const start = Date.now();
 			const e = Data.events.splice(-500);
 			if (e.length > 0) {
 				delay = 250;
-				e.forEach((event) => {
-					(event as IEvent).tags = (event as IEvent).tags?.map((it) => (it as unknown as string[]).join('»')) || [];
+				forEach(e as IEvent[], (event) => {
+					event.tags = event.tags?.map((it) => (it as unknown as string[]).join('»')) || [];
 				});
-				promiseQueue.push(db.events.bulkPut(e as IEvent[]));
-				const dt = Date.now() - t;
-				console.log(`It took ${dt}ms to store ${e.length} events.`);
+				await db.events.bulkPut(e as IEvent[])
 				const updatedProfiles = filterMap(e, (it) => (it as IEvent).kind === 0, (it) => it.pubkey);
 				promiseQueue.push(db.updateProfileFromMeta(updatedProfiles));
+			} else {
+				queueMicrotask(()=>{
+					Data.downloadMissingEvents();
+					Data.broadcastOutbox();
+				})
+				await snooze(delay);
+				continue;
 			}
-			Data.downloadMissingEvents();
-			Data.broadcastOutbox();
-			await Promise.all(promiseQueue);
+
+			await Promise.allSettled(promiseQueue);
+			const dt = Date.now() - start;
+			console.log(`It took ${dt}ms to store ${e.length} events.`);
+			await yieldMicrotask();
+
 			promiseQueue.length = 0;
-			await yieldMicrotask()
 			await snooze(delay);
 		}
 	}
@@ -93,7 +100,7 @@ export class $Data {
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
 			// TODO: Should we try to get them again after a while? When relays change?
-			.filter((it) => it.requested == undefined);
+			.filter((it) => it.requested === undefined);
 		if (events.length > 0) {
 			console.log(`fetching ${events.length} missing events.`);
 			const t = Date.now() / 1000;
@@ -122,16 +129,14 @@ export class $Data {
 				.where('created_at')
 				.above(Math.floor(Date.now() / 1000 - 60 * 60))
 				.toArray()
-		).filter((it) => (it as unknown as Record<string, unknown>).outbox);
+		).filter((it) => it.outbox);
 		if (events.length > 0) {
 			console.log(events.length)
 			events.forEach((e) => {
-				delete (e as IEvent).outbox;
+				delete e.outbox;
 				const event = deepCloneObj(e);
-				//?Are we sure that we want to return a string[][] ???
-				//@ts-expect-error Original code
-				event.tags = event.tags.map((it: string) => it.split('»'));
-				//@ts-expect-error We dont need a callback (?)
+				event.tags = (event.tags.map((it: string) => it.split('»')) as unknown) as string[];
+
 				Data.pool.publish(event);
 			});
 			await db.events.bulkPut(events);
@@ -217,7 +222,6 @@ export class $Data {
 				it.tags.filter((it) => it.startsWith('p»')).map((it) => it.split('»', 3)[1])
 			])
 		);
-
 		const profiles = await db.profiles.toArray();
 
 		// n-th degree follows' pubkeys
@@ -234,10 +238,10 @@ export class $Data {
 				break;
 			}
 			// 1st
-			const fArray = [...follows[i]]
+			const fArray = Array.from(follows[i])
 				.flatMap((it) => profileFollows.get(it)!)
 				.filter((it) => !all.has(it));
-			const newSet = new Set([...fArray]);
+			const newSet = new Set(fArray);
 			if (newSet.size == 0) {
 				console.log(
 					`Exploring ${all.size} follows to the ${i}-th degree. No more follows found in the ${
@@ -267,21 +271,20 @@ export class $Data {
 				}) as IProfile);
 			}
 		});
+		const batchedProfiles = chunks(profiles, 250);
+		for (const chunk of batchedProfiles) {
+			db.profiles.bulkPut(chunk);
+		}
 
-		queueMicrotask(()=>{
-			db.profiles.bulkPut(profiles)
-		})
-		await yieldMicrotask()
 	}
 
 	private rereceivedCounter = 0
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async onEvent(event: IEvent, relay: string): Promise<void> {
-		if (!Data.allEventIds.has(event)) {
-			Data.allEventIds.add(event);
+		if (!Data.allEventIds.has(event.id)) {
+			Data.allEventIds.add(event.id);
 			Data.events.push(event);
 		} else {
-			Data.allEventIds.delete(event)
 			Data.rereceivedCounter++;
 		}
 	}
