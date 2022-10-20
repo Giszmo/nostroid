@@ -27,8 +27,6 @@ export class $Data {
 		await snooze(50)
 		this.loadAndWatchProfiles();
 		await snooze(50)
-		//? Are we sure we need to call this without a parameter?
-		//@ts-expect-error Original implementation
 		await db.updateProfileFromMeta();
 		await snooze(50)
 	}
@@ -37,6 +35,7 @@ export class $Data {
 	private async storeEventsLoop(): Promise<never> {
 		let delay = 500;
 		const promiseQueue: Promise<unknown>[] = [];
+
 		while (true){
 			delay = 350;
 			this.events = (Data.events as IEvent[]).filter(
@@ -45,15 +44,22 @@ export class $Data {
 
 			const start = Date.now();
 			const e = Data.events.splice(-500);
+
 			if (e.length > 0) {
+				// If we have events on the stack, reduce the delay
 				delay = 250;
+
 				forEach(e as IEvent[], (event) => {
 					event.tags = event.tags?.map((it) => (it as unknown as string[]).join('»')) || [];
 				});
+
 				await db.events.bulkPut(e as IEvent[])
 				const updatedProfiles = filterMap(e, (it) => (it as IEvent).kind === 0, (it) => it.pubkey);
+
 				promiseQueue.push(db.updateProfileFromMeta(updatedProfiles));
 			} else {
+				// If there's no events on the stack - fetch for more
+				// queueMicrotask helps ensure proper execution order
 				queueMicrotask(()=>{
 					Data.downloadMissingEvents();
 					Data.broadcastOutbox();
@@ -271,6 +277,9 @@ export class $Data {
 				}) as IProfile);
 			}
 		});
+
+		// Chunk the profiles into batches and run `bulkPut` on each chunk
+		// `bulkPut` is more efficient than regular `put`
 		const batchedProfiles = chunks(profiles, 250);
 		for (const chunk of batchedProfiles) {
 			db.profiles.bulkPut(chunk);
@@ -281,7 +290,9 @@ export class $Data {
 	private rereceivedCounter = 0
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async onEvent(event: IEvent, relay: string): Promise<void> {
-		if (!Data.allEventIds.has(event.id)) {
+
+		// Check if there is an event ID, and if we already processed it
+		if (event?.id && !Data.allEventIds.has(event.id)) {
 			Data.allEventIds.add(event.id);
 			Data.events.push(event);
 		} else {

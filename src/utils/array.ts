@@ -132,6 +132,14 @@ export function filterTF<T>(array: T[], predicate: (item: T) => unknown): [T[], 
     return [truthyItems, falseyItems]
 }
 
+/**
+ * Iterates over an array, running the specified `callback` for each entry.
+ *
+ * @export
+ * @template T
+ * @param {T[]} arr
+ * @param {VoidCallback<T>} callback
+ */
 export function forEach<T>(arr: T[], callback: VoidCallback<T>): void {
     // eslint-disable-next-line prefer-const
     let idx = -1, length = arr.length;
@@ -140,7 +148,27 @@ export function forEach<T>(arr: T[], callback: VoidCallback<T>): void {
     }
 }
 
-
+/**
+ * Splits an array of `T` into chunks of `len` length, returning a new array of `T[]`.
+ *
+ * Does not mutate the original array.
+ *
+ * @example
+ * ```ts
+ * const items = [0, 1, 2, 3, 4, 5]
+ *
+ * const chunkedItems = chunk(items, 2)
+ *
+ * // Logs `[[0, 1], [2, 3], [4, 5]]
+ * console.log(chunkedItems)
+ * ```
+ *
+ * @export
+ * @template T
+ * @param {T[]} arr
+ * @param {number} [len=0]
+ * @return {*}  {T[][]}
+ */
 export function chunks<T>(arr: T[], len = 0): T[][] {
     const chunks: T[][] = [],
         n = arr.length;

@@ -84,6 +84,7 @@ export class NostroidDexie extends Dexie {
       })
     })
   }
+
   private async nip05Valid(name: string, pubkey: string) {
     if (typeof name !== 'string' || name.length < 3) {
       return false
@@ -109,12 +110,15 @@ export class NostroidDexie extends Dexie {
       let profiles: Array<IProfile> = []
 
       if (pubkeys) {
+        // Avoids using IDBCursor. Recommended by Dexie's creator
+        // source: https://github.com/dexie/Dexie.js/issues/1388#issuecomment-917367428
         profiles = (
           await Promise.all(
             pubkeys.map((key) => db.profiles.where('pubkey').equals(key).toArray()))).flat();
       } else {
         profiles = await db.profiles.toArray()
       }
+
       let metaDataEvents = new Map<string, IEvent>()
       ;(await db.events
         .where({kind: 0})
@@ -129,7 +133,7 @@ export class NostroidDexie extends Dexie {
             metaDataEvents.set(e.pubkey, e)
           }
         })
-        await yieldMicrotask();
+
         for (const p of profiles) {
           let metadataEvent = metaDataEvents.get(p.pubkey)
           let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined
