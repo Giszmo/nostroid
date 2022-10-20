@@ -1,38 +1,26 @@
 <script lang="ts">
-	import { useRegisterSW } from 'virtual:pwa-register/svelte'
-	const {
-		offlineReady,
-		needRefresh,
-		updateServiceWorker
-	} = useRegisterSW()
+	import { useRegisterSW } from 'virtual:pwa-register/svelte';
+	const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW();
 	const close = () => {
-		offlineReady.set(false)
-		needRefresh.set(false)
-	}
-	$: toast = $offlineReady || $needRefresh
+		offlineReady.set(false);
+		needRefresh.set(false);
+	};
+	$: toast = $offlineReady || $needRefresh;
 </script>
 
 {#if toast}
 	<div class="pwa-toast" role="alert">
 		<div class="message">
 			{#if $offlineReady}
-				<span>
-					App ready to work offline
-				</span>
+				<span> App ready to work offline </span>
 			{:else}
-				<span>
-					New content available, click on reload button to update.
-				</span>
+				<span> New content available, click on reload button to update. </span>
 			{/if}
 		</div>
 		{#if $needRefresh}
-			<button on:click={() => updateServiceWorker(true)}>
-				Reload
-			</button>
+			<button on:click={() => updateServiceWorker(true)}> Reload </button>
 		{/if}
-		<button on:click={close}>
-			Close
-		</button>
+		<button on:click={close}> Close </button>
 	</div>
 {/if}
 
