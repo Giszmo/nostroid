@@ -121,9 +121,7 @@ export class NostroidDexie extends Dexie {
         .toArray())
         .sort((a,b) => b.created_at - a.created_at)
         .forEach(e => {
-          if (e.pubkey === 'messages') console.warn(`[DB:events] invalid pubkey. Object: `, e)
           if (metaDataEvents.get(e.pubkey)) {
-            if (e.pubkey === 'messages') console.warn(`[DB:events] deleting pubkey 'messages' from db.events. Object: `, e)
             // delete older metadata events if we already found one sorting
             // newest to oldest.
             db.events.delete(e.id)
