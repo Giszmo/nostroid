@@ -4,6 +4,7 @@
 	import type { IProfile } from '../../db';
 	import { liveQuery } from 'dexie';
 	import Event from '../../components/Event.svelte';
+	import AvatarImage from '../../components/AvatarImage.svelte';
 
 	const pubkey = $page.params.pubkey;
 	let p = liveQuery(() => db.profiles.get(pubkey));
@@ -32,11 +33,10 @@
 		{#if profile?.privkey}yes{:else}no{/if}
 	</li>
 	<li>
-		<strong>Avatar: </strong>{#if profile?.avatar}<img
-				class="avatar-img"
-				src={profile?.avatar}
-				alt="The Avatar"
-			/>{:else}no{/if}
+		<strong>Avatar: </strong>
+		<div class="avatar">
+			<AvatarImage {profile} />
+		</div>
 	</li>
 </ul>
 
@@ -50,7 +50,7 @@
 	ul {
 		word-wrap: break-word;
 	}
-	.avatar-img {
-		max-width: 12rem;
+	.avatar {
+		max-width: 5rem;
 	}
 </style>
