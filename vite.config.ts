@@ -5,6 +5,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import { nostroidPWA } from './nostroid-config.js';
+import inject from '@rollup/plugin-inject';
 
 export default defineConfig({
 	plugins: [
@@ -12,7 +13,8 @@ export default defineConfig({
 		SvelteKitPWA(nostroidPWA),
 		NodeGlobalsPolyfillPlugin({
 			process: true,
-			buffer: true
+			buffer: true,
+			webworkers: true
 		}),
 		NodeModulesPolyfillPlugin()
 	],
@@ -42,7 +44,8 @@ export default defineConfig({
 			plugins: [
 				NodeGlobalsPolyfillPlugin({
 					process: true,
-					buffer: true
+					buffer: true,
+					webworkers: true
 				}),
 				NodeModulesPolyfillPlugin()
 			]
@@ -51,7 +54,10 @@ export default defineConfig({
 	build: {
 		sourcemap: 'inline', // helpful for debugging, maybe remove in production
 		rollupOptions: {
-			plugins: [rollupNodePolyFill()]
+			plugins: [
+				rollupNodePolyFill(),
+				inject({ Buffer: ['Buffer', 'Buffer'] })
+			]
 		}
 	},
 	define: {}

@@ -1,54 +1,85 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 // import { relayPool } from 'nostr-tools';
 // import { validateEvent } from 'nostr-tools';
-import { relayPool } from './lib/nostr-tools';
+import { relayPool, type RelayPool } from './lib/nostr-tools';
 import { validateEvent } from './lib/nostr-tools';
 import { db } from './db';
 import type { IProfile, IEvent } from './db';
+import { snooze, yieldMicrotask } from './utils/sync';
+import { chunks, filterMap, filterTF, forEach } from './utils/array';
+import { deepCloneObj } from './utils/clone';
 
-export class Data {
-	private static _instance: Data = new this();
-	public pool;
-	private allEventIds: Set<string>
-
+const itemKinds = [0, 1, 3, 4, 5, 7];
+export class $Data {
+	public pool!: RelayPool;
+	private allEventIds!: Set<IEvent['id']>
 	// event buffer to batch verify and insert
-	public events: object[] = [];
-
-	private constructor() {}
+	public events: (IProfile | IEvent)[] = [];
+	constructor() {
+		//!Empty
+	}
 
 	public async start() {
 		this.allEventIds = new Set((await db.events.toArray()).map(it => it.id));
-		this.storeEventsLoop();
+		// Use the `snooze` function to defer intensive code execution since
+		// each of these calls happen synchronously
+		this.storeEventsLoop()
+		await snooze(50)
 		this.loadAndWatchProfiles();
-		db.updateProfileFromMeta();
+		await snooze(50)
+		await db.updateProfileFromMeta();
+		await snooze(50)
 	}
 
 	// check for work constantly
-	private async storeEventsLoop() {
-		const snooze = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-		while (true) {
-			Data.instance.events = Data.instance.events.filter(
+	private async storeEventsLoop(): Promise<never> {
+		let delay = 500;
+		const promiseQueue: Promise<unknown>[] = [];
+
+		while (true){
+			delay = 350;
+			this.events = (Data.events as IEvent[]).filter(
 				(value, index, self) => index === self.findIndex((t) => t.id === value.id)
 			);
-			const t = Date.now();
-			const e = Data.instance.events.splice(-500);
+
+			const start = Date.now();
+			const e = Data.events.splice(-500);
+
 			if (e.length > 0) {
-				e.forEach((event) => {
-					event.tags = event.tags?.map((it) => it.join('»')) || [];
+				// If we have events on the stack, reduce the delay
+				delay = 250;
+
+				forEach(e as IEvent[], (event) => {
+					event.tags = event.tags?.map((it) => (it as unknown as string[]).join('»')) || [];
 				});
-				await db.events.bulkPut(e);
-				const dt = Date.now() - t;
-				console.log(`It took ${dt}ms to store ${e.length} events.`);
-				const updatedProfiles = e.filter((it) => it.kind === 0).map((it) => it.pubkey);
-				await db.updateProfileFromMeta(updatedProfiles);
+
+				await db.events.bulkPut(e as IEvent[])
+				const updatedProfiles = filterMap(e, (it) => (it as IEvent).kind === 0, (it) => it.pubkey);
+
+				promiseQueue.push(db.updateProfileFromMeta(updatedProfiles));
+			} else {
+				// If there's no events on the stack - fetch for more
+				// queueMicrotask helps ensure proper execution order
+				queueMicrotask(()=>{
+					Data.downloadMissingEvents();
+					Data.broadcastOutbox();
+				})
+				await snooze(delay);
+				continue;
 			}
-			Data.instance.downloadMissingEvents();
-			Data.instance.broadcastOutbox();
-			await snooze(200);
+
+			await Promise.allSettled(promiseQueue);
+			const dt = Date.now() - start;
+			console.log(`It took ${dt}ms to store ${e.length} events.`);
+			await yieldMicrotask();
+
+			promiseQueue.length = 0;
+			await snooze(delay);
 		}
 	}
 
 	private async downloadMissingEvents() {
-		this.connectWS();
+		Data.connectWS();
 		// load missing profile meta data
 		const profiles = (await db.profiles.toArray()).filter((it) => it.missing);
 		if (profiles.length > 0) {
@@ -57,14 +88,16 @@ export class Data {
 				it.fetching = true;
 			});
 			await db.profiles.bulkPut(profiles);
-			const s = Data.instance.pool.sub({
-				cb: Data.instance.onEvent,
-				filter: { authors: profiles.map((it) => it.pubkey), kinds: [0] }
+			const profilesWithKey = profiles.map((it) => it.pubkey)
+			const s = this.pool.sub({
+				cb: Data.onEvent,
+				filter: { authors: profilesWithKey , kinds: [0] }
+			//@ts-expect-error The callback is supposed to be there, the type defs are wrong
 			}, undefined, () => {
 				s.unsub();
 				db.profiles
 					.where('pubkey')
-					.anyOf(profiles.map((it) => it.pubkey))
+					.anyOf(profilesWithKey)
 					.modify((profile) => {
 						delete profile.fetching;
 					});
@@ -73,7 +106,7 @@ export class Data {
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
 			// TODO: Should we try to get them again after a while? When relays change?
-			.filter((it) => it.requested == undefined);
+			.filter((it) => it.requested === undefined);
 		if (events.length > 0) {
 			console.log(`fetching ${events.length} missing events.`);
 			const t = Date.now() / 1000;
@@ -83,17 +116,19 @@ export class Data {
 					return it;
 				})
 			);
-			const s = Data.instance.pool.sub({
-				cb: Data.instance.onEvent,
+			const s = Data.pool.sub({
+				cb: Data.onEvent,
 				filter: { ids: events.map((it) => it.id) }
+				//@ts-expect-error The callback is supposed to be there, the type defs are wrong
 			}, undefined, () => {
         s.unsub();
       });
 		}
+		await yieldMicrotask()
 	}
 
-	private async broadcastOutbox(): void {
-		this.connectWS();
+	private async broadcastOutbox(): Promise<void> {
+		Data.connectWS();
 		// events
 		const events = (
 			await db.events
@@ -102,36 +137,37 @@ export class Data {
 				.toArray()
 		).filter((it) => it.outbox);
 		if (events.length > 0) {
+			console.log(events.length)
 			events.forEach((e) => {
 				delete e.outbox;
-				const event = JSON.parse(JSON.stringify(e));
-				event.tags = event.tags.map((it) => it.split('»'));
-				Data.instance.pool.publish(event);
+				const event = deepCloneObj(e);
+				event.tags = (event.tags.map((it: string) => it.split('»')) as unknown) as string[];
+
+				Data.pool.publish(event);
 			});
 			await db.events.bulkPut(events);
 		}
+		await yieldMicrotask()
 	}
 
-	public async loadAndWatchProfiles(): void {
+	public async loadAndWatchProfiles(): Promise<void> {
 		this.connectWS();
 		const profiles = await db.profiles.toArray();
 		// "new" profiles are those we never synced ever
 		// sync those from the beginning of time
-		const newProfiles = profiles.filter((p) => !p.synced);
-		const oldProfiles = profiles.filter((p) => p.synced);
+		const [ newProfiles, oldProfiles ] = filterTF(profiles, (item) => !item.synced);
 		const newKeys = newProfiles.map((it) => it.pubkey);
 		const oldKeys = oldProfiles.map((it) => it.pubkey);
 		const priorSyncTS = (await db.config.get(`priorSyncTS`))?.value;
 		const syncFromTS = priorSyncTS || 0;
 		const filters = [];
-		const kinds = [0, 1, 3, 4, 5, 7];
 		if (newKeys.length > 0) {
 			filters.push({
 				authors: newKeys,
-				kinds: kinds
+				kinds: itemKinds
 			}, {
 				'#p': newKeys,
-				kinds: kinds
+				kinds: itemKinds
 			});
 		}
 		if (oldKeys.length > 0) {
@@ -139,33 +175,35 @@ export class Data {
 				{
 					authors: oldKeys,
 					since: syncFromTS,
-					kinds: kinds
+					kinds: itemKinds
 				}, {
 					'#p': oldKeys,
 					since: syncFromTS,
-					kinds: kinds
+					kinds: itemKinds
 				}
 			);
 		}
-		Data.instance.pool.sub(
+		Data.pool.sub(
 			{
-				cb: Data.instance.onEvent,
+				cb: Data.onEvent,
 				filter: filters
 			},
 			'fromToAllProfiles',
+			//@ts-expect-error The callback is supposed to be there, the type defs are wrong
 			() => {
 				// EOSE
 				console.log('Synced all profiles');
 				db.config.put({
 					key: 'priorSyncTS',
-					value: Math.floor(new Date().getTime() / 1000)
+					value: Math.floor(new Date().getTime() / 1000).toString()
 				});
 				// mark all profiles synced
 				db.profiles
-					.where('pubkey')
-					.anyOf(profiles.map((it) => it.pubkey))
-					.modify({ synced: true });
-				this.getRelevantProfiles();
+				.where('pubkey')
+				.anyOf(profiles.map((it) => it.pubkey))
+				.modify({ synced: true });
+
+				Data.getRelevantProfiles();
 			}
 		);
 	}
@@ -190,16 +228,15 @@ export class Data {
 				it.tags.filter((it) => it.startsWith('p»')).map((it) => it.split('»', 3)[1])
 			])
 		);
-
 		const profiles = await db.profiles.toArray();
 
 		// n-th degree follows' pubkeys
 		const follows: Array<Set<string>> = [];
 		// 0-th
-		follows[0] = new Set(profiles.filter((it) => it.degree == 0).map((it) => it.pubkey));
+		follows[0] = new Set(filterMap(profiles, (it) => it.degree === 0, (it) => it.pubkey));
 
 		// n-th
-		let all = new Set();
+		let all = new Set<string>();
 		for (let i = 0; i < 10; i++) {
 			all = new Set(follows.flatMap((it) => [...it]));
 			if (all.size > 10000) {
@@ -207,10 +244,10 @@ export class Data {
 				break;
 			}
 			// 1st
-			const fArray = [...follows[i]]
-				.flatMap((it) => profileFollows.get(it))
+			const fArray = Array.from(follows[i])
+				.flatMap((it) => profileFollows.get(it)!)
 				.filter((it) => !all.has(it));
-			const newSet = new Set([...fArray]);
+			const newSet = new Set(fArray);
 			if (newSet.size == 0) {
 				console.log(
 					`Exploring ${all.size} follows to the ${i}-th degree. No more follows found in the ${
@@ -240,30 +277,35 @@ export class Data {
 				}) as IProfile);
 			}
 		});
-		profiles.forEach((it) => {
-			db.profiles.put(it);
-		});
-		// db.profiles.bulkPut(profiles)
+
+		// Chunk the profiles into batches and run `bulkPut` on each chunk
+		// `bulkPut` is more efficient than regular `put`
+		const batchedProfiles = chunks(profiles, 250);
+		for (const chunk of batchedProfiles) {
+			db.profiles.bulkPut(chunk);
+		}
+
 	}
 
 	private rereceivedCounter = 0
-	private async onEvent(event: IEvent, relay: string): void {
-		if (!Data.instance.allEventIds.has(event.id)) {
-			Data.instance.events.push(event);
-			Data.instance.allEventIds.add(event.id);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	private async onEvent(event: IEvent, relay: string): Promise<void> {
+
+		// Check if there is an event ID, and if we already processed it
+		if (event?.id && !Data.allEventIds.has(event.id)) {
+			Data.allEventIds.add(event.id);
+			Data.events.push(event);
 		} else {
-			Data.instance.rereceivedCounter++;
+			Data.rereceivedCounter++;
 		}
 	}
 
 	public connectWS(): void {
-		if (Data.instance?.pool) return;
+		if (this.pool) return;
 		const relay = 'wss://relay.nostr.info';
-		Data.instance.pool = relayPool();
-		Data.instance.pool.addRelay(relay, { read: true, write: true });
+		this.pool = relayPool();
+		this.pool.addRelay(relay, { read: true, write: true });
 	}
 
-	public static get instance() {
-		return this._instance;
-	}
 }
+export const Data = new $Data()

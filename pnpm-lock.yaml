@@ -5,6 +5,7 @@ specifiers:
   '@esbuild-plugins/node-modules-polyfill': ^0.1.4
   '@fontsource/fira-mono': ^4.5.9
   '@playwright/test': ^1.25.2
+  '@rollup/plugin-inject': ^4.0.4
   '@rollup/plugin-json': ^4.1.0
   '@sveltejs/adapter-static': ^1.0.0-next.42
   '@sveltejs/kit': 1.0.0-next.480
@@ -13,6 +14,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.36.2
   '@typescript-eslint/parser': ^5.36.2
   '@vite-pwa/sveltekit': file:vite-pwa-sveltekit-0.13.0.tgz
+  buffer: ^6.0.3
   cookie: ^0.4.2
   dexie: ^3.2.2
   eslint: ^8.23.0
@@ -39,7 +41,9 @@ dependencies:
   '@esbuild-plugins/node-globals-polyfill': 0.1.1_esbuild@0.15.7
   '@esbuild-plugins/node-modules-polyfill': 0.1.4_esbuild@0.15.7
   '@fontsource/fira-mono': 4.5.9
+  '@rollup/plugin-inject': 4.0.4_rollup@2.79.0
   '@sveltejs/adapter-static': 1.0.0-next.42
+  buffer: 6.0.3
   cookie: 0.4.2
   dexie: 3.2.2
   events: 3.3.0
@@ -1423,6 +1427,17 @@ packages:
       rollup: 2.79.0
     dev: true
 
+  /@rollup/plugin-inject/4.0.4_rollup@2.79.0:
+    resolution: {integrity: sha512-4pbcU4J/nS+zuHk+c+OL3WtmEQhqxlZ9uqfjQMQDOHOPld7PsCd8k5LWs8h5wjwJN7MgnAn768F2sDxEP4eNFQ==}
+    peerDependencies:
+      rollup: ^1.20.0 || ^2.0.0
+    dependencies:
+      '@rollup/pluginutils': 3.1.0_rollup@2.79.0
+      estree-walker: 2.0.2
+      magic-string: 0.25.9
+      rollup: 2.79.0
+    dev: false
+
   /@rollup/plugin-json/4.1.0_rollup@2.79.0:
     resolution: {integrity: sha512-yfLbTdNS6amI/2OpmbiBoW12vngr5NW2jCJVZSBEz+H5KfUJZ2M7sDjk0U6GOOdCWFVScShte29o9NezJ53TPw==}
     peerDependencies:
@@ -1467,7 +1482,6 @@ packages:
       estree-walker: 1.0.1
       picomatch: 2.3.1
       rollup: 2.79.0
-    dev: true
 
   /@rollup/pluginutils/4.2.1:
     resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
@@ -1563,7 +1577,6 @@ packages:
 
   /@types/estree/0.0.39:
     resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
-    dev: true
 
   /@types/json-schema/7.0.11:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
@@ -2629,11 +2642,9 @@ packages:
 
   /estree-walker/1.0.1:
     resolution: {integrity: sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==}
-    dev: true
 
   /estree-walker/2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
-    dev: true
 
   /esutils/2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
@@ -2761,7 +2772,6 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
     requiresBuild: true
-    dev: true
     optional: true
 
   /function-bind/1.1.1:
@@ -3509,7 +3519,6 @@ packages:
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
-    dev: true
 
   /playwright-core/1.25.2:
     resolution: {integrity: sha512-0yTbUE9lIddkEpLHL3u8PoCL+pWiZtj5A/j3U7YoNjcmKKDGBnCrgHJMzwd2J5vy6l28q4ki3JIuz7McLHhl1A==}
@@ -3743,7 +3752,6 @@ packages:
     hasBin: true
     optionalDependencies:
       fsevents: 2.3.2
-    dev: true
 
   /run-parallel/1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}

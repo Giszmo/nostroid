@@ -8,6 +8,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
+		"lib": ["DOM", "DOM.Iterable", "WebWorker"],
 		"sourceMap": true,
 		"strict": true
 	}

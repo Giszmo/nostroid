@@ -1,13 +1,14 @@
 <script lang="ts">
-	import DM from '../../components/DM.svelte';
-	import TextNoteProfile from '../../components/TextNoteProfile.svelte';
-	import { cProfiles } from '../../stores';
-	import { liveQuery } from 'dexie';
-	import { type IProfile, type IEvent, db } from '../../db';
-	import { activeProfile } from '../../stores';
-	// import { encrypt } from 'nostr-tools/nip04.js'
-	import { encrypt } from '../../lib/nostr-tools/nip04.js';
-	import { sendPersistEvent } from '../../nostrHelper';
+  import DM from '../../components/DM.svelte'
+  import TextNoteProfile from '../../components/TextNoteProfile.svelte'
+  import { cProfiles } from '../../stores'
+  import { liveQuery } from "dexie"
+  import { type IProfile, type IEvent, db } from "../../db"
+  import { activeProfile } from '../../stores'
+  // import { encrypt } from 'nostr-tools/nip04.js'
+  import { encrypt } from '../../lib/nostr-tools/nip04.js'
+  import { sendPersistEvent } from '../../nostrHelper'
+  import { onDestroy } from 'svelte';
 
 	let searchInput = '';
 	let show = 10;
@@ -30,9 +31,9 @@
 		other = undefined;
 	};
 
-	activeProfile.subscribe(() => {
-		other = undefined;
-	});
+	const profileSubscription = activeProfile.subscribe(() => {
+    other = undefined
+    })
 
 	/**
 	 * Update the event to be sent
@@ -106,6 +107,10 @@
 		newMessage;
 		processNewEvent();
 	}
+
+  onDestroy(()=>{
+    profileSubscription.unsubscribe()
+  })
 </script>
 
 <svelte:head>

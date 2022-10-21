@@ -8,7 +8,8 @@
 
 	let err = false;
 
-	let ReloadPrompt;
+	let ReloadPrompt
+	let worker: Worker;
 	onMount(async () => {
 		// check availability of service worker and indexedDB before registering sw
 		db.open().catch((e) => {
@@ -19,9 +20,12 @@
 		} else {
 			err = true;
 		}
+
+		worker = (await import('../data.service')).DataWorker!;
+		worker.postMessage('start');
 	});
 
-	$: webManifest = pwaInfo && !err ? pwaInfo.webManifest.linkTag : '';
+	$: webManifest = pwaInfo && !err ? pwaInfo.webManifest.linkTag : ''
 </script>
 
 <svelte:head>
