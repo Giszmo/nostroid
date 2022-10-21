@@ -2,6 +2,7 @@
 	import { activeProfile } from '../../stores';
 	import { sendPersistEvent } from '../../nostrHelper';
 	import { type IProfile, db } from '../../db';
+	import AvatarImage from '../../components/AvatarImage.svelte';
 
 	let name = '';
 	let avatar = '';
@@ -107,8 +108,10 @@
 		{#if $activeProfile?.privkey != undefined}
 			<label>PK: <input bind:value={pk} disabled /></label><br />
 			<label>Name: <input bind:value={name} /></label><br />
+			<div class="avatar">
+				<AvatarImage profile={$activeProfile} />
+			</div>
 			<label>Avatar: <input bind:value={avatar} /></label><br />
-			<img class="profile-img" src={avatar} alt="profile" /><br />
 			<label>
 				nip05:
 				<input bind:value={nip05} />
@@ -135,7 +138,7 @@
 	span {
 		word-break: break-word;
 	}
-	.profile-img {
-		max-width: 12rem;
+	.avatar {
+		max-width: 4rem;
 	}
 </style>
