@@ -51,6 +51,7 @@
 		word-wrap: break-word;
 	}
 	.avatar {
-		max-width: 5rem;
+		width: 5rem;
+		height: 5rem;
 	}
 </style>
