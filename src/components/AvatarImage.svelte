@@ -2,7 +2,7 @@
   import type { IProfile } from "../db"
   export let profile: IProfile;
 
-  const robo = `https://robohash.org/${profile?.pubkey}.png`
+  $: robo = `https://robohash.org/${profile?.pubkey}.png`
 
   $: avatar = profile?.avatar || robo
 </script>
