@@ -126,7 +126,9 @@
 			<strong>PK</strong>: <span>{pk}</span><br />
 			<strong>Name</strong>: <span>{name}</span><br />
 			<strong>Avatar</strong>: <span>{avatar}</span><br />
-			<img class="profile-img" src={avatar} alt="profile" /><br />
+			<div class="avatar">
+				<AvatarImage profile={$activeProfile} />
+			</div>
 			<strong>nip05</strong>: <span>{nip05}</span><br />
 		{/if}
 	{:else}
@@ -139,6 +141,7 @@
 		word-break: break-word;
 	}
 	.avatar {
-		max-width: 4rem;
+		display: flex;
+		max-width: 5rem;
 	}
 </style>
