@@ -2,12 +2,19 @@
   import type { IProfile } from "../db"
   export let profile: IProfile;
 
-  $: robo = `https://robohash.org/${profile?.pubkey}.png`
+  let src = '';
+  let robo = '';
 
-  $: avatar = profile?.avatar || robo
+  const setSrc = (_: any) => {
+    if (!profile) return;
+    if (profile.pubkey) robo = `https://robohash.org/${profile.pubkey}.png`
+    src = profile.avatar ? profile.avatar : robo;
+  }
+
+  $: setSrc(profile)
 </script>
 
-<img on:error={() => avatar = robo} src={avatar} alt="user's avatar">
+<img on:error={() => src = robo} src={src} alt="user's avatar">
 
 <style>
   img {
