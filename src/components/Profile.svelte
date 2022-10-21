@@ -4,11 +4,10 @@
 	import { db } from '../db';
 	import type { IProfile } from '../db';
 	import { activeProfile } from '../stores';
-	import noPic from '$lib/assets/noProfilePic.png';
+	import AvatarImage from './AvatarImage.svelte';
 	export let profile: IProfile;
 
 	$: active = $activeProfile as IProfile;
-	$: avatar = profile.avatar || noPic;
 	const select = async () => {
 		db.config.put({
 			key: 'activePubkey',
@@ -28,7 +27,9 @@
 </script>
 
 <div on:click={select} class="profile {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
-	<img src={avatar} alt="user's avatar" /><br />
+	<div class="avatar">
+		<AvatarImage {profile}/>
+	</div>
 	<div class="name">
 		<div class="keys" class:has-keys={profile?.privkey}>🔑</div>
 		{profile?.name || '???'}
@@ -55,13 +56,11 @@
 	.profile:hover {
 		filter: none;
 	}
-	img {
+	.avatar {
+		float: left;
 		width: 3.5em;
 		height: 3.5em;
-		border-radius: 50%;
-		object-fit: cover;
 		margin: 1em;
-		float: left;
 	}
 	.keys {
 		display: none;

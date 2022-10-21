@@ -1,8 +1,8 @@
 <script type="ts">
 	import { cProfiles } from '../stores';
-	import noPic from '$lib/assets/noProfilePic.png';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import AvatarImage from './AvatarImage.svelte';
 
 	export let content: { pubkey: string };
 
@@ -14,18 +14,20 @@
 </script>
 
 <span on:click|stopPropagation={showProfile}>
-	<img src={profile?.avatar || noPic} alt="user's avatar" />&nbsp;<span class="info">
-		{profile?.name || content.pubkey}</span
-	>
+	<span class="avatar">
+		<AvatarImage {profile} />
+	</span>
+	<span class="info">
+		{profile?.name || content.pubkey}
+	</span>
 </span>
 
 <style>
-	img {
+	.avatar {
 		width: 1em;
 		height: 1em;
-		object-fit: cover;
-		border-radius: 50%;
 		vertical-align: sub;
+		display: inline-block;
 	}
 
 	.info {
