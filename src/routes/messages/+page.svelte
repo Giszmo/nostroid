@@ -8,6 +8,7 @@
 	// import { encrypt } from 'nostr-tools/nip04.js'
 	import { encrypt } from '../../lib/nostr-tools/nip04.js';
 	import { sendPersistEvent } from '../../nostrHelper';
+	import { onDestroy } from 'svelte';
 
 	let searchInput = '';
 	let show = 10;
@@ -30,7 +31,7 @@
 		other = undefined;
 	};
 
-	activeProfile.subscribe(() => {
+	const profileSubscription = activeProfile.subscribe(() => {
 		other = undefined;
 	});
 
@@ -106,6 +107,10 @@
 		newMessage;
 		processNewEvent();
 	}
+
+	onDestroy(() => {
+		profileSubscription.unsubscribe();
+	});
 </script>
 
 <svelte:head>

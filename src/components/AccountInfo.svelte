@@ -1,10 +1,13 @@
 <script type="ts">
 	import { activeProfile } from '../stores';
 	import noPic from '$lib/assets/noProfilePic.png';
+	import AvatarImage from './AvatarImage.svelte';
 </script>
 
 <div class="accountInfo">
-	<img src={$activeProfile?.avatar || noPic} alt="user's avatar" />
+	<div class="avatar">
+		<AvatarImage profile={$activeProfile} />
+	</div>
 	<div class="right-container">
 		<div class="name">{$activeProfile?.name || '???'}<br /></div>
 		<div class="pubkey">{$activeProfile?.pubkey}</div>
@@ -17,11 +20,9 @@
 		display: flex;
 		font-weight: bold;
 	}
-	img {
+	.avatar {
 		width: 3em;
 		height: 3em;
-		object-fit: cover;
-		border-radius: 50%;
 		margin-right: 0.5em;
 	}
 	.pubkey {

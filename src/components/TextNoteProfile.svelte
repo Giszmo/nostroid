@@ -1,6 +1,7 @@
 <script type="ts">
 	import { cProfiles } from '../stores';
 	import noPic from '$lib/assets/noProfilePic.png';
+	import AvatarImage from './AvatarImage.svelte';
 
 	export let pubkey: string;
 
@@ -19,7 +20,9 @@
 </script>
 
 <div class="profile">
-	<img src={avatar || noPic} alt="user's avatar" />
+	<div class="avatar">
+		<AvatarImage {profile} />
+	</div>
 	<div class="info">
 		{profile?.name || 'no name set'}<br />
 		<div id="id" class="{profile?.nip05 ? 'nip05' : 'pubkey'} {profile?.nip05Valid ? 'valid' : ''}">
@@ -43,12 +46,10 @@
 		color: darkgreen;
 	}
 
-	img {
+	.avatar {
 		width: 3em;
 		height: 3em;
 		float: left;
-		object-fit: cover;
-		border-radius: 50%;
 		margin: 10px;
 	}
 	#id {

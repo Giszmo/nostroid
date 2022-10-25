@@ -1,14 +1,15 @@
 import Dexie from 'dexie';
 import { getPublicKey } from './lib/nostr-tools';
 import { queryName } from './lib/nostr-tools/nip05';
-
+import { filterMap } from './utils/array';
+import { yieldMicrotask } from './utils/sync';
 export interface IProfile {
 	pubkey: string;
 	privkey?: string;
 	name?: string;
 	avatar?: string;
 	nip05?: string;
-	nip05Valid: boolean;
+	nip05Valid: boolean | null;
 	/**
 	 * "degree of separation"
 	 *
@@ -19,6 +20,9 @@ export interface IProfile {
 	 **/
 	degree: number;
 	index: number;
+	fetching?: boolean;
+	missing?: boolean;
+	synced?: boolean;
 }
 
 export interface IConfig {
@@ -27,6 +31,7 @@ export interface IConfig {
 }
 
 export interface IEvent {
+	outbox?: true;
 	id: string;
 	pubkey: string;
 	created_at: number;
@@ -51,6 +56,7 @@ export interface ITag {
 }
 
 export interface IMissing {
+	requested: number;
 	id: string;
 }
 
@@ -82,11 +88,11 @@ export class NostroidDexie extends Dexie {
 			});
 	}
 
-	public async nip05Valid(name, pubkey) {
-		if (name == undefined || name.length < 3) {
+	private async nip05Valid(name: string, pubkey: string) {
+		if (typeof name !== 'string' || name.length < 3) {
 			return false;
 		}
-		var n = name;
+		let n = name;
 		switch (name.indexOf('@')) {
 			case -1:
 				n = `_@${name}`;
@@ -99,21 +105,28 @@ export class NostroidDexie extends Dexie {
 		}
 		const qName = await queryName(n);
 		console.log(`${name}->${n}->${qName}`);
-		return qName == pubkey;
+		return qName === pubkey;
 	}
 
-	public async updateProfileFromMeta(pubkeys) {
+	public async updateProfileFromMeta(pubkeys: string[]) {
 		console.log(`updateProfileFromMeta(${pubkeys?.length})`);
-		if (pubkeys && pubkeys.length === 0) {
+		if (Array.isArray(pubkeys) && pubkeys.length === 0) {
 			return;
 		}
-		let profiles: Array<IProfile>;
-		await db.transaction('rw', db.profiles, db.events, async () => {
+
+		const profiles = await db.transaction('rw', db.profiles, db.events, async () => {
+			let profiles: Array<IProfile> = [];
+
 			if (pubkeys) {
-				profiles = await db.profiles.where('pubkey').anyOf(pubkeys).toArray();
+				// Avoids using IDBCursor. Recommended by Dexie's creator
+				// source: https://github.com/dexie/Dexie.js/issues/1388#issuecomment-917367428
+				profiles = (
+					await Promise.all(pubkeys.map((key) => db.profiles.where('pubkey').equals(key).toArray()))
+				).flat();
 			} else {
 				profiles = await db.profiles.toArray();
 			}
+
 			let metaDataEvents = new Map<string, IEvent>();
 			(await db.events.where({ kind: 0 }).toArray())
 				.sort((a, b) => b.created_at - a.created_at)
@@ -126,6 +139,7 @@ export class NostroidDexie extends Dexie {
 						metaDataEvents.set(e.pubkey, e);
 					}
 				});
+
 			for (const p of profiles) {
 				let metadataEvent = metaDataEvents.get(p.pubkey);
 				let metadata = metadataEvent ? JSON.parse(metadataEvent.content) : undefined;
@@ -136,19 +150,29 @@ export class NostroidDexie extends Dexie {
 					p.nip05Valid = null;
 				}
 			}
+
 			db.profiles.bulkPut(profiles);
+
+			return profiles;
 		});
-		this.validateNip05ProfilesNip05(profiles || []);
+
+		this.validateNip05ProfilesNip05(profiles ?? []);
 	}
 
 	private async validateNip05ProfilesNip05(profiles: Array<IProfile>) {
-		let profilesWithNip05 = profiles.filter((p) => p.nip05);
 		const profilesValidated = await Promise.all(
-			profilesWithNip05.map(async (p) => {
-				p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey);
-				return p;
-			})
+			filterMap(
+				profiles,
+				(item) => item.nip05 && item.nip05Valid === null,
+				async (p) => {
+					if (p.nip05) {
+						p.nip05Valid = await this.nip05Valid(p.nip05, p.pubkey);
+					}
+					return p;
+				}
+			)
 		);
+
 		db.profiles.bulkPut(profilesValidated);
 	}
 }
