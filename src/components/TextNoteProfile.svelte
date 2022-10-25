@@ -21,7 +21,7 @@
 
 <div class="profile">
 	<div class="avatar">
-		<AvatarImage profile={profile} />
+		<AvatarImage {profile} />
 	</div>
 	<div class="info">
 		{profile?.name || 'no name set'}<br />

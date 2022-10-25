@@ -28,7 +28,7 @@
 
 <div on:click={select} class="profile {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
 	<div class="avatar">
-		<AvatarImage {profile}/>
+		<AvatarImage {profile} />
 	</div>
 	<div class="name">
 		<div class="keys" class:has-keys={profile?.privkey}>🔑</div>

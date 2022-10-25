@@ -54,10 +54,7 @@ export default defineConfig({
 	build: {
 		sourcemap: 'inline', // helpful for debugging, maybe remove in production
 		rollupOptions: {
-			plugins: [
-				rollupNodePolyFill(),
-				inject({ Buffer: ['Buffer', 'Buffer'] })
-			]
+			plugins: [rollupNodePolyFill(), inject({ Buffer: ['Buffer', 'Buffer'] })]
 		}
 	},
 	define: {}

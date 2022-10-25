@@ -12,7 +12,8 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"postinstall": "node scripts/patch.mjs"
+		"postinstall": "node scripts/patch.mjs",
+		"prepare": "husky install"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.25.2",
@@ -26,6 +27,7 @@
 		"eslint": "^8.23.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
+		"husky": "^8.0.1",
 		"prettier": "^2.7.1",
 		"prettier-plugin-svelte": "^2.8.0",
 		"svelte": "^3.50.1",
