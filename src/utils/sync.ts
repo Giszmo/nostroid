@@ -5,9 +5,9 @@
  * Used to ensure consistent code execution order.
  */
 export function yieldMicrotask(): Promise<void> {
-    return new Promise<void>((resolve)=>{
-        queueMicrotask(resolve)
-    })
+	return new Promise<void>((resolve) => {
+		queueMicrotask(resolve);
+	});
 }
 
 /**
