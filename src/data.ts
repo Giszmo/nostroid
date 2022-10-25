@@ -12,7 +12,7 @@ import { deepCloneObj } from './utils/clone';
 const itemKinds = [0, 1, 3, 4, 5, 7];
 export class $Data {
 	public pool!: RelayPool;
-	private allEventIds!: Set<IEvent['id']>
+	private allEventIds!: Set<IEvent['id']>;
 	// event buffer to batch verify and insert
 	public events: (IProfile | IEvent)[] = [];
 	constructor() {
@@ -20,15 +20,15 @@ export class $Data {
 	}
 
 	public async start() {
-		this.allEventIds = new Set((await db.events.toArray()).map(it => it.id));
+		this.allEventIds = new Set((await db.events.toArray()).map((it) => it.id));
 		// Use the `snooze` function to defer intensive code execution since
 		// each of these calls happen synchronously
-		this.storeEventsLoop()
-		await snooze(50)
+		this.storeEventsLoop();
+		await snooze(50);
 		this.loadAndWatchProfiles();
-		await snooze(50)
+		await snooze(50);
 		await db.updateProfileFromMeta();
-		await snooze(50)
+		await snooze(50);
 	}
 
 	// check for work constantly
@@ -36,7 +36,7 @@ export class $Data {
 		let delay = 500;
 		const promiseQueue: Promise<unknown>[] = [];
 
-		while (true){
+		while (true) {
 			delay = 350;
 			this.events = (Data.events as IEvent[]).filter(
 				(value, index, self) => index === self.findIndex((t) => t.id === value.id)
@@ -53,17 +53,21 @@ export class $Data {
 					event.tags = event.tags?.map((it) => (it as unknown as string[]).join('»')) || [];
 				});
 
-				await db.events.bulkPut(e as IEvent[])
-				const updatedProfiles = filterMap(e, (it) => (it as IEvent).kind === 0, (it) => it.pubkey);
+				await db.events.bulkPut(e as IEvent[]);
+				const updatedProfiles = filterMap(
+					e,
+					(it) => (it as IEvent).kind === 0,
+					(it) => it.pubkey
+				);
 
 				promiseQueue.push(db.updateProfileFromMeta(updatedProfiles));
 			} else {
 				// If there's no events on the stack - fetch for more
 				// queueMicrotask helps ensure proper execution order
-				queueMicrotask(()=>{
+				queueMicrotask(() => {
 					Data.downloadMissingEvents();
 					Data.broadcastOutbox();
-				})
+				});
 				await snooze(delay);
 				continue;
 			}
@@ -88,20 +92,24 @@ export class $Data {
 				it.fetching = true;
 			});
 			await db.profiles.bulkPut(profiles);
-			const profilesWithKey = profiles.map((it) => it.pubkey)
-			const s = this.pool.sub({
-				cb: Data.onEvent,
-				filter: { authors: profilesWithKey , kinds: [0] }
-			//@ts-expect-error The callback is supposed to be there, the type defs are wrong
-			}, undefined, () => {
-				s.unsub();
-				db.profiles
-					.where('pubkey')
-					.anyOf(profilesWithKey)
-					.modify((profile) => {
-						delete profile.fetching;
-					});
-      });
+			const profilesWithKey = profiles.map((it) => it.pubkey);
+			const s = this.pool.sub(
+				{
+					cb: Data.onEvent,
+					filter: { authors: profilesWithKey, kinds: [0] }
+					//@ts-expect-error The callback is supposed to be there, the type defs are wrong
+				},
+				undefined,
+				() => {
+					s.unsub();
+					db.profiles
+						.where('pubkey')
+						.anyOf(profilesWithKey)
+						.modify((profile) => {
+							delete profile.fetching;
+						});
+				}
+			);
 		}
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
@@ -116,15 +124,19 @@ export class $Data {
 					return it;
 				})
 			);
-			const s = Data.pool.sub({
-				cb: Data.onEvent,
-				filter: { ids: events.map((it) => it.id) }
-				//@ts-expect-error The callback is supposed to be there, the type defs are wrong
-			}, undefined, () => {
-        s.unsub();
-      });
+			const s = Data.pool.sub(
+				{
+					cb: Data.onEvent,
+					filter: { ids: events.map((it) => it.id) }
+					//@ts-expect-error The callback is supposed to be there, the type defs are wrong
+				},
+				undefined,
+				() => {
+					s.unsub();
+				}
+			);
 		}
-		await yieldMicrotask()
+		await yieldMicrotask();
 	}
 
 	private async broadcastOutbox(): Promise<void> {
@@ -137,17 +149,17 @@ export class $Data {
 				.toArray()
 		).filter((it) => it.outbox);
 		if (events.length > 0) {
-			console.log(events.length)
+			console.log(events.length);
 			events.forEach((e) => {
 				delete e.outbox;
 				const event = deepCloneObj(e);
-				event.tags = (event.tags.map((it: string) => it.split('»')) as unknown) as string[];
+				event.tags = event.tags.map((it: string) => it.split('»')) as unknown as string[];
 
 				Data.pool.publish(event);
 			});
 			await db.events.bulkPut(events);
 		}
-		await yieldMicrotask()
+		await yieldMicrotask();
 	}
 
 	public async loadAndWatchProfiles(): Promise<void> {
@@ -155,20 +167,23 @@ export class $Data {
 		const profiles = await db.profiles.toArray();
 		// "new" profiles are those we never synced ever
 		// sync those from the beginning of time
-		const [ newProfiles, oldProfiles ] = filterTF(profiles, (item) => !item.synced);
+		const [newProfiles, oldProfiles] = filterTF(profiles, (item) => !item.synced);
 		const newKeys = newProfiles.map((it) => it.pubkey);
 		const oldKeys = oldProfiles.map((it) => it.pubkey);
 		const priorSyncTS = (await db.config.get(`priorSyncTS`))?.value;
 		const syncFromTS = priorSyncTS || 0;
 		const filters = [];
 		if (newKeys.length > 0) {
-			filters.push({
-				authors: newKeys,
-				kinds: itemKinds
-			}, {
-				'#p': newKeys,
-				kinds: itemKinds
-			});
+			filters.push(
+				{
+					authors: newKeys,
+					kinds: itemKinds
+				},
+				{
+					'#p': newKeys,
+					kinds: itemKinds
+				}
+			);
 		}
 		if (oldKeys.length > 0) {
 			filters.push(
@@ -176,7 +191,8 @@ export class $Data {
 					authors: oldKeys,
 					since: syncFromTS,
 					kinds: itemKinds
-				}, {
+				},
+				{
 					'#p': oldKeys,
 					since: syncFromTS,
 					kinds: itemKinds
@@ -199,9 +215,9 @@ export class $Data {
 				});
 				// mark all profiles synced
 				db.profiles
-				.where('pubkey')
-				.anyOf(profiles.map((it) => it.pubkey))
-				.modify({ synced: true });
+					.where('pubkey')
+					.anyOf(profiles.map((it) => it.pubkey))
+					.modify({ synced: true });
 
 				Data.getRelevantProfiles();
 			}
@@ -233,7 +249,13 @@ export class $Data {
 		// n-th degree follows' pubkeys
 		const follows: Array<Set<string>> = [];
 		// 0-th
-		follows[0] = new Set(filterMap(profiles, (it) => it.degree === 0, (it) => it.pubkey));
+		follows[0] = new Set(
+			filterMap(
+				profiles,
+				(it) => it.degree === 0,
+				(it) => it.pubkey
+			)
+		);
 
 		// n-th
 		let all = new Set<string>();
@@ -284,13 +306,11 @@ export class $Data {
 		for (const chunk of batchedProfiles) {
 			db.profiles.bulkPut(chunk);
 		}
-
 	}
 
-	private rereceivedCounter = 0
+	private rereceivedCounter = 0;
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private async onEvent(event: IEvent, relay: string): Promise<void> {
-
 		// Check if there is an event ID, and if we already processed it
 		if (event?.id && !Data.allEventIds.has(event.id)) {
 			Data.allEventIds.add(event.id);
@@ -306,6 +326,5 @@ export class $Data {
 		this.pool = relayPool();
 		this.pool.addRelay(relay, { read: true, write: true });
 	}
-
 }
-export const Data = new $Data()
+export const Data = new $Data();
