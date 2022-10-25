@@ -8,7 +8,7 @@ import type { IProfile, IEvent } from './db';
 export class Data {
 	private static _instance: Data = new this();
 	public pool;
-	private allEventIds: Set<string>
+	private allEventIds: Set<string>;
 
 	// event buffer to batch verify and insert
 	public events: object[] = [];
@@ -16,7 +16,7 @@ export class Data {
 	private constructor() {}
 
 	public async start() {
-		this.allEventIds = new Set((await db.events.toArray()).map(it => it.id));
+		this.allEventIds = new Set((await db.events.toArray()).map((it) => it.id));
 		this.storeEventsLoop();
 		this.loadAndWatchProfiles();
 		db.updateProfileFromMeta();
@@ -57,18 +57,22 @@ export class Data {
 				it.fetching = true;
 			});
 			await db.profiles.bulkPut(profiles);
-			const s = Data.instance.pool.sub({
-				cb: Data.instance.onEvent,
-				filter: { authors: profiles.map((it) => it.pubkey), kinds: [0] }
-			}, undefined, () => {
-				s.unsub();
-				db.profiles
-					.where('pubkey')
-					.anyOf(profiles.map((it) => it.pubkey))
-					.modify((profile) => {
-						delete profile.fetching;
-					});
-      });
+			const s = Data.instance.pool.sub(
+				{
+					cb: Data.instance.onEvent,
+					filter: { authors: profiles.map((it) => it.pubkey), kinds: [0] }
+				},
+				undefined,
+				() => {
+					s.unsub();
+					db.profiles
+						.where('pubkey')
+						.anyOf(profiles.map((it) => it.pubkey))
+						.modify((profile) => {
+							delete profile.fetching;
+						});
+				}
+			);
 		}
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
@@ -83,12 +87,16 @@ export class Data {
 					return it;
 				})
 			);
-			const s = Data.instance.pool.sub({
-				cb: Data.instance.onEvent,
-				filter: { ids: events.map((it) => it.id) }
-			}, undefined, () => {
-        s.unsub();
-      });
+			const s = Data.instance.pool.sub(
+				{
+					cb: Data.instance.onEvent,
+					filter: { ids: events.map((it) => it.id) }
+				},
+				undefined,
+				() => {
+					s.unsub();
+				}
+			);
 		}
 	}
 
@@ -126,13 +134,16 @@ export class Data {
 		const filters = [];
 		const kinds = [0, 1, 3, 4, 5, 7];
 		if (newKeys.length > 0) {
-			filters.push({
-				authors: newKeys,
-				kinds: kinds
-			}, {
-				'#p': newKeys,
-				kinds: kinds
-			});
+			filters.push(
+				{
+					authors: newKeys,
+					kinds: kinds
+				},
+				{
+					'#p': newKeys,
+					kinds: kinds
+				}
+			);
 		}
 		if (oldKeys.length > 0) {
 			filters.push(
@@ -140,7 +151,8 @@ export class Data {
 					authors: oldKeys,
 					since: syncFromTS,
 					kinds: kinds
-				}, {
+				},
+				{
 					'#p': oldKeys,
 					since: syncFromTS,
 					kinds: kinds
@@ -246,7 +258,7 @@ export class Data {
 		// db.profiles.bulkPut(profiles)
 	}
 
-	private rereceivedCounter = 0
+	private rereceivedCounter = 0;
 	private async onEvent(event: IEvent, relay: string): void {
 		if (!Data.instance.allEventIds.has(event.id)) {
 			Data.instance.events.push(event);
