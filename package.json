@@ -10,6 +10,7 @@
 		"test": "playwright test",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+		"prepare": "husky install",
 		"lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
 		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
 		"postinstall": "node scripts/patch.mjs"
@@ -27,6 +28,7 @@
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-babel": "^5.3.1",
 		"eslint-plugin-svelte3": "^4.0.0",
+		"husky": "^8.0.1",
 		"prettier": "^2.7.1",
 		"prettier-plugin-svelte": "^2.8.0",
 		"svelte": "^3.50.1",
