@@ -5,7 +5,12 @@
 	import type { IProfile } from '../db';
 	import { activeProfile } from '../stores';
 	import AvatarImage from './AvatarImage.svelte';
+	import { createEventDispatcher } from 'svelte';
+
 	export let profile: IProfile;
+	export let dragDisabled: boolean;
+
+	const dispatch = createEventDispatcher();
 
 	$: active = $activeProfile as IProfile;
 	const select = async () => {
@@ -30,14 +35,25 @@
 	<div class="avatar">
 		<AvatarImage {profile} />
 	</div>
-	<div class="name">
-		<div class="keys" class:has-keys={profile?.privkey}>🔑</div>
-		{profile?.name || '???'}
+	<div class="middle">
+		<div class="name">
+			<div class="keys" class:has-keys={profile?.privkey}>🔑</div>
+			{profile?.name || '???'}
+		</div>
+		<div class="controlls {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
+			<button on:click={showPubkey}>Show</button>
+			<button on:click={deleteProfile}>Delete</button>
+		</div>
 	</div>
-	<div class="controlls {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
-		<button on:click={showPubkey}>Show</button>
-		<button on:click={deleteProfile}>Delete</button>
-	</div>
+	<div
+		tabindex={dragDisabled ? 0 : -1}
+		aria-label="drag-handle"
+		class="handle"
+		style={dragDisabled ? 'cursor: grab' : 'cursor: grabbing'}
+		on:mousedown={(e) => dispatch('dragstart', e)}
+		on:touchstart={(e) => dispatch('dragstart', e)}
+		on:keydown={(e) => dispatch('keydown', e)}
+	/>
 </div>
 
 <style>
@@ -45,9 +61,10 @@
 		background-color: lightgray;
 		border: 2px solid darkgray;
 		text-align: left;
-		/* display: inline-grid; */
+		display: flex;
+		align-items: center;
 		height: 5em;
-		max-width: 20em;
+		max-width: 21em;
 		margin: 0.5em;
 		padding: 0.5em;
 		border-radius: 15px;
@@ -61,6 +78,7 @@
 		width: 3.5em;
 		height: 3.5em;
 		margin: 1em;
+		flex-shrink: 0;
 	}
 	.keys {
 		display: none;
@@ -74,6 +92,7 @@
 		font-size: 1.5em;
 		overflow-x: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.selectedProfile {
 		background-color: lightgreen;
@@ -84,5 +103,26 @@
 	}
 	.controlls.selectedProfile {
 		display: block;
+	}
+	.handle {
+		margin-left: auto;
+		background-image: url('/icons/drag-handle.svg');
+		width: 37px;
+		height: 37px;
+		background-size: cover;
+		background-position: center;
+		flex-shrink: 0;
+	}
+	.middle {
+		min-width: 0;
+	}
+	@media (max-width: 550px) {
+		.avatar {
+			width: 3.3em;
+			height: 3.3em;
+		}
+		.name {
+			font-size: 1.3em;
+		}
 	}
 </style>
