@@ -5,19 +5,16 @@
 	import Profile from '../../components/Profile.svelte';
 	import { db } from '../../db';
 	import type { IProfile } from '../../db';
-	import { liveQuery } from 'dexie';
 	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-
-	let profiles = liveQuery(async () => {
-		return await db.profiles.orderBy('index').toArray();
-	});
+	import { onMount } from 'svelte';
 
 	let newProfileName = 'nostroid-user';
 	let newProfilePrivkey = '';
 	let newProfilePubkey = '';
 	let error = '';
 	let dragDisabled = true;
+	let items: { id: string; profile: IProfile }[] = [];
 
 	function hex(val: number) {
 		if (val < 10) return String.fromCharCode(48 + val);
@@ -135,11 +132,14 @@
 	function handleKeyDown({ detail: e }: CustomEvent<KeyboardEvent>) {
 		if ((e.key === 'Enter' || e.key === ' ') && dragDisabled) dragDisabled = false;
 	}
-	$: items = ($profiles as IProfile[])
-		?.filter((it) => it?.degree == 0)
-		?.map((it) => {
-			return { id: it.pubkey, profile: it };
-		});
+
+	onMount(async () => {
+		items = (await db.profiles.orderBy('index').toArray())
+			?.filter((it) => it?.degree == 0)
+			?.map((it) => {
+				return { id: it.pubkey, profile: it };
+			});
+	});
 </script>
 
 <svelte:head>
