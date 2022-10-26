@@ -107,7 +107,7 @@
 	.handle {
 		margin-left: auto;
 		background-image: url('/icons/drag-handle.svg');
-		width: 37px;
+		width: 30px;
 		height: 37px;
 		background-size: cover;
 		background-position: center;
