@@ -112,6 +112,7 @@
 		background-size: cover;
 		background-position: center;
 		flex-shrink: 0;
+		touch-action: none;
 	}
 	.middle {
 		min-width: 0;
