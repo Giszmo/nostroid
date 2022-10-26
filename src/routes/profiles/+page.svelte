@@ -8,6 +8,7 @@
 	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
 	import { onMount } from 'svelte';
+	import { activeProfile } from '../../stores';
 
 	let newProfileName = 'nostroid-user';
 	let newProfilePrivkey = '';
@@ -93,13 +94,24 @@
 				return;
 		}
 		try {
+			items = [...items, { id: profile.pubkey, profile }];
 			await db.profiles.put(profile);
 		} catch (error) {
 			error = `Failed to add ${profile}: ${error}`;
+			items.pop();
+			items = items;
 		}
 		newProfilePrivkey = '';
 		newProfilePubkey = '';
 		newProfileName = 'nostroid-user';
+	}
+
+	async function deleteProfile({ detail: pubkey }: CustomEvent<string>) {
+		items = items.filter((item) => item.id !== pubkey);
+		await db.profiles.delete(pubkey);
+		if (pubkey == $activeProfile?.pubkey) {
+			db.config.delete('activePubkey');
+		}
 	}
 	let radioWhat = 'gen';
 
@@ -162,6 +174,7 @@
 						bind:dragDisabled
 						on:dragstart={startDrag}
 						on:keydown={handleKeyDown}
+						on:deleteProfile={deleteProfile}
 					/>
 				</div>
 			{/each}
