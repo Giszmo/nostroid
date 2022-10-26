@@ -22,13 +22,6 @@
 	const showPubkey = () => {
 		goto(`${base}/${profile?.pubkey}`);
 	};
-
-	const deleteProfile = async () => {
-		await db.profiles.delete(profile.pubkey);
-		if (profile.pubkey == active?.pubkey) {
-			db.config.delete('activePubkey');
-		}
-	};
 </script>
 
 <div on:click={select} class="profile {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
@@ -42,7 +35,7 @@
 		</div>
 		<div class="controlls {active?.pubkey == profile?.pubkey ? 'selectedProfile' : ''}">
 			<button on:click={showPubkey}>Show</button>
-			<button on:click={deleteProfile}>Delete</button>
+			<button on:click={() => dispatch('deleteProfile', profile.pubkey)}>Delete</button>
 		</div>
 	</div>
 	<div
