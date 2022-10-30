@@ -5,18 +5,17 @@
 	import Profile from '../../components/Profile.svelte';
 	import { db } from '../../db';
 	import type { IProfile } from '../../db';
-	import { liveQuery } from 'dexie';
-	import { dndzone } from 'svelte-dnd-action';
+	import { dndzone, SOURCES, TRIGGERS } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-
-	let profiles = liveQuery(async () => {
-		return await db.profiles.orderBy('index').toArray();
-	});
+	import { onMount } from 'svelte';
+	import { activeProfile } from '../../stores';
 
 	let newProfileName = 'nostroid-user';
 	let newProfilePrivkey = '';
 	let newProfilePubkey = '';
 	let error = '';
+	let dragDisabled = true;
+	let items: { id: string; profile: IProfile }[] = [];
 
 	function hex(val: number) {
 		if (val < 10) return String.fromCharCode(48 + val);
@@ -95,19 +94,36 @@
 				return;
 		}
 		try {
+			items = [...items, { id: profile.pubkey, profile }];
 			await db.profiles.put(profile);
 		} catch (error) {
 			error = `Failed to add ${profile}: ${error}`;
+			items.pop();
+			items = items;
 		}
 		newProfilePrivkey = '';
 		newProfilePubkey = '';
 		newProfileName = 'nostroid-user';
+	}
+
+	async function deleteProfile({ detail: pubkey }: CustomEvent<string>) {
+		items = items.filter((item) => item.id !== pubkey);
+		await db.profiles.delete(pubkey);
+		if (pubkey == $activeProfile?.pubkey) {
+			db.config.delete('activePubkey');
+		}
 	}
 	let radioWhat = 'gen';
 
 	const flipDurationMs = 200;
 	function handleConsider(e: CustomEvent<DndEvent>) {
 		items = e.detail.items as { id: string; profile: IProfile }[];
+		if (
+			e.detail.info.source === SOURCES.KEYBOARD &&
+			e.detail.info.trigger === TRIGGERS.DRAG_STOPPED
+		) {
+			dragDisabled = true;
+		}
 	}
 	function handleFinalize(e: CustomEvent<DndEvent>) {
 		items = e.detail.items as { id: string; profile: IProfile }[];
@@ -117,12 +133,25 @@
 			return it.profile;
 		});
 		db.profiles.bulkPut(p);
+		if (e.detail.info.source === SOURCES.POINTER) {
+			dragDisabled = true;
+		}
 	}
-	$: items = ($profiles as IProfile[])
-		?.filter((it) => it?.degree == 0)
-		?.map((it) => {
-			return { id: it.pubkey, profile: it };
-		});
+	function startDrag({ detail: e }: CustomEvent<MouseEvent | TouchEvent>) {
+		e.preventDefault();
+		dragDisabled = false;
+	}
+	function handleKeyDown({ detail: e }: CustomEvent<KeyboardEvent>) {
+		if ((e.key === 'Enter' || e.key === ' ') && dragDisabled) dragDisabled = false;
+	}
+
+	onMount(async () => {
+		items = (await db.profiles.orderBy('index').toArray())
+			?.filter((it) => it?.degree == 0)
+			?.map((it) => {
+				return { id: it.pubkey, profile: it };
+			});
+	});
 </script>
 
 <svelte:head>
@@ -134,13 +163,19 @@
 	<h1>Profiles</h1>
 	{#if items instanceof Array}
 		<section
-			use:dndzone={{ items, flipDurationMs }}
+			use:dndzone={{ items, dragDisabled, flipDurationMs }}
 			on:consider={handleConsider}
 			on:finalize={handleFinalize}
 		>
 			{#each items as idProfile (idProfile.id)}
 				<div animate:flip={{ duration: flipDurationMs }}>
-					<Profile profile={idProfile.profile} />
+					<Profile
+						profile={idProfile.profile}
+						bind:dragDisabled
+						on:dragstart={startDrag}
+						on:keydown={handleKeyDown}
+						on:deleteProfile={deleteProfile}
+					/>
 				</div>
 			{/each}
 		</section>
