@@ -5,7 +5,12 @@
 	import type { IProfile } from '../db';
 	import { activeProfile } from '../stores';
 	import AvatarImage from './AvatarImage.svelte';
+	import { createEventDispatcher } from 'svelte';
+
 	export let profile: IProfile;
+	export let dragDisabled: boolean;
+
+	const dispatch = createEventDispatcher();
 
 	$: active = $activeProfile as IProfile;
 	const select = async () => {
