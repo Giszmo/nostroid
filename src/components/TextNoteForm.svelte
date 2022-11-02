@@ -63,6 +63,7 @@
 		height: 3em;
 		float: left;
 		margin: 10px;
+		flex-shrink: 0;
 	}
 	.top {
 		display: flex;
@@ -79,10 +80,10 @@
 	.input {
 		font-size: 17px;
 		min-height: 70px;
+		word-break: break-word;
 	}
 	.format-input {
 		position: absolute;
-		width: 100%;
 		border: 1px solid rgba(251, 251, 251, 0);
 		border-radius: 4px;
 		padding: 6px 12px;
