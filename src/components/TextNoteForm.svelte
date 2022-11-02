@@ -5,6 +5,8 @@
 
 	let noteText = '';
 	let posting = false;
+	let editableEl: HTMLDivElement;
+	let formatEl: HTMLDivElement;
 
 	const post = async () => {
 		if (posting) return;
@@ -17,6 +19,19 @@
 		}
 		posting = false;
 	};
+
+	const onEdit = (
+		e: Event & {
+			currentTarget: EventTarget & HTMLDivElement;
+		}
+	) => {
+		const formatted = e.currentTarget.innerHTML.replace(
+			/(@[a-zA-Z0-9_]+)/g,
+			'<span class="highlight">$1</span>'
+		);
+		console.log(formatted);
+		formatEl.innerHTML = formatted;
+	};
 </script>
 
 <form on:submit|preventDefault={post}>
@@ -24,7 +39,16 @@
 		<div class="avatar">
 			<AvatarImage profile={$activeProfile} />
 		</div>
-		<input class="post-text" type="text" bind:value={noteText} />
+		<div class="input-container">
+			<div class="input format-input" contenteditable="true" bind:this={formatEl} />
+			<div
+				class="input editable-input"
+				contenteditable="true"
+				on:input={(e) => onEdit(e)}
+				bind:this={editableEl}
+				bind:textContent={noteText}
+			/>
+		</div>
 	</div>
 	<button class="submit-btn">Post</button>
 </form>
@@ -48,7 +72,30 @@
 		align-self: flex-end;
 		margin-top: 10px;
 	}
-	.post-text {
+	.input-container {
 		flex-grow: 1;
+		position: relative;
+	}
+	.input {
+		font-size: 17px;
+		min-height: 70px;
+	}
+	.format-input {
+		position: absolute;
+		width: 100%;
+		border: 1px solid rgba(251, 251, 251, 0);
+		border-radius: 4px;
+		padding: 6px 12px;
+		pointer-events: none;
+		color: #fff0;
+	}
+	.editable-input {
+		border: 1px solid #ccc;
+		background-color: white;
+		border-radius: 4px;
+		padding: 6px 12px;
+	}
+	:global(.highlight) {
+		color: blue;
 	}
 </style>
