@@ -5,7 +5,6 @@
 	import type { IProfile } from '../db';
 	import { db } from '../db';
 
-	let noteText = '';
 	let posting = false;
 	let editableEl: HTMLDivElement;
 	let formatEl: HTMLDivElement;
@@ -13,13 +12,22 @@
 	let showMentionList = false;
 	let currentWord = '';
 	let wordPosition = 0;
+	let mentions: IProfile[] = [];
 
 	const post = async () => {
 		if (posting) return;
 		posting = true;
+		let text = editableEl.innerText;
+		let tags = [];
+
+		for (let i = 0; i < mentions.length; i++) {
+			const mention = mentions[i];
+			const regex = new RegExp(`@${mention.name}`, 'g');
+			text = text.replace(regex, `#[${i}]`);
+			tags.push(`p»${mention.pubkey}»wss://relay.nostr.info`);
+		}
 		try {
-			await sendPersistEvent(1, [], noteText, $activeProfile.privkey);
-			noteText = '';
+			await sendPersistEvent(1, tags, text, $activeProfile.privkey);
 		} catch (err) {
 			console.error(err);
 		}
@@ -60,14 +68,15 @@
 		mentionMatches = [...new Set([...searches[0], ...searches[1]])];
 	};
 
-	const replaceMention = (newWord: string) => {
+	const replaceMention = (profile: IProfile) => {
 		const selection = window.getSelection();
 		const text = selection?.anchorNode?.nodeValue;
 		if (!text) return;
 		const left = text.slice(0, wordPosition);
 		const right = text.slice(wordPosition);
 
-		selection.anchorNode.nodeValue = left + right.replace(`@${currentWord}`, `@${newWord}`);
+		mentions.push(profile);
+		selection.anchorNode.nodeValue = left + right.replace(`@${currentWord}`, `@${profile.name}`);
 
 		onEdit();
 		showMentionList = false;
@@ -86,7 +95,6 @@
 				contenteditable="true"
 				on:input={onEdit}
 				bind:this={editableEl}
-				bind:textContent={noteText}
 				on:keyup={(e) => onSelChange(e)}
 				on:click={(e) => onSelChange(e)}
 			/>
@@ -94,7 +102,7 @@
 				<div class="mention-container">
 					<ul>
 						{#each mentionMatches as profile}
-							<li on:click={() => replaceMention(profile.name)}>
+							<li on:click={() => replaceMention(profile)}>
 								<strong>{profile.name}</strong>
 								{profile.pubkey.slice(0, 8)}...
 							</li>
