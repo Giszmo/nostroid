@@ -2,11 +2,17 @@
 	import { activeProfile } from '../stores';
 	import { sendPersistEvent } from '../nostrHelper';
 	import AvatarImage from './AvatarImage.svelte';
+	import type { IProfile } from '../db';
+	import { db } from '../db';
 
 	let noteText = '';
 	let posting = false;
 	let editableEl: HTMLDivElement;
 	let formatEl: HTMLDivElement;
+	let mentionMatches: IProfile[] = [];
+	let showMentionList = false;
+	let currentWord = '';
+	let wordPosition = 0;
 
 	const post = async () => {
 		if (posting) return;
@@ -20,17 +26,51 @@
 		posting = false;
 	};
 
-	const onEdit = (
-		e: Event & {
-			currentTarget: EventTarget & HTMLDivElement;
-		}
-	) => {
-		const formatted = e.currentTarget.innerHTML.replace(
-			/(@[a-zA-Z0-9_]+)/g,
+	const onEdit = () => {
+		const formatted = editableEl.innerHTML.replace(
+			/(@[a-zA-Z0-9_.]+)/g,
 			'<span class="highlight">$1</span>'
 		);
-		console.log(formatted);
 		formatEl.innerHTML = formatted;
+	};
+
+	const onSelChange = async () => {
+		showMentionList = false;
+		const selection = window.getSelection();
+		const text = selection?.anchorNode?.textContent;
+		const offset = selection?.anchorOffset;
+		const left = text?.slice(0, offset);
+		const right = text?.slice(offset);
+		// find out index where the word starts
+		wordPosition = left?.lastIndexOf('@') || 0;
+		// match left until @
+		const match = left?.match(/@([a-zA-Z0-9_.]+)$/)?.[1];
+		// match right until space
+		const match2 = right?.match(/^([a-zA-Z0-9_.]+)/)?.[0];
+		const joined = match && match2 ? match + match2 : match;
+
+		if (!joined) return;
+		showMentionList = true;
+		currentWord = joined;
+
+		const searches = await Promise.all([
+			db.profiles.where('pubkey').startsWithIgnoreCase(joined).toArray(),
+			db.profiles.where('name').startsWithIgnoreCase(joined).toArray()
+		]);
+		mentionMatches = [...new Set([...searches[0], ...searches[1]])];
+	};
+
+	const replaceMention = (newWord: string) => {
+		const selection = window.getSelection();
+		const text = selection?.anchorNode?.nodeValue;
+		if (!text) return;
+		const left = text.slice(0, wordPosition);
+		const right = text.slice(wordPosition);
+
+		selection.anchorNode.nodeValue = left + right.replace(`@${currentWord}`, `@${newWord}`);
+
+		onEdit();
+		showMentionList = false;
 	};
 </script>
 
@@ -44,10 +84,24 @@
 			<div
 				class="input editable-input"
 				contenteditable="true"
-				on:input={(e) => onEdit(e)}
+				on:input={onEdit}
 				bind:this={editableEl}
 				bind:textContent={noteText}
+				on:keyup={(e) => onSelChange(e)}
+				on:click={(e) => onSelChange(e)}
 			/>
+			{#if showMentionList}
+				<div class="mention-container">
+					<ul>
+						{#each mentionMatches as profile}
+							<li on:click={() => replaceMention(profile.name)}>
+								<strong>{profile.name}</strong>
+								{profile.pubkey.slice(0, 8)}...
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 		</div>
 	</div>
 	<button class="submit-btn">Post</button>
@@ -98,5 +152,27 @@
 	}
 	:global(.highlight) {
 		color: blue;
+	}
+	.mention-container {
+		background-color: white;
+		max-height: 115px;
+		overflow: scroll;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		position: absolute;
+		width: 100%;
+	}
+	.mention-container > ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.mention-container > ul > li {
+		padding: 5px;
+		cursor: pointer;
+		user-select: none;
+	}
+	.mention-container > ul > li:hover {
+		background-color: #eee;
 	}
 </style>
