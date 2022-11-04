@@ -18,14 +18,12 @@
 		if (posting) return;
 		posting = true;
 		let text = editableEl.innerText;
-		let tags = [];
+		let tags: string[] = [];
 
-		for (let i = 0; i < mentions.length; i++) {
-			const mention = mentions[i];
-			const regex = new RegExp(`@${mention.name}`, 'g');
-			text = text.replace(regex, `#[${i}]`);
+		mentions.forEach((mention, i) => {
+			text = text.replace(`@${mention.name}`, `#[${i}]`);
 			tags.push(`p»${mention.pubkey}»wss://relay.nostr.info`);
-		}
+		});
 		try {
 			await sendPersistEvent(1, tags, text, $activeProfile.privkey);
 		} catch (err) {
@@ -35,11 +33,16 @@
 	};
 
 	const onEdit = () => {
-		const formatted = editableEl.innerHTML.replace(
-			/(@[a-zA-Z0-9_.]+)/g,
-			'<span class="highlight">$1</span>'
-		);
-		formatEl.innerHTML = formatted;
+		let text = editableEl.innerHTML;
+		mentions.forEach((profile) => {
+			const name = `@${profile.name}`;
+			if (!text.includes(name)) {
+				mentions = mentions.filter((p) => p.pubkey !== profile.pubkey);
+				return;
+			}
+			text = text.replace(name, `<span class="highlight">${name}</span>`);
+		});
+		formatEl.innerHTML = text;
 	};
 
 	const onSelChange = async () => {
