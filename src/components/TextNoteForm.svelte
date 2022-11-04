@@ -62,7 +62,7 @@
 		currentWord = joined;
 
 		const searches = await Promise.all([
-			db.profiles.where('pubkey').startsWithIgnoreCase(joined).toArray(),
+			db.profiles.where('nip05').startsWithIgnoreCase(joined).toArray(),
 			db.profiles.where('name').startsWithIgnoreCase(joined).toArray()
 		]);
 		mentionMatches = [...new Set([...searches[0], ...searches[1]])];

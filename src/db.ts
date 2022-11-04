@@ -87,7 +87,7 @@ export class NostroidDexie extends Dexie {
 					});
 			});
 		this.version(23).stores({
-			profiles: '&pubkey, degree, index, name'
+			profiles: '&pubkey, degree, index, name, nip05'
 		});
 	}
 
