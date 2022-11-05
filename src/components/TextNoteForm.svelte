@@ -78,6 +78,7 @@
 				return arr.findIndex((p) => p.pubkey === profile.pubkey) === i;
 			});
 		} else {
+			currentWord = '';
 			mentionMatches = await db.profiles.where('degree').equals(1).limit(20).toArray();
 		}
 	};
