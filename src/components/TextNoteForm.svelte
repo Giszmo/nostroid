@@ -96,7 +96,12 @@
 		selection?.removeAllRanges();
 		selection?.addRange(range);
 	};
+	const handleWindowClick = (e: MouseEvent) => {
+		if (e.target !== editableEl) showMentionList = false;
+	};
 </script>
+
+<svelte:window on:click={handleWindowClick} />
 
 <form on:submit|preventDefault={post}>
 	<div class="top">
