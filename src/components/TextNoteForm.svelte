@@ -42,7 +42,7 @@
 				mentions = mentions.filter((p) => p.pubkey !== profile.pubkey);
 				return;
 			}
-			text = text.replace(name, `<span class="highlight">${name}</span>`);
+			text = text.replace(new RegExp(name, 'g'), `<span class="highlight">${name}</span>`);
 		});
 		formatEl.innerHTML = text;
 	};
