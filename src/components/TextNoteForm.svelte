@@ -68,7 +68,9 @@
 			db.profiles.where('nip05').startsWithIgnoreCase(joined).toArray(),
 			db.profiles.where('name').startsWithIgnoreCase(joined).toArray()
 		]);
-		mentionMatches = [...new Set([...searches[0], ...searches[1]])];
+		mentionMatches = searches.flat().filter((profile, i, arr) => {
+			return arr.findIndex((p) => p.pubkey === profile.pubkey) === i;
+		});
 	};
 
 	const replaceMention = (profile: IProfile) => {
