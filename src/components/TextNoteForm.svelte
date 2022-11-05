@@ -114,15 +114,19 @@
 			{#if showMentionList}
 				<div class="mention-container">
 					<ul>
-						{#each mentionMatches as profile}
-							<li
-								on:click={() => replaceMention(profile)}
-								on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
-							>
-								<strong>{profile.name}</strong>
-								{profile.pubkey.slice(0, 8)}...
-							</li>
-						{/each}
+						{#if mentionMatches.length}
+							{#each mentionMatches as profile}
+								<li
+									on:click={() => replaceMention(profile)}
+									on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
+								>
+									<strong>{profile.name}</strong>
+									{profile.pubkey.slice(0, 8)}...
+								</li>
+							{/each}
+						{:else}
+							<li>No matches</li>
+						{/if}
 					</ul>
 				</div>
 			{/if}
