@@ -13,10 +13,12 @@
 	let currentWord = '';
 	let wordPosition = 0;
 	let mentions: IProfile[] = [];
+	let showSuccess = false;
 
 	const post = async () => {
 		if (posting) return;
 		posting = true;
+		showSuccess = false;
 		let text = editableEl.innerText;
 		let tags: string[] = [];
 
@@ -28,6 +30,10 @@
 		});
 		try {
 			await sendPersistEvent(1, tags, text, $activeProfile.privkey);
+			editableEl.innerHTML = '';
+			formatEl.innerHTML = '';
+			showSuccess = true;
+			setTimeout(() => (showSuccess = false), 5000);
 		} catch (err) {
 			console.error(err);
 		}
@@ -139,6 +145,9 @@
 			{/if}
 		</div>
 	</div>
+	{#if showSuccess}
+		<span class="success"> posted! </span>
+	{/if}
 	<button
 		class="submit-btn"
 		disabled={!$activeProfile?.privkey || posting}
@@ -215,5 +224,9 @@
 	}
 	.mention-container > ul > li:hover {
 		background-color: #eee;
+	}
+	.success {
+		align-self: flex-end;
+		color: green;
 	}
 </style>
