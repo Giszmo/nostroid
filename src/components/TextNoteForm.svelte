@@ -63,22 +63,23 @@
 		// find out index where the word starts
 		wordPosition = left?.lastIndexOf('@') || 0;
 		// match left until @
-		const match = left?.match(/@([a-zA-Z0-9_.]+)$/)?.[1];
+		const match = left?.match(/@([a-zA-Z0-9_.]*)$/)?.[1];
 		// match right until space
 		const match2 = right?.match(/^([a-zA-Z0-9_.]+)/)?.[0];
 		const joined = match && match2 ? match + match2 : match;
-
-		if (!joined) return;
-		showMentionList = true;
-		currentWord = joined;
-
-		const searches = await Promise.all([
-			db.profiles.where('nip05').startsWithIgnoreCase(joined).toArray(),
-			db.profiles.where('name').startsWithIgnoreCase(joined).toArray()
-		]);
-		mentionMatches = searches.flat().filter((profile, i, arr) => {
-			return arr.findIndex((p) => p.pubkey === profile.pubkey) === i;
-		});
+		if (left?.match(/(@\S*)$/g)) showMentionList = true;
+		if (joined) {
+			currentWord = joined;
+			const searches = await Promise.all([
+				db.profiles.where('nip05').startsWithIgnoreCase(joined).toArray(),
+				db.profiles.where('name').startsWithIgnoreCase(joined).toArray()
+			]);
+			mentionMatches = searches.flat().filter((profile, i, arr) => {
+				return arr.findIndex((p) => p.pubkey === profile.pubkey) === i;
+			});
+		} else {
+			mentionMatches = await db.profiles.where('degree').equals(1).limit(20).toArray();
+		}
 	};
 
 	const replaceMention = (profile: IProfile) => {
