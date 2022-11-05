@@ -73,16 +73,24 @@
 
 	const replaceMention = (profile: IProfile) => {
 		const selection = window.getSelection();
-		const text = selection?.anchorNode?.nodeValue;
+		const node = selection?.anchorNode;
+		const text = node?.nodeValue;
 		if (!text) return;
 		const left = text.slice(0, wordPosition);
 		const right = text.slice(wordPosition);
 
 		mentions.push(profile);
-		selection.anchorNode.nodeValue = left + right.replace(`@${currentWord}`, `@${profile.name}`);
+		const newWord = `@${profile.name} `;
+		node.nodeValue = left + right.replace(`@${currentWord}`, newWord);
 
 		onEdit();
 		showMentionList = false;
+
+		const range = document.createRange();
+		range.setStart(node, wordPosition + newWord.length);
+		range.collapse(true);
+		selection?.removeAllRanges();
+		selection?.addRange(range);
 	};
 </script>
 
@@ -105,7 +113,10 @@
 				<div class="mention-container">
 					<ul>
 						{#each mentionMatches as profile}
-							<li on:click={() => replaceMention(profile)}>
+							<li
+								on:click={() => replaceMention(profile)}
+								on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
+							>
 								<strong>{profile.name}</strong>
 								{profile.pubkey.slice(0, 8)}...
 							</li>
@@ -146,6 +157,7 @@
 		font-size: 17px;
 		min-height: 70px;
 		word-break: break-word;
+		white-space: pre-wrap;
 	}
 	.format-input {
 		position: absolute;
@@ -182,6 +194,7 @@
 		padding: 5px;
 		cursor: pointer;
 		user-select: none;
+		-webkit-user-select: none;
 	}
 	.mention-container > ul > li:hover {
 		background-color: #eee;
