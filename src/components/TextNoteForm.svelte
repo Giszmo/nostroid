@@ -20,6 +20,8 @@
 		let text = editableEl.innerText;
 		let tags: string[] = [];
 
+		if (!text) return (posting = false);
+
 		mentions.forEach((mention, i) => {
 			text = text.replace(`@${mention.name}`, `#[${i}]`);
 			tags.push(`p»${mention.pubkey}»wss://relay.nostr.info`);
@@ -132,7 +134,11 @@
 			{/if}
 		</div>
 	</div>
-	<button class="submit-btn">Post</button>
+	<button
+		class="submit-btn"
+		disabled={!$activeProfile?.privkey || posting}
+		title={!$activeProfile?.privkey ? 'no privkey on this profile' : ''}>Post</button
+	>
 </form>
 
 <style>
