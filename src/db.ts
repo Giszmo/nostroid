@@ -86,6 +86,9 @@ export class NostroidDexie extends Dexie {
 						event.tags = event.tags.map((it) => it.split(',').join('»'));
 					});
 			});
+		this.version(23).stores({
+			profiles: '&pubkey, degree, index, name, nip05'
+		});
 	}
 
 	private async nip05Valid(name: string, pubkey: string) {
