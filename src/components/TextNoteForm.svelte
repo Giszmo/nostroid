@@ -8,12 +8,14 @@
 	let posting = false;
 	let editableEl: HTMLDivElement;
 	let formatEl: HTMLDivElement;
+	let selectedEl: HTMLLIElement;
 	let mentionMatches: IProfile[] = [];
 	let showMentionList = false;
 	let currentWord = '';
 	let wordPosition = 0;
 	let mentions: IProfile[] = [];
 	let showSuccess = false;
+	let selectedMention = 0;
 
 	const post = async () => {
 		if (posting) return;
@@ -53,8 +55,11 @@
 		formatEl.innerHTML = text;
 	};
 
-	const onSelChange = async () => {
-		showMentionList = false;
+	const onSelChange = async (
+		e: KeyboardEvent & {
+			currentTarget: EventTarget & HTMLDivElement;
+		}
+	) => {
 		const selection = window.getSelection();
 		const text = selection?.anchorNode?.textContent;
 		const offset = selection?.anchorOffset;
@@ -67,7 +72,8 @@
 		// match right until space
 		const match2 = right?.match(/^([a-zA-Z0-9_.]+)/)?.[0];
 		const joined = match && match2 ? match + match2 : match;
-		if (left?.match(/(@\S*)$/g)) showMentionList = true;
+		if (!left?.match(/(@\S*)$/g)) return;
+		showMentionList = true;
 		if (joined) {
 			currentWord = joined;
 			const searches = await Promise.all([
@@ -97,6 +103,7 @@
 
 		onEdit();
 		showMentionList = false;
+		selectedMention = 0;
 
 		const range = document.createRange();
 		range.setStart(node, wordPosition + newWord.length);
@@ -105,11 +112,37 @@
 		selection?.addRange(range);
 	};
 	const handleWindowClick = (e: MouseEvent) => {
-		if (e.target !== editableEl) showMentionList = false;
+		if (e.target !== editableEl) {
+			showMentionList = false;
+			selectedMention = 0;
+		}
+	};
+
+	const navigateList = (e: KeyboardEvent) => {
+		if (!showMentionList) return;
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			replaceMention(mentionMatches[selectedMention]);
+			showMentionList = false;
+			selectedMention = 0;
+			return;
+		}
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			selectedMention = (selectedMention + 1) % mentionMatches.length;
+			selectedEl.scrollIntoView();
+		}
+		if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			selectedMention = selectedMention === 0 ? mentionMatches.length - 1 : selectedMention - 1;
+			selectedEl.scrollIntoView({
+				block: 'end'
+			});
+		}
 	};
 </script>
 
-<svelte:window on:click={handleWindowClick} />
+<svelte:body on:click={handleWindowClick} />
 
 <form on:submit|preventDefault={post}>
 	<div class="top">
@@ -124,26 +157,34 @@
 				on:input={onEdit}
 				bind:this={editableEl}
 				on:keyup={(e) => onSelChange(e)}
+				on:keydown={(e) => navigateList(e)}
 				on:click={(e) => onSelChange(e)}
 			/>
 			{#if showMentionList}
-				<div class="mention-container">
-					<ul>
-						{#if mentionMatches.length}
-							{#each mentionMatches as profile}
-								<li
-									on:click={() => replaceMention(profile)}
-									on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
-								>
-									<strong>{profile.name}</strong>
-									{profile.pubkey.slice(0, 8)}...
-								</li>
-							{/each}
+				<ul class="mention-list">
+					{#each mentionMatches as profile, i}
+						{#if i === selectedMention}
+							<li
+								on:click={() => replaceMention(profile)}
+								on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
+								class="mention-selected"
+								bind:this={selectedEl}
+							>
+								<strong>{profile.name}</strong>
+								{profile.pubkey.slice(0, 8)}...
+							</li>
 						{:else}
-							<li>No matches</li>
+							<li
+								on:click={() => replaceMention(profile)}
+								on:mousedown|preventDefault={(e) => e.stopImmediatePropagation()}
+								class:mention-selected={selectedMention === i}
+							>
+								<strong>{profile.name}</strong>
+								{profile.pubkey.slice(0, 8)}...
+							</li>
 						{/if}
-					</ul>
-				</div>
+					{/each}
+				</ul>
 			{/if}
 		</div>
 	</div>
@@ -204,7 +245,10 @@
 	:global(.highlight) {
 		color: blue;
 	}
-	.mention-container {
+	.mention-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
 		background-color: white;
 		max-height: 115px;
 		overflow: scroll;
@@ -213,19 +257,15 @@
 		position: absolute;
 		width: 100%;
 	}
-	.mention-container > ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-	.mention-container > ul > li {
+	.mention-list > li {
 		padding: 5px;
 		cursor: pointer;
 		user-select: none;
 		-webkit-user-select: none;
 	}
-	.mention-container > ul > li:hover {
-		background-color: #eee;
+	.mention-selected,
+	.mention-list > li:hover {
+		background-color: rgb(216, 216, 216);
 	}
 	.success {
 		align-self: flex-end;
