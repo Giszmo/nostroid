@@ -10,6 +10,7 @@
 	let event;
 	let previousEvents: IEvent[] = [];
 	let previousEventsLimit = 2;
+	let morePreviousExists = false;
 
 	$: {
 		event = liveQuery<IEvent | undefined>(async () => {
@@ -25,18 +26,23 @@
 	}
 
 	const getPreviousEvents = async (event: IEvent) => {
-		if (previousEvents.length >= previousEventsLimit) return;
 		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('reply'));
-		if (index !== -1) {
-			const id = event.tags[index].split('»', 3)[1];
-			const e = await db.events.get(id);
-			if (!e) return;
-			previousEvents = [e, ...previousEvents];
-			getPreviousEvents(e);
-		}
+		if (index === -1) return (morePreviousExists = false);
+
+		const id = event.tags[index].split('»', 3)[1];
+		const e = await db.events.get(id);
+
+		if (!e) return (morePreviousExists = false);
+
+		morePreviousExists = true;
+
+		if (previousEvents.length >= previousEventsLimit) return;
+
+		previousEvents = [e, ...previousEvents];
+		getPreviousEvents(e);
 	};
 
-	const loadMore = () => {
+	const loadMorePrevious = () => {
 		previousEventsLimit += 2;
 		getPreviousEvents(previousEvents[0]);
 	};
@@ -53,7 +59,9 @@
 	Loading ...
 {:then event}
 	{#if event}
-		<button on:click={loadMore}>load more</button>
+		{#if morePreviousExists}
+			<button on:click={loadMorePrevious}>Load more</button>
+		{/if}
 		{#each previousEvents as ev (ev.id)}
 			<TextNote event={ev} />
 		{/each}
@@ -70,5 +78,9 @@
 		overflow-x: clip;
 		white-space: nowrap;
 		text-overflow: ellipsis;
+	}
+	button {
+		margin: 10px;
+		width: 100px;
 	}
 </style>
