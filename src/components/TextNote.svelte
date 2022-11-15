@@ -9,6 +9,7 @@
 	import { goto } from '$app/navigation';
 
 	export let event: IEvent;
+	export let selected = false;
 
 	marked.setOptions({ breaks: true });
 	let text: string = marked
@@ -23,7 +24,7 @@
 
 <div class="tn" on:click|stopPropagation={showEvent}>
 	<TextNoteProfile pubkey={event.pubkey} />
-	<div class="note">
+	<div class="note" class:note-selected={selected}>
 		{#each tagLinky(text, event) as comp, i}
 			<svelte:component this={comp.component} content={comp.content} />
 		{/each}
@@ -36,10 +37,13 @@
 		margin-left: 60px;
 		overflow-x: auto;
 	}
-
 	.tn {
 		border: 2px solid gray;
 		border-radius: 15px;
 		padding: 15px;
+		cursor: pointer;
+	}
+	.note-selected {
+		font-size: 19px;
 	}
 </style>
