@@ -11,6 +11,7 @@
 	let previousEvents: IEvent[] = [];
 	let previousEventsLimit = 2;
 	let morePreviousExists = false;
+	let root: IEvent | undefined;
 
 	$: {
 		event = liveQuery<IEvent | undefined>(async () => {
@@ -20,10 +21,18 @@
 			}
 			if (e) {
 				getPreviousEvents(e);
+				getRoot(e);
 			}
 			return e;
 		});
 	}
+
+	const getRoot = async (event: IEvent) => {
+		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('root'));
+		if (index === -1) return;
+		const id = event.tags[index].split('»', 3)[1];
+		root = await db.events.get(id);
+	};
 
 	const getPreviousEvents = async (event: IEvent) => {
 		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('reply'));
@@ -59,6 +68,9 @@
 	Loading ...
 {:then event}
 	{#if event}
+		{#if root}
+			<TextNote event={root} />
+		{/if}
 		{#if morePreviousExists}
 			<button on:click={loadMorePrevious}>Load more</button>
 		{/if}
