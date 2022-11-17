@@ -7,25 +7,32 @@
 	import TextNote from '../../../components/TextNote.svelte';
 
 	let id: string | undefined;
-	let event;
+	let event: IEvent | undefined;
 	let previousEvents: IEvent[] = [];
 	let previousEventsLimit = 2;
 	let morePreviousExists = false;
 	let root: IEvent | undefined;
 
-	$: {
-		event = liveQuery<IEvent | undefined>(async () => {
-			const e = await db.events.get(id);
-			if (id && id.length === 64 && !e) {
-				db.missingEvents.put(<IMissing>{ id: id });
-			}
-			if (e) {
-				getPreviousEvents(e);
-				getRoot(e);
-			}
-			return e;
-		});
-	}
+	// reload on route change
+	$: load($page.params.id);
+	const load = async (..._: any) => {
+		event = undefined;
+		id = $page.params.id;
+		previousEvents = [];
+		previousEventsLimit = 2;
+		morePreviousExists = false;
+		root = undefined;
+
+		const e = await db.events.get(id);
+		if (id && id.length === 64 && !e) {
+			db.missingEvents.put(<IMissing>{ id: id });
+		}
+		if (e) {
+			getPreviousEvents(e);
+			getRoot(e);
+			event = e;
+		}
+	};
 
 	const getRoot = async (event: IEvent) => {
 		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('root'));
@@ -41,7 +48,7 @@
 		const id = event.tags[index].split('»', 3)[1];
 		const e = await db.events.get(id);
 
-		if (!e) return (morePreviousExists = false);
+		if (!e || (root && e.id === root.id)) return (morePreviousExists = false);
 
 		morePreviousExists = true;
 
@@ -55,35 +62,26 @@
 		previousEventsLimit += 2;
 		getPreviousEvents(previousEvents[0]);
 	};
-
-	onMount(async () => {
-		id = $page.params.id;
-	});
 </script>
 
 <svelte:head>
 	<title>Event</title>
 </svelte:head>
-{#await $event}
-	Loading ...
-{:then event}
-	{#if event}
-		{#if root}
-			<TextNote event={root} />
-		{/if}
-		{#if morePreviousExists}
-			<button on:click={loadMorePrevious}>Load more</button>
-		{/if}
-		{#each previousEvents as ev (ev.id)}
-			<TextNote event={ev} />
-		{/each}
-		<TextNote {event} selected={true} />
-	{:else}
-		Event not found.
+
+{#if event}
+	{#if root}
+		<TextNote event={root} />
 	{/if}
-{:catch _}
+	{#if morePreviousExists}
+		<button on:click={loadMorePrevious}>Load more</button>
+	{/if}
+	{#each previousEvents as ev (ev.id)}
+		<TextNote event={ev} />
+	{/each}
+	<TextNote {event} selected={true} />
+{:else}
 	Event not found.
-{/await}
+{/if}
 
 <style>
 	h1 {
