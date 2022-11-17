@@ -12,6 +12,7 @@
 	let previousEventsLimit = 2;
 	let morePreviousExists = false;
 	let root: IEvent | undefined;
+	let replies: IEvent[] = [];
 
 	// reload on route change
 	$: load($page.params.id);
@@ -22,6 +23,7 @@
 		previousEventsLimit = 2;
 		morePreviousExists = false;
 		root = undefined;
+		replies = [];
 
 		const e = await db.events.get(id);
 		if (id && id.length === 64 && !e) {
@@ -30,6 +32,7 @@
 		if (e) {
 			getPreviousEvents(e);
 			getRoot(e);
+			getReplies(e);
 			event = e;
 		}
 	};
@@ -58,6 +61,21 @@
 		getPreviousEvents(e);
 	};
 
+	const getReplies = async (event: IEvent) => {
+		const reply = await db.events
+			.where('tags')
+			.startsWithIgnoreCase(`e»${event.id}»`)
+			.and(
+				(it) =>
+					it.tags.findIndex((tag: string) => {
+						return tag.match(new RegExp(`e»${event.id}».*»reply`, 'g'))?.[0];
+					}) !== -1
+			)
+			.toArray();
+		if (!reply) return;
+		replies = [...replies, ...reply];
+	};
+
 	const loadMorePrevious = () => {
 		previousEventsLimit += 2;
 		getPreviousEvents(previousEvents[0]);
@@ -79,6 +97,9 @@
 		<TextNote event={ev} />
 	{/each}
 	<TextNote {event} selected={true} />
+	{#each replies as ev (ev.id)}
+		<TextNote event={ev} />
+	{/each}
 {:else}
 	Event not found.
 {/if}
