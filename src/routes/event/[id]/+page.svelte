@@ -8,6 +8,8 @@
 	type Reply = {
 		event: IEvent;
 		children: Reply[];
+		showAmount: number;
+		level: number;
 	};
 
 	let id: string | undefined;
@@ -37,7 +39,9 @@
 			getRoot(e);
 			baseReplyObj = {
 				event: e,
-				children: []
+				children: [],
+				showAmount: 5,
+				level: 0
 			};
 			getReplies(baseReplyObj);
 		}
@@ -86,7 +90,12 @@
 			.toArray();
 		if (!r.length) return;
 
-		reply.children = r.map((it) => ({ event: it, children: [] }));
+		reply.children = r.map((it) => ({
+			event: it,
+			children: [],
+			level: reply.level + 1,
+			showAmount: reply.level === 1 ? 1 : 0
+		}));
 		for (const child of reply.children) {
 			await getReplies(child);
 		}
@@ -115,7 +124,7 @@
 	{/each}
 	<TextNote {event} selected={true} />
 	{#each baseReplyObj.children as reply (reply.event.id)}
-		<TextNoteThread {reply} level={1} />
+		<TextNoteThread bind:reply />
 	{/each}
 {:else}
 	Event not found.
