@@ -51,10 +51,13 @@
 	};
 
 	const getPreviousEvents = async (event: IEvent) => {
-		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('reply'));
-		if (index === -1) return (morePreviousExists = false);
+		const match = event.tags
+			.slice()
+			.reverse()
+			.find((it) => it.startsWith('e»') && it.includes('reply'));
+		if (!match) return (morePreviousExists = false);
 
-		const id = event.tags[index].split('»', 3)[1];
+		const id = match.split('»', 3)[1];
 		const e = await db.events.get(id);
 
 		if (!e || (root && e.id === root.id)) return (morePreviousExists = false);
@@ -71,18 +74,22 @@
 		const r = await db.events
 			.where('tags')
 			.startsWithIgnoreCase(`e»${reply.event.id}»`)
+			.distinct()
 			.and((it) => it.kind === 1)
-			.and(
-				(it) =>
-					it.tags.findIndex((tag: string) => {
-						return tag.match(new RegExp(`e»${reply.event.id}».*»reply`, 'g'))?.[0];
-					}) !== -1
-			)
+			.and((it) => {
+				const lastReply = it.tags
+					.slice()
+					.reverse()
+					.find((tag) => tag.match(new RegExp(`e».*».*»reply`, 'g'))?.[0]);
+				return Boolean(lastReply?.match(new RegExp(`e»${reply.event.id}».*»reply`, 'g'))?.[0]);
+			})
 			.toArray();
 		if (!r.length) return;
 
 		reply.children = r.map((it) => ({ event: it, children: [] }));
-		reply.children.forEach((it) => getReplies(it));
+		for (const child of reply.children) {
+			await getReplies(child);
+		}
 		baseReplyObj.children = baseReplyObj.children;
 	};
 
