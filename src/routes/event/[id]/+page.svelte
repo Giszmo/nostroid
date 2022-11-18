@@ -2,9 +2,13 @@
 	import { page } from '$app/stores';
 	import { db } from '../../../db';
 	import type { IEvent, IMissing } from '../../../db';
-	import { onMount } from 'svelte';
-	import { liveQuery } from 'dexie';
 	import TextNote from '../../../components/TextNote.svelte';
+	import TextNoteThread from '../../../components/TextNoteThread.svelte';
+
+	type Reply = {
+		event: IEvent;
+		children: Reply[];
+	};
 
 	let id: string | undefined;
 	let event: IEvent | undefined;
@@ -12,7 +16,7 @@
 	let previousEventsLimit = 2;
 	let morePreviousExists = false;
 	let root: IEvent | undefined;
-	let replies: IEvent[] = [];
+	let baseReplyObj: Reply;
 
 	// reload on route change
 	$: load($page.params.id);
@@ -23,17 +27,19 @@
 		previousEventsLimit = 2;
 		morePreviousExists = false;
 		root = undefined;
-		replies = [];
-
 		const e = await db.events.get(id);
 		if (id && id.length === 64 && !e) {
 			db.missingEvents.put(<IMissing>{ id: id });
 		}
 		if (e) {
+			event = e;
 			getPreviousEvents(e);
 			getRoot(e);
-			getReplies(e);
-			event = e;
+			baseReplyObj = {
+				event: e,
+				children: []
+			};
+			getReplies(baseReplyObj);
 		}
 	};
 
@@ -61,19 +67,23 @@
 		getPreviousEvents(e);
 	};
 
-	const getReplies = async (event: IEvent) => {
-		const reply = await db.events
+	const getReplies = async (reply: Reply) => {
+		const r = await db.events
 			.where('tags')
-			.startsWithIgnoreCase(`e»${event.id}»`)
+			.startsWithIgnoreCase(`e»${reply.event.id}»`)
+			.and((it) => it.kind === 1)
 			.and(
 				(it) =>
 					it.tags.findIndex((tag: string) => {
-						return tag.match(new RegExp(`e»${event.id}».*»reply`, 'g'))?.[0];
+						return tag.match(new RegExp(`e»${reply.event.id}».*»reply`, 'g'))?.[0];
 					}) !== -1
 			)
 			.toArray();
-		if (!reply) return;
-		replies = [...replies, ...reply];
+		if (!r.length) return;
+
+		reply.children = r.map((it) => ({ event: it, children: [] }));
+		reply.children.forEach((it) => getReplies(it));
+		baseReplyObj.children = baseReplyObj.children;
 	};
 
 	const loadMorePrevious = () => {
@@ -97,19 +107,14 @@
 		<TextNote event={ev} />
 	{/each}
 	<TextNote {event} selected={true} />
-	{#each replies as ev (ev.id)}
-		<TextNote event={ev} />
+	{#each baseReplyObj.children as reply (reply.event.id)}
+		<TextNoteThread {reply} level={1} />
 	{/each}
 {:else}
 	Event not found.
 {/if}
 
 <style>
-	h1 {
-		overflow-x: clip;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-	}
 	button {
 		margin: 10px;
 		width: 100px;

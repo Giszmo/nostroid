@@ -10,6 +10,7 @@
 
 	export let event: IEvent;
 	export let selected = false;
+	export let level = 0;
 
 	marked.setOptions({ breaks: true });
 	let text: string = marked
@@ -22,7 +23,7 @@
 	};
 </script>
 
-<div class="tn" on:click|stopPropagation={showEvent}>
+<div class="tn" on:click|stopPropagation={showEvent} style={`margin-left: ${level * 2}rem`}>
 	<TextNoteProfile pubkey={event.pubkey} />
 	<div class="note" class:note-selected={selected}>
 		{#each tagLinky(text, event) as comp, i}
