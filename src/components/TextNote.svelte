@@ -45,6 +45,6 @@
 		cursor: pointer;
 	}
 	.note-selected {
-		font-size: 19px;
+		font-size: 1.5rem;
 	}
 </style>
