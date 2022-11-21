@@ -26,7 +26,7 @@ export const sendPersistEvent = async (kind, tags, content, privkey) => {
 	db.events.add(e);
 };
 
-export const getDegreesForPubkey = async (pubkey: string, profiles: IProfile[]) => {
+export const getDegreesForPubkeys = async (pubkeys: string[], profiles: IProfile[]) => {
 	const profileFollows = new Map(
 		(await db.events.where('kind').equals(3).toArray()).map((it) => [
 			it.pubkey,
@@ -37,7 +37,7 @@ export const getDegreesForPubkey = async (pubkey: string, profiles: IProfile[]) 
 	// n-th degree follows' pubkeys
 	const follows: Array<Set<string>> = [];
 	// 0-th
-	follows[0] = new Set([pubkey]);
+	follows[0] = new Set(pubkeys);
 
 	// n-th
 	let all = new Set<string>();

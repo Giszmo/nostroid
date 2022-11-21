@@ -2,7 +2,7 @@ import { db } from './db';
 import type { IProfile } from './db';
 import { liveQuery, type Observable } from 'dexie';
 import { get, writable } from 'svelte/store';
-import { getDegreesForPubkey } from './nostrHelper';
+import { getDegreesForPubkeys } from './nostrHelper';
 
 export const activeProfile: Observable<IProfile | undefined> = liveQuery(
 	async (): Promise<IProfile | undefined> => {
@@ -44,7 +44,7 @@ export class ProfileCache {
 	public async updateDegrees(profiles?: IProfile[]) {
 		if (profiles === undefined) profiles = await db.profiles.toArray();
 		const pubkey = (await db.config.get('activePubkey'))?.value;
-		const profilesWithDegrees = await getDegreesForPubkey(pubkey, profiles);
+		const profilesWithDegrees = await getDegreesForPubkeys([pubkey], profiles);
 		this.backing = new Map(profilesWithDegrees.map((x) => [x.pubkey, x]));
 		cProfiles.set(this);
 	}
