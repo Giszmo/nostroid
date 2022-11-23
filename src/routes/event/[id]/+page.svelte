@@ -97,7 +97,7 @@
 	{#each previousEvents as ev (ev.id)}
 		<TextNote event={ev} />
 	{/each}
-	<TextNote {event} selected={true} />
+	<TextNote {event} selected={true} replies={baseReplyObj.children.length} />
 	{#each baseReplyObj.children as reply (reply.event.id)}
 		<TextNoteThread bind:reply />
 	{/each}
