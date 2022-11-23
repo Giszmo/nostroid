@@ -4,6 +4,7 @@
 	import type { IEvent, IMissing } from '../../../db';
 	import TextNote from '../../../components/TextNote.svelte';
 	import TextNoteThread from '../../../components/TextNoteThread.svelte';
+	import { getEventParent, getEventReplies, getEventRoot } from '../../../dbHelper';
 
 	type Reply = {
 		event: IEvent;
@@ -35,34 +36,20 @@
 		}
 		if (e) {
 			event = e;
-			getPreviousEvents(e);
-			getRoot(e);
 			baseReplyObj = {
 				event: e,
 				children: [],
 				showAmount: 5,
 				level: 0
 			};
+			root = await getEventRoot({ event });
+			getPreviousEvents(e);
 			getReplies(baseReplyObj);
 		}
 	};
 
-	const getRoot = async (event: IEvent) => {
-		const index = event.tags.findIndex((it) => it.startsWith('e»') && it.includes('root'));
-		if (index === -1) return;
-		const id = event.tags[index].split('»', 3)[1];
-		root = await db.events.get(id);
-	};
-
 	const getPreviousEvents = async (event: IEvent) => {
-		const match = event.tags
-			.slice()
-			.reverse()
-			.find((it) => it.startsWith('e»') && it.includes('reply'));
-		if (!match) return (morePreviousExists = false);
-
-		const id = match.split('»', 3)[1];
-		const e = await db.events.get(id);
+		const e = await getEventParent({ event });
 
 		if (!e || (root && e.id === root.id)) return (morePreviousExists = false);
 
@@ -75,19 +62,7 @@
 	};
 
 	const getReplies = async (reply: Reply) => {
-		const r = await db.events
-			.where('tags')
-			.startsWithIgnoreCase(`e»${reply.event.id}»`)
-			.distinct()
-			.and((it) => it.kind === 1)
-			.and((it) => {
-				const lastReply = it.tags
-					.slice()
-					.reverse()
-					.find((tag) => tag.match(new RegExp(`e».*».*»reply`, 'g'))?.[0]);
-				return Boolean(lastReply?.match(new RegExp(`e»${reply.event.id}».*»reply`, 'g'))?.[0]);
-			})
-			.toArray();
+		const r = await getEventReplies(reply.event.id);
 		if (!r.length) return;
 
 		reply.children = r.map((it) => ({
