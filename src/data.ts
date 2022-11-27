@@ -8,6 +8,7 @@ import type { IProfile, IEvent } from './db';
 import { snooze, yieldMicrotask } from './utils/sync';
 import { chunks, filterMap, filterTF, forEach } from './utils/array';
 import { deepCloneObj } from './utils/clone';
+import { getDegreesForPubkeys } from './nostrHelper';
 
 const itemKinds = [0, 1, 3, 4, 5, 7];
 export class $Data {
@@ -238,71 +239,19 @@ export class $Data {
 
 		// of all the profiles we know, who is following whom?
 		// Map<pubkey, List<pubkey>>
-		const profileFollows = new Map(
-			(await db.events.where('kind').equals(3).toArray()).map((it) => [
-				it.pubkey,
-				it.tags.filter((it) => it.startsWith('p»')).map((it) => it.split('»', 3)[1])
-			])
-		);
-		const profiles = await db.profiles.toArray();
+		const allProfiles = await db.profiles.toArray();
 
-		// n-th degree follows' pubkeys
-		const follows: Array<Set<string>> = [];
-		// 0-th
-		follows[0] = new Set(
-			filterMap(
-				profiles,
-				(it) => it.degree === 0,
-				(it) => it.pubkey
-			)
+		const ownProfiles = filterMap(
+			allProfiles,
+			(it) => it.degree === 0,
+			(it) => it.pubkey
 		);
 
-		// n-th
-		let all = new Set<string>();
-		for (let i = 0; i < 10; i++) {
-			all = new Set(follows.flatMap((it) => [...it]));
-			if (all.size > 10000) {
-				console.log(`Exploring ${all.size} follows to the ${i}-th degree ...`);
-				break;
-			}
-			// 1st
-			const fArray = Array.from(follows[i])
-				.flatMap((it) => profileFollows.get(it)!)
-				.filter((it) => !all.has(it));
-			const newSet = new Set(fArray);
-			if (newSet.size == 0) {
-				console.log(
-					`Exploring ${all.size} follows to the ${i}-th degree. No more follows found in the ${
-						i + 1
-					}-th degree ...`
-				);
-				break;
-			}
-			follows[i + 1] = newSet;
-		}
-
-		profiles.forEach((profile) => {
-			if (all.has(profile.pubkey)) {
-				// we have a degree. Store it!
-				profile.degree = follows.findIndex((it) => it.has(profile.pubkey));
-				// remove pubkey from `all`, to later store all those profiles as missing
-				all.delete(profile.pubkey);
-			}
-		});
-		// for the remaining pubkeys, request profiles
-		all.forEach((pubkey) => {
-			if (pubkey) {
-				profiles.push((<IProfile>{
-					pubkey: pubkey,
-					missing: true,
-					degree: follows.findIndex((it) => it.has(pubkey))
-				}) as IProfile);
-			}
-		});
+		const profilesWithDegrees = await getDegreesForPubkeys(ownProfiles, allProfiles);
 
 		// Chunk the profiles into batches and run `bulkPut` on each chunk
 		// `bulkPut` is more efficient than regular `put`
-		const batchedProfiles = chunks(profiles, 250);
+		const batchedProfiles = chunks(profilesWithDegrees, 250);
 		for (const chunk of batchedProfiles) {
 			db.profiles.bulkPut(chunk);
 		}

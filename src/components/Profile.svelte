@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 	import { db } from '../db';
 	import type { IProfile } from '../db';
-	import { activeProfile } from '../stores';
+	import { activeProfile, cProfiles } from '../stores';
 	import AvatarImage from './AvatarImage.svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -18,6 +18,8 @@
 			key: 'activePubkey',
 			value: profile.pubkey
 		});
+
+		$cProfiles.updateDegrees();
 	};
 	const showPubkey = () => {
 		goto(`${base}/${profile?.pubkey}`);
