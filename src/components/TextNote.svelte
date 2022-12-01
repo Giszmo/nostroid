@@ -11,6 +11,7 @@
 	export let event: IEvent;
 	export let selected = false;
 	export let level = 0;
+	export let replies: number;
 
 	marked.setOptions({ breaks: true });
 	let text: string = marked
@@ -31,6 +32,9 @@
 		{/each}
 	</div>
 	<Time t={event.created_at} />
+	{#if replies || replies === 0}
+		<span class="reply-count">- {replies} Repl{replies == 1 ? 'y' : 'ies'}</span>
+	{/if}
 </div>
 
 <style>
@@ -46,5 +50,8 @@
 	}
 	.note-selected {
 		font-size: 1.5rem;
+	}
+	.reply-count {
+		font: 0.8em lightgray bold;
 	}
 </style>

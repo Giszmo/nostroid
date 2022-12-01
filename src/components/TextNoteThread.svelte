@@ -12,7 +12,7 @@
 	export let reply: Reply;
 </script>
 
-<TextNote event={reply.event} level={reply.level} />
+<TextNote event={reply.event} level={reply.level} replies={reply.children.length} />
 {#each reply.children as child, i}
 	{#if i < reply.showAmount}
 		<svelte:self reply={child} />
