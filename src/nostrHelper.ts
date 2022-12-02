@@ -24,6 +24,7 @@ export const sendPersistEvent = async (kind, tags, content, privkey) => {
 	e.id = event.id;
 	e.sig = await signEvent(event, privkey);
 	db.events.add(e);
+	return e;
 };
 
 export const getDegreesForPubkeys = async (pubkeys: string[], profiles: IProfile[]) => {

@@ -4,6 +4,7 @@
 	import AvatarImage from './AvatarImage.svelte';
 	import type { IEvent, IProfile } from '../db';
 	import { db } from '../db';
+	import { createEventDispatcher } from 'svelte';
 
 	export let replyTo: IEvent | undefined = undefined;
 	let posting = false;
@@ -17,6 +18,8 @@
 	let mentions: IProfile[] = [];
 	let showSuccess = false;
 	let selectedMention = 0;
+
+	const dispatch = createEventDispatcher();
 
 	const post = async () => {
 		if (posting) return;
@@ -50,11 +53,12 @@
 			text = text.replace(`@${mention.name}`, `#[${index}]`);
 		});
 		try {
-			await sendPersistEvent(1, tags, text, $activeProfile.privkey);
+			const e = await sendPersistEvent(1, tags, text, $activeProfile.privkey);
 			editableEl.innerHTML = '';
 			formatEl.innerHTML = '';
 			showSuccess = true;
 			setTimeout(() => (showSuccess = false), 5000);
+			dispatch('posted', e);
 		} catch (err) {
 			console.error(err);
 		}

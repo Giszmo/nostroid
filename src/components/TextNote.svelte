@@ -41,7 +41,7 @@
 	</div>
 	<button class="link-btn" on:click={() => (showReplyForm = !showReplyForm)}>Reply</button>
 	{#if showReplyForm}
-		<TextNoteForm replyTo={event} />
+		<TextNoteForm replyTo={event} on:posted />
 	{/if}
 </div>
 
