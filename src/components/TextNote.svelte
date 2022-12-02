@@ -7,11 +7,13 @@
 	import { marked } from 'marked';
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import TextNoteForm from './TextNoteForm.svelte';
 
 	export let event: IEvent;
 	export let selected = false;
 	export let level = 0;
 	export let replies: number;
+	let showReplyForm = false;
 
 	marked.setOptions({ breaks: true });
 	let text: string = marked
@@ -24,16 +26,22 @@
 	};
 </script>
 
-<div class="tn" on:click|stopPropagation={showEvent} style={`margin-left: ${level * 2}rem`}>
-	<TextNoteProfile pubkey={event.pubkey} />
-	<div class="note" class:note-selected={selected}>
-		{#each tagLinky(text, event) as comp, i}
-			<svelte:component this={comp.component} content={comp.content} />
-		{/each}
+<div style={`margin-left: ${level * 2}rem`}>
+	<div class="tn" on:click|stopPropagation={showEvent}>
+		<TextNoteProfile pubkey={event.pubkey} />
+		<div class="note" class:note-selected={selected}>
+			{#each tagLinky(text, event) as comp, i}
+				<svelte:component this={comp.component} content={comp.content} />
+			{/each}
+		</div>
+		<Time t={event.created_at} />
+		{#if replies || replies === 0}
+			<span class="reply-count">- {replies} Repl{replies == 1 ? 'y' : 'ies'}</span>
+		{/if}
 	</div>
-	<Time t={event.created_at} />
-	{#if replies || replies === 0}
-		<span class="reply-count">- {replies} Repl{replies == 1 ? 'y' : 'ies'}</span>
+	<button class="link-btn" on:click={() => (showReplyForm = !showReplyForm)}>Reply</button>
+	{#if showReplyForm}
+		<TextNoteForm replyTo={event} />
 	{/if}
 </div>
 

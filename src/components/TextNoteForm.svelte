@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { activeProfile } from '../stores';
-	import { sendPersistEvent } from '../nostrHelper';
+	import { getEventRootId, sendPersistEvent } from '../nostrHelper';
 	import AvatarImage from './AvatarImage.svelte';
-	import type { IProfile } from '../db';
+	import type { IEvent, IProfile } from '../db';
 	import { db } from '../db';
 
+	export let replyTo: IEvent | undefined = undefined;
 	let posting = false;
 	let editableEl: HTMLDivElement;
 	let formatEl: HTMLDivElement;
@@ -26,9 +27,27 @@
 
 		if (!text) return (posting = false);
 
+		if (replyTo) {
+			const pTags = replyTo.tags.filter((t) => t.startsWith('p»'));
+			tags.push(...pTags);
+			if (!tags.find((t) => t.includes(`p»${replyTo.pubkey}`))) {
+				tags.push(`p»${replyTo.pubkey}`);
+			}
+			let rootId = await getEventRootId(replyTo);
+			if (!rootId) {
+				// is a reply to root
+				rootId = replyTo.id;
+			} else {
+				tags.push(`e»${replyTo.id}»wss://relay.nostr.info»reply`);
+			}
+			tags.push(`e»${rootId}»wss://relay.nostr.info»root`);
+		}
 		mentions.forEach((mention, i) => {
-			text = text.replace(`@${mention.name}`, `#[${i}]`);
-			tags.push(`p»${mention.pubkey}»wss://relay.nostr.info`);
+			let index = tags.findIndex((t) => t.includes(`p»${mention.pubkey}`));
+			if (index === -1) {
+				index = tags.push(`p»${mention.pubkey}`) - 1;
+			}
+			text = text.replace(`@${mention.name}`, `#[${index}]`);
 		});
 		try {
 			await sendPersistEvent(1, tags, text, $activeProfile.privkey);
