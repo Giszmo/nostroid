@@ -28,7 +28,7 @@ export function tagLinky(text: string, event: IEvent) {
 		if (!Number.isInteger(tagRef)) {
 			continue;
 		}
-		const tag = event.tags[tagRef].split('»');
+		const tag = event.tags[tagRef]?.split('»');
 		if (tag) {
 			switch (tag[0]) {
 				case 'e':
