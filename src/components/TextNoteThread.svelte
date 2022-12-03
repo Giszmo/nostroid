@@ -29,7 +29,7 @@
 	replies={reply.children.length}
 	on:posted={replyPosted}
 />
-{#each reply.children as child, i}
+{#each reply.children as child, i (child.event.id)}
 	{#if i < reply.showAmount}
 		<svelte:self reply={child} />
 	{/if}
