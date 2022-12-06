@@ -109,6 +109,17 @@ button:focus:not(:focus-visible) {
 	background-position: center;
 }
 
+.link-btn {
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	margin: 5px;
+	color: var(--accent-color);
+	text-decoration: underline;
+	width: fit-content;
+}
+
 .noscroll {
 	overflow: hidden;
 }

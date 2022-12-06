@@ -24,6 +24,7 @@ export const sendPersistEvent = async (kind, tags, content, privkey) => {
 	e.id = event.id;
 	e.sig = await signEvent(event, privkey);
 	db.events.add(e);
+	return e;
 };
 
 export const getDegreesForPubkeys = async (pubkeys: string[], profiles: IProfile[]) => {
@@ -70,4 +71,11 @@ export const getDegreesForPubkeys = async (pubkeys: string[], profiles: IProfile
 	});
 
 	return profiles;
+};
+
+export const getEventRootId = async (event: IEvent) => {
+	const eTags = event.tags.filter((it) => it.startsWith('e»'));
+	const rootTag = eTags.find((it) => it.includes('root'));
+	const id = rootTag ? rootTag.split('»', 3)[1] : eTags?.[0]?.split('»', 3)[1];
+	return id;
 };

@@ -81,6 +81,17 @@
 		previousEventsLimit += 2;
 		getPreviousEvents(previousEvents[0]);
 	};
+
+	const replyPosted = ({ detail }: CustomEvent<IEvent>) => {
+		const newReply = {
+			event: detail,
+			children: [],
+			level: baseReplyObj.level + 1,
+			showAmount: baseReplyObj.level === 1 ? 1 : 0
+		};
+		baseReplyObj.children = [newReply, ...baseReplyObj.children];
+		baseReplyObj.showAmount += 1;
+	};
 </script>
 
 <svelte:head>
@@ -97,7 +108,12 @@
 	{#each previousEvents as ev (ev.id)}
 		<TextNote event={ev} />
 	{/each}
-	<TextNote {event} selected={true} replies={baseReplyObj.children.length} />
+	<TextNote
+		{event}
+		selected={true}
+		replies={baseReplyObj.children.length}
+		on:posted={replyPosted}
+	/>
 	{#each baseReplyObj.children as reply (reply.event.id)}
 		<TextNoteThread bind:reply />
 	{/each}

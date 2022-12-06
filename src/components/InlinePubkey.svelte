@@ -6,7 +6,7 @@
 
 	export let content: { pubkey: string };
 
-	let profile = $cProfiles.get(content.pubkey);
+	$: profile = $cProfiles.get(content.pubkey);
 
 	const showProfile = () => {
 		goto(`${base}/${content.pubkey}`);
