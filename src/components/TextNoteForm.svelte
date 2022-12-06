@@ -39,11 +39,11 @@
 			let rootId = await getEventRootId(replyTo);
 			if (!rootId) {
 				// is a reply to root
-				rootId = replyTo.id;
+				tags.push(`e»${replyTo.id}»wss://relay.nostr.info»root`);
 			} else {
+				tags.push(`e»${rootId}»wss://relay.nostr.info»root`);
 				tags.push(`e»${replyTo.id}»wss://relay.nostr.info»reply`);
 			}
-			tags.push(`e»${rootId}»wss://relay.nostr.info»root`);
 		}
 		mentions.forEach((mention, i) => {
 			let index = tags.findIndex((t) => t.includes(`p»${mention.pubkey}`));
