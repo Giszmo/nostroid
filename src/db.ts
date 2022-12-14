@@ -1,4 +1,4 @@
-import Dexie from 'dexie';
+import Dexie, { liveQuery } from 'dexie';
 import { getPublicKey } from './lib/nostr-tools';
 import { queryName } from './lib/nostr-tools/nip05';
 import { filterMap } from './utils/array';
@@ -63,7 +63,9 @@ export interface IMissing {
 export class NostroidDexie extends Dexie {
 	profiles!: Dexie.Table<IProfile>;
 	config!: Dexie.Table<IConfig>;
-	events!: Dexie.Table<IEvent>;
+	events!: Dexie.Table<IEvent> & {
+		getWithFallback: (id: string) => PromiseExtended<IEvent | undefined>;
+	};
 	tags!: Dexie.Table<ITag>;
 	missingEvents!: Dexie.Table<IMissing>;
 
@@ -89,6 +91,18 @@ export class NostroidDexie extends Dexie {
 		this.version(23).stores({
 			profiles: '&pubkey, degree, index, name, nip05'
 		});
+
+		this.events.getWithFallback = (id) =>
+			new Promise((resolve) => {
+				this.events.get(id).then(async (event) => {
+					if (event) resolve(event);
+					await db.missingEvents.put(<IMissing>{ id: id });
+					liveQuery(() => this.events.get(id)).subscribe((ev) => {
+						if (ev) resolve(ev);
+					});
+					setTimeout(() => resolve(undefined), 10000);
+				});
+			});
 	}
 
 	private async nip05Valid(name: string, pubkey: string) {
