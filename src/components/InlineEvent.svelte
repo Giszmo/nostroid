@@ -8,7 +8,7 @@
 	export let content: { eventId: string };
 
 	let event: Observable<IEvent | undefined> = liveQuery(async () => {
-		let x = await db.events.get(content.eventId);
+		let x = await db.events.getWithFallback(content.eventId);
 		if (!x) {
 			db.missingEvents.add({ id: content.eventId });
 		}

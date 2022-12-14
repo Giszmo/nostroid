@@ -30,10 +30,7 @@
 		previousEventsLimit = 2;
 		morePreviousExists = false;
 		root = undefined;
-		const e = await db.events.get(id);
-		if (id && id.length === 64 && !e) {
-			db.missingEvents.put(<IMissing>{ id: id });
-		}
+		const e = await db.events.getWithFallback(id);
 		if (e) {
 			event = e;
 			baseReplyObj = {

@@ -25,19 +25,19 @@ export const getEventReplies = async (eventId: string) => {
 };
 
 export const getEventRoot = async ({ event, eventId }: { event?: IEvent; eventId?: string }) => {
-	if (!event && eventId) event = await db.events.get(eventId);
+	if (!event && eventId) event = await db.events.getWithFallback(eventId);
 	if (!event) return;
 	const id = await getEventRootId(event);
 	if (!id) return;
-	return await db.events.get(id);
+	return await db.events.getWithFallback(id);
 };
 
 export const getEventParent = async ({ event, eventId }: { event?: IEvent; eventId?: string }) => {
-	if (!event && eventId) event = await db.events.get(eventId);
+	if (!event && eventId) event = await db.events.getWithFallback(eventId);
 	if (!event) return;
 	const eTags = [...event.tags].reverse().filter((it) => it.startsWith('e»'));
 	const replyTag = eTags.find((it) => it.includes('reply'));
 	const id = replyTag ? replyTag.split('»', 3)[1] : eTags?.[0]?.split('»', 3)[1];
 	if (!id) return;
-	return await db.events.get(id);
+	return await db.events.getWithFallback(id);
 };
