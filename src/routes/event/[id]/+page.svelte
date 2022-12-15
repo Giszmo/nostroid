@@ -20,6 +20,8 @@
 	let morePreviousExists = false;
 	let root: IEvent | undefined;
 	let baseReplyObj: Reply;
+	let loading = true;
+	let rootLoading = true;
 
 	// reload on route change
 	$: load($page.params.id);
@@ -30,7 +32,11 @@
 		previousEventsLimit = 2;
 		morePreviousExists = false;
 		root = undefined;
+		loading = true;
+		rootLoading = true;
+
 		const e = await db.events.getWithFallback(id);
+		loading = false;
 		if (e) {
 			event = e;
 			baseReplyObj = {
@@ -40,6 +46,7 @@
 				level: 0
 			};
 			root = await getEventRoot({ event });
+			rootLoading = false;
 			getPreviousEvents(e);
 			getReplies(baseReplyObj);
 		}
@@ -95,27 +102,24 @@
 	<title>Event</title>
 </svelte:head>
 
-{#if event}
-	{#if root}
-		<TextNote event={root} />
-	{/if}
-	{#if morePreviousExists}
-		<button on:click={loadMorePrevious}>Load more</button>
-	{/if}
-	{#each previousEvents as ev (ev.id)}
-		<TextNote event={ev} />
-	{/each}
-	<TextNote
-		{event}
-		selected={true}
-		replies={baseReplyObj.children.length}
-		on:posted={replyPosted}
-	/>
-	{#each baseReplyObj.children as reply (reply.event.id)}
+<TextNote event={root} loading={rootLoading} />
+{#if morePreviousExists}
+	<button on:click={loadMorePrevious}>Load more</button>
+{/if}
+{#each previousEvents as ev (ev.id)}
+	<TextNote event={ev} />
+{/each}
+<TextNote
+	{event}
+	selected={true}
+	replies={baseReplyObj?.children?.length}
+	on:posted={replyPosted}
+	{loading}
+/>
+{#if baseReplyObj?.children?.length}
+	{#each baseReplyObj?.children as reply (reply.event.id)}
 		<TextNoteThread bind:reply />
 	{/each}
-{:else}
-	Event not found.
 {/if}
 
 <style>
