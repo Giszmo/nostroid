@@ -11,7 +11,7 @@
 	<div class="right-container">
 		<div class="name">{$activeProfile?.name || '???'}<br /></div>
 		<div class="pubkey">{$activeProfile?.pubkey}</div>
-		{@html $activeProfile?.privkey ? '🔑' : ''}
+		{$activeProfile?.privkey ? '🔑' : ''}
 	</div>
 </div>
 

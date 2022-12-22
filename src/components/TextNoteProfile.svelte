@@ -7,16 +7,6 @@
 
 	$: p = $cProfiles;
 	$: profile = p.get(pubkey);
-	$: avatar = profile?.avatar;
-	let id = pubkey;
-	$: {
-		const nip05 = profile?.nip05;
-		id = nip05
-			? profile?.nip05Valid
-				? `${nip05} ✓`
-				: `${nip05} <a href="https://${nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">?</a>`
-			: pubkey;
-	}
 </script>
 
 <div class="profile">
@@ -26,7 +16,16 @@
 	<div class="info">
 		{profile?.name || 'no name set'}<br />
 		<div id="id" class="{profile?.nip05 ? 'nip05' : 'pubkey'} {profile?.nip05Valid ? 'valid' : ''}">
-			{@html id}
+			{#if profile?.nip05}
+				{#if profile.nip05Valid}
+					{profile.nip05} ✓
+				{:else if profile.nip05.match(/.+\@.+\..+/)}
+					{profile.nip05}
+					<a href="https://{profile?.nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">?</a>
+				{/if}
+			{:else}
+				{pubkey}
+			{/if}
 		</div>
 	</div>
 </div>
