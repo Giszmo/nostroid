@@ -19,7 +19,7 @@
 			{#if profile?.nip05}
 				{#if profile.nip05Valid}
 					{profile.nip05} ✓
-				{:else if profile.nip05.match(/.+\@.+\..+/)}
+				{:else}
 					{profile.nip05}
 					<a href="https://{profile?.nip05.split('@').slice(-1)[0]}/.well-known/nostr.json">?</a>
 				{/if}
