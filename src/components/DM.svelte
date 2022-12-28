@@ -1,7 +1,6 @@
 <script type="ts">
 	import type { IEvent } from '../db';
 	import { marked } from 'marked';
-	// import { decrypt } from 'nostr-tools/nip04.js'
 	import { decrypt } from '../lib/nostr-tools/nip04.js';
 	import { activeProfile } from '../stores';
 	import Time from './Time.svelte';
@@ -10,27 +9,32 @@
 	export let event: IEvent;
 	marked.setOptions({ breaks: true });
 	let text = '';
-	$: {
+
+	$: decrypter(event, $activeProfile);
+
+	const decrypter = async (..._: any) => {
+		if (!event?.pubkey || !$activeProfile?.pubkey) return;
 		let decrypted;
-		if ($activeProfile?.privkey) {
-			let other =
-				event.pubkey === $activeProfile.pubkey
-					? event.tags.filter((t) => t.startsWith('p»'))[0]?.split('»', 3)[1]
-					: event.pubkey;
-			try {
+		let other =
+			event.pubkey === $activeProfile.pubkey
+				? event.tags.filter((t) => t.startsWith('p»'))[0]?.split('»', 3)[1]
+				: event.pubkey;
+		try {
+			if ($activeProfile.privkey) {
 				decrypted = decrypt($activeProfile.privkey, other, event.content);
-			} catch (e) {
-				console.error(`${e}`);
-				decrypted = 'failed to decrypt message...';
-			}
-		} else {
-			decrypted = 'not meant for us...';
+			} else if ($activeProfile.pubkey == (await window.nostr.getPublicKey()))
+				decrypted = await window.nostr.nip04.decrypt(other, event.content);
+			else decrypted = 'not meant for us...';
+		} catch (e) {
+			console.error(`${e}`);
+			decrypted = 'failed to decrypt message...';
 		}
 		text = marked
 			.parseInline(decrypted)
 			.replace(/(<br>\s*)+/, '<br>')
 			.replace(/(<br>\s*)+$/, '');
-	}
+	};
+
 	$: ourMessage = event.pubkey === $activeProfile?.pubkey;
 	const copy = () => {
 		navigator.clipboard.writeText(JSON.stringify(event).replace('»', '","'));

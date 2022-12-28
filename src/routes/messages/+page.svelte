@@ -41,24 +41,28 @@
 	const processNewEvent = async () => {
 		let privkey = $activeProfile?.privkey;
 		let pubkey = $activeProfile?.pubkey;
-		if (privkey && pubkey && other && newMessage.length != 0) {
+		if (pubkey && other && newMessage.length != 0) {
+			let content = '';
+			if (!privkey && (await window.nostr.getPublicKey()) === pubkey) {
+				content = await window.nostr.nip04.encrypt(other.pubkey, newMessage.trim());
+			} else {
+				content = encrypt(privkey, other.pubkey, newMessage.trim());
+			}
 			newEvent = {
 				pubkey: pubkey,
 				kind: 4,
-				content: encrypt(privkey, other.pubkey, newMessage.trim()),
+				content,
 				created_at: Math.floor(Date.now() / 1000),
 				tags: [`p»${other.pubkey}`],
 				id: '',
 				sig: ''
 			};
-			if (newMessage.endsWith('\n')) {
-				sendPersistEvent(4, newEvent.tags, newEvent.content, privkey);
-				newMessage = '';
-				newEvent = undefined;
-			}
-		} else {
+
+			sendPersistEvent(4, newEvent.tags, newEvent.content);
+			newMessage = '';
 			newEvent = undefined;
 		}
+		newEvent = undefined;
 	};
 
 	const updateConversations = (evs: Array<IEvent>) => {
@@ -101,13 +105,6 @@
 		other ? (conversations.get(other.pubkey) || []).sort((a, b) => a.created_at - b.created_at) : []
 	) as Array<IEvent>;
 
-	$: {
-		$activeProfile;
-		other;
-		newMessage;
-		processNewEvent();
-	}
-
 	onDestroy(() => {
 		profileSubscription.unsubscribe();
 	});
@@ -130,12 +127,10 @@
 		{#each conversation.slice(-show) as event (event.id)}
 			<DM {event} />
 		{/each}
-		{#if $activeProfile?.privkey}
-			{#if newEvent}
-				<DM event={newEvent} />
-			{/if}
-			<textarea bind:value={newMessage} />
+		{#if newEvent}
+			<DM event={newEvent} />
 		{/if}
+		<textarea bind:value={newMessage} on:keypress={(e) => e.key == 'Enter' && processNewEvent()} />
 	{:else}
 		<label>Search DMs: <input bind:value={searchInput} /></label>
 		{#each [...conversations] as p (p[0])}
