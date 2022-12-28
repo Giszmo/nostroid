@@ -90,10 +90,15 @@
 				profile.privkey = privkey;
 				profile.pubkey = getPublicKey(privkey);
 				break;
+			case 'nip07':
+				profile.imported = true;
+				profile.pubkey = await window.nostr.getPublicKey();
+				break;
 			default:
 				return;
 		}
 		try {
+			if (items.find((item) => item.id === profile.pubkey)) return;
 			items = [...items, { id: profile.pubkey, profile }];
 			await db.profiles.put(profile);
 		} catch (error) {
@@ -190,6 +195,12 @@
 		<label
 			><input type="radio" bind:group={radioWhat} value="priv" />using imported private key</label
 		>
+		{#if window.nostr}
+			<br />
+			<label
+				><input type="radio" bind:group={radioWhat} value="nip07" />using nip07 browser extension</label
+			>
+		{/if}
 		{#if radioWhat == 'priv'}
 			<input bind:value={newProfilePrivkey} /> (format: hex or bech32)
 		{/if}
