@@ -1,8 +1,6 @@
 <script type="ts">
 	import type { IEvent } from '../db';
 	import { marked } from 'marked';
-	// import { decrypt } from 'nostr-tools/nip04.js'
-	import { decrypt } from '../lib/nostr-tools/nip04.js';
 	import { activeProfile } from '../stores';
 	import Time from './Time.svelte';
 	import { tagLinky } from './TagLinky';
@@ -10,27 +8,14 @@
 	export let event: IEvent;
 	marked.setOptions({ breaks: true });
 	let text = '';
+
 	$: {
-		let decrypted;
-		if ($activeProfile?.privkey) {
-			let other =
-				event.pubkey === $activeProfile.pubkey
-					? event.tags.filter((t) => t.startsWith('p»'))[0]?.split('»', 3)[1]
-					: event.pubkey;
-			try {
-				decrypted = decrypt($activeProfile.privkey, other, event.content);
-			} catch (e) {
-				console.error(`${e}`);
-				decrypted = 'failed to decrypt message...';
-			}
-		} else {
-			decrypted = 'not meant for us...';
-		}
 		text = marked
-			.parseInline(decrypted)
+			.parseInline(event.content)
 			.replace(/(<br>\s*)+/, '<br>')
 			.replace(/(<br>\s*)+$/, '');
 	}
+
 	$: ourMessage = event.pubkey === $activeProfile?.pubkey;
 	const copy = () => {
 		navigator.clipboard.writeText(JSON.stringify(event).replace('»', '","'));

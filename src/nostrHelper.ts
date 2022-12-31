@@ -6,8 +6,11 @@ import { getPublicKey } from './lib/nostr-tools';
 import { getEventHash, signEvent } from './lib/nostr-tools/event.js';
 import { chunks, filterMap, filterTF, forEach } from './utils/array';
 
-export const sendPersistEvent = async (kind, tags, content, privkey) => {
-	let pubkey = getPublicKey(privkey);
+export const sendPersistEvent = async (kind, tags, content) => {
+	const pubkey = (await db.config.get('activePubkey'))?.value;
+	if (!pubkey) throw new Error('No active pubkey');
+	const privkey = (await db.profiles.get(pubkey))?.privkey;
+
 	let e = <IEvent>{
 		id: '',
 		sig: '',
@@ -15,14 +18,21 @@ export const sendPersistEvent = async (kind, tags, content, privkey) => {
 		created_at: Math.floor(Date.now() / 1000),
 		kind: kind,
 		tags: tags,
-		content: content,
-		outbox: true
+		content: content
 	};
 	let event = JSON.parse(JSON.stringify(e));
 	event.tags = event.tags.map((it) => it.split('»'));
 	event.id = getEventHash(event);
 	e.id = event.id;
-	e.sig = await signEvent(event, privkey);
+
+	if (privkey) {
+		e.sig = await signEvent(event, privkey);
+	} else if (!privkey && window.nostr && (await window.nostr.getPublicKey()) == pubkey) {
+		e.sig = (await window.nostr.signEvent(event)).sig;
+	} else {
+		throw new Error('No private key');
+	}
+	e.outbox = true;
 	db.events.add(e);
 	return e;
 };

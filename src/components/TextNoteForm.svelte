@@ -216,7 +216,7 @@
 	{/if}
 	<button
 		class="submit-btn"
-		disabled={!$activeProfile?.privkey || posting}
+		disabled={posting}
 		title={!$activeProfile?.privkey ? 'no privkey on this profile' : ''}>Post</button
 	>
 </form>
