@@ -105,7 +105,7 @@ export class NostroidDexie extends Dexie {
 			});
 	}
 
-	private async nip05Valid(name: string, pubkey: string) {
+	public async nip05Valid(name: string, pubkey: string) {
 		if (typeof name !== 'string' || name.length < 3) {
 			return false;
 		}

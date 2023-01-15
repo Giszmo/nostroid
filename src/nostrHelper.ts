@@ -27,7 +27,7 @@ export const sendPersistEvent = async (kind, tags, content) => {
 
 	if (privkey) {
 		e.sig = await signEvent(event, privkey);
-	} else if (!privkey && window.nostr && (await window.nostr.getPublicKey()) == pubkey) {
+	} else if (window.nostr && (await window.nostr.getPublicKey()) == pubkey) {
 		e.sig = (await window.nostr.signEvent(event)).sig;
 	} else {
 		throw new Error('No private key');

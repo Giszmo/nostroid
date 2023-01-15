@@ -52,7 +52,9 @@
 
 	const sendPersist = async () => {
 		if (!outEvent || !(await validate())) return cancelPersist();
-		sendPersistEvent(0, [], outEvent.content, outEvent.privkey);
+		sendPersistEvent(0, [], outEvent.content);
+		outEvent = undefined;
+		cancelPersist();
 	};
 
 	const validate = async () => {
@@ -61,7 +63,7 @@
 		nip05Status = 'checking';
 		nip05Status = nip05 ? ((await db.nip05Valid(nip05, a.pubkey)) ? 'valid' : 'invalid') : '';
 		if (
-			a?.privkey === undefined ||
+			(a?.privkey === undefined && window.nostr === undefined) ||
 			(nip05Status !== 'valid' && nip05) ||
 			(name === a.name && avatar === a.avatar && nip05 === a.nip05)
 		) {
@@ -105,7 +107,7 @@
 <div>
 	<h1>Settings</h1>
 	{#if $activeProfile}
-		{#if $activeProfile?.privkey != undefined}
+		{#if $activeProfile?.privkey != undefined || window.nostr}
 			<label>PK: <input bind:value={pk} disabled /></label><br />
 			<label>Name: <input bind:value={name} /></label><br />
 			<div class="avatar">

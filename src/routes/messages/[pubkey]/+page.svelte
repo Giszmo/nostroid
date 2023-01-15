@@ -47,9 +47,11 @@
 
 		if ($activeProfile.privkey) {
 			decrypted = localDecrypt($activeProfile.privkey, other, event.content);
-		} else if ($activeProfile.pubkey == (await window.nostr.getPublicKey()))
+		} else if (window.nostr && $activeProfile.pubkey == (await window.nostr.getPublicKey())) {
 			decrypted = await window.nostr.nip04.decrypt(other, event.content);
-		else decrypted = 'not meant for us...';
+		} else {
+			decrypted = 'not meant for us...';
+		}
 
 		return {
 			...event,
@@ -74,9 +76,9 @@
 		let pubkey = $activeProfile?.pubkey;
 		if (pubkey && otherPubkey && newMessage.length != 0) {
 			let content = '';
-			if (!privkey && (await window.nostr.getPublicKey()) === pubkey) {
+			if (window.nostr && (await window.nostr.getPublicKey()) === pubkey) {
 				content = await window.nostr.nip04.encrypt(otherPubkey, newMessage.trim());
-			} else {
+			} else if (privkey) {
 				content = encrypt(privkey, otherPubkey, newMessage.trim());
 			}
 			newEvent = {
@@ -109,10 +111,12 @@
 			<DM {event} />
 		{/each}
 	{/if}
-	<div class="new-message">
-		<input bind:value={newMessage} on:keypress={(e) => e.key == 'Enter' && processNewEvent()} />
-		<button on:click={() => processNewEvent()}>Send</button>
-	</div>
+	{#if window.nostr || $activeProfile?.privkey}
+		<div class="new-message">
+			<input bind:value={newMessage} on:keypress={(e) => e.key == 'Enter' && processNewEvent()} />
+			<button on:click={() => processNewEvent()}>Send</button>
+		</div>
+	{/if}
 </div>
 
 <style>
