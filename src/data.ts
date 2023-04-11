@@ -112,10 +112,11 @@ export class $Data {
 				}
 			);
 		}
+		const hex64 = /[a-f0-9]{64}/;
 		// load events marked as missing (we only know their IDs)
 		const events = (await db.missingEvents.toArray())
 			// TODO: Should we try to get them again after a while? When relays change?
-			.filter((it) => it.requested === undefined);
+			.filter((it) => it.requested === undefined && hex64.test(it));
 		if (events.length > 0) {
 			console.log(`fetching ${events.length} missing events.`);
 			const t = Date.now() / 1000;
@@ -271,9 +272,22 @@ export class $Data {
 
 	public connectWS(): void {
 		if (this.pool) return;
-		const relay = 'wss://relay.nostr.info';
+		const rw = { read: true, write: true };
+		const wo = { read: false, write: true };
 		this.pool = relayPool();
-		this.pool.addRelay(relay, { read: true, write: true });
+		`wss://relay.nostr.info/
+wss://nostr-pub.wellorder.net/
+wss://relay.damus.io/
+wss://nostr.oxtr.dev/
+wss://nostr.bitcoiner.social/
+wss://relay.wellorder.net/
+wss://nos.lol/
+wss://relay.plebstr.com/
+wss://no.str.cr/
+wss://nostr.wine/`
+			.split('\n')
+			.forEach((it) => this.pool.addRelay(it, rw));
+		this.pool.addRelay('wss://nostr.mutinywallet.com/', wo);
 	}
 }
 export const Data = new $Data();
